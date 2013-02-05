@@ -1,3 +1,10 @@
+body{
+    background-color: #FFFFFF; /* Цвет фона веб-страницы */
+   	font-family: arial,sans-serif;
+   	font-size: 13px;	
+	margin:0;
+}
+
 #sidebar {
 	background: #E6E6E6;
 	float: left;
