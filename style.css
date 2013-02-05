@@ -1,26 +1,23 @@
-
 #sidebar {
-	background: #E0E9EE;
+	background: #E6E6E6;
 	float: left;
 	height: 800px;
 	padding: 5px;
 	width: 200px;
-	/*border-right  2px solid #AAADAE*/ 
 }
 
 #content {
-	background: #FFFFFF;
-	background: #FFFDE1;
+	background: #FDF6E3;
 	display: block;
 	float: left;
-	height: 800px*; /
+	height: 800px * ;
 	overflow-x: hidden;
 	overflow-y: scroll;
 	padding: 5px;
 }
 
 #footer {
-		padding: 5px;
+	padding: 5px;
 	background: #EFEDE8;
 	border-top: 2px solid #AAADAE;
 	clear: left;
@@ -28,9 +25,15 @@
 
 /* --------------------------------------------------------- */
 
-div.row { border-bottom: 1px solid #CCCCCC; border-left: 3px solid inherit; display: block; }
+div.row {
+	border-bottom: 1px solid #CCCCCC;
+	border-left: 3px solid inherit;
+	display: block;
+}
 
-.row.current { border-left: 3px solid #000000; }
+.row.current {
+	border-left: 3px solid #000000; 
+}
 
 /* --------------------------------------------------------- */
 
@@ -38,8 +41,8 @@ div.row { border-bottom: 1px solid #CCCCCC; border-left: 3px solid inherit; disp
 	clear: both;
 	cursor: pointer;
 	display: block;
-	padding - left: 7px;
-	vertical - align: middle;
+	padding-left: 7px;
+	vertical-align: middle;
 	width: 100 % ;
 }
 
@@ -58,7 +61,9 @@ div.row { border-bottom: 1px solid #CCCCCC; border-left: 3px solid inherit; disp
 
 .unread .titlerow .title { font-weight: bold; }
 
-.excerpt { color: #656565; }
+.excerpt { 
+	color: # 656565;
+}
 
 .updated {
 	color: #656565;
@@ -69,7 +74,9 @@ div.row { border-bottom: 1px solid #CCCCCC; border-left: 3px solid inherit; disp
 	text-decoration: none;
 }
 
-div.current { 		background: #FFFFFF; }
+div.current { 		
+	background: #FFFFFF;
+}
 
 div.content {
 	clear: both;
@@ -81,7 +88,10 @@ div.content {
 	padding: 3px 7px;
 }
 
-.feedicon { display: block; float: right; }
+.feedicon {
+	display: block;
+	float: right;
+}
 
 .main-link-box {
 	display: inline;
@@ -103,11 +113,13 @@ div.content {
 
 /* --------------------------------------------------------- */
 
-.content p { margin: 0.3em 0; }
+.content p {
+	margin: 0.3em 0;
+}
 
 /* --------------------------------------------------------- */
 
-.stared, .unstared  {
+.stared, .unstared {
 	cursor: pointer;
 	display: inline;
 	float: left;
@@ -116,13 +128,17 @@ div.content {
 	width: 16px;
 }
 
-.stared { background-image: url('img/star_set.png'); }
+.stared {
+	background-image: url('img/star_set.png');
+}
 
-.unstared { background-image: url('img/star_unset.png'); }
+.unstared {
+	background-image: url('img/star_unset.png');
+}
 
 /* --------------------------------------------------------- */
 
-.shared, .unshared  {
+.shared, .unshared {
 	cursor: pointer;
 	display: block;
 	float: left;
@@ -131,14 +147,18 @@ div.content {
 	width: 16px;
 }
 
-.shared { background-image: url('img/share_set.png'); }
+.shared {
+	background-image: url('img/share_set.png');
+}
 
-.unshared { background-image: url('img/share_unset.png'); }
+.unshared {
+	background-image: url('img/share_unset.png');
+}
 
 /* --------------------------------------------------------- */
 
 .imagebox {
-	border: 1px solid #ccc;
+	border: 1px solid # ccc;
 	display: block;
 	float: left;
 	height: 200px;
@@ -147,4 +167,4 @@ div.content {
 	width: 200px;
 }
 
-.imagebox img { }
+.imagebox img {}
