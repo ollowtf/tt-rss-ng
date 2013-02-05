@@ -22,7 +22,7 @@ var listView = (function() {
 		if(cd.isBefore(updateTime)) {
 			return(updateTime.toString("HH:mm"));
 		} else {
-			return(updateTime.toString("dd-MM-yyyy"))sЗ;
+			return(updateTime.toString("dd-MM-yyyy"));
 		}
 	}
 
