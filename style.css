@@ -1,0 +1,188 @@
+body{
+    background-color: #FFFFFF; /* Цвет фона веб-страницы */
+   	font-family: arial,sans-serif;
+   	font-size: 13px;	
+	margin:0;
+}
+   
+#sidebar { 
+	background: #E0E9EE;
+	float: left;
+    /*border-right: 2px solid #AAADAE;*/ 
+    width: 200px;
+	height: 800px;
+    padding: 5px; 
+}
+
+#content { 
+	display: block;
+	float: left;
+	background: #FFFFFF;
+	/*width: 800px;
+	height: 800px;*/
+    padding: 5px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	background:#FFFDE1;
+}
+
+#footer { 
+    background: #EFEDE8;
+	border-top: 2px solid #AAADAE;	
+    padding: 5px;
+    clear: left; 
+}
+
+/* --------------------------------------------------------- */
+
+div.row {
+	display:block;
+	border-left: 3px solid inherit;
+	border-bottom: 1px solid #CCCCCC;
+}
+
+.row.current {
+	border-left: 3px solid #000000;		
+}
+
+/* --------------------------------------------------------- */
+
+.header {
+	display:block;
+	padding-left: 7px;
+	vertical-align: middle;
+	width:100%;
+	clear: both;
+	cursor: pointer;
+}
+
+.titlerow {
+	height: 1.8em;
+	line-height:1.8em;
+	position:static;
+	overflow: hidden;
+	width:auto;
+	margin-right: 8em;
+}
+
+.current .titlerow .title {
+	font-weight: bold;	
+}
+
+.current .titlerow .excerpt {
+	display:none;
+}
+
+.unread .titlerow .title {
+	font-weight: bold;	
+}
+
+.excerpt {
+	color: #656565;
+}
+
+.updated {
+	float:right;
+	line-height:1.8em;
+	text-decoration: none;
+	text-align: right;
+	margin-right: 0.5em;
+	color: #656565;
+}
+
+div.current {		
+	background:#FFFFFF;
+}
+
+div.content {
+	padding: 3px 7px;
+	clear:both;
+	font-weight: normal;
+	font-size:small;
+	line-height:1.4em;
+	display: block;
+	overflow: auto;
+}
+
+.feedicon {
+	display: block;
+	float: right;
+}
+
+.main-link-box {
+	margin-right: 1em;
+	float:right;
+	line-height:1.8em;
+	width: 16px;
+	height: 16px;
+    vertical-align: middle;
+    display: inline;
+}
+
+.main-link {
+	background: url('img/link.png') no-repeat scroll 0 0 transparent;
+	opacity: 0.4;
+	width: 16px;
+	height: 16px;
+	position: absolute;
+}
+
+/* --------------------------------------------------------- */
+
+.content p {
+	margin: 0.3em 0;
+}
+
+/* --------------------------------------------------------- */
+
+.stared, .unstared  {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    display: inline;
+    float: left;
+}
+
+.stared {
+	background-image: url('img/star_set.png');
+}
+
+.unstared {
+	background-image: url('img/star_unset.png');
+}
+
+/* --------------------------------------------------------- */
+
+.shared, .unshared  {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    vertical-align:baseline;
+    display:block;
+    float: left;
+}
+
+.shared {
+	background-image: url('img/share_set.png');
+}
+
+.unshared {
+	background-image: url('img/share_unset.png');
+}
+
+/* --------------------------------------------------------- */
+
+.imagebox {
+	width: 200px;
+	height: 200px;
+	display: block;
+	overflow: hidden;
+	float: left;
+	border: 1px solid #ccc;
+	margin: 2px;
+}
+
+.imagebox img {
+	
+}
