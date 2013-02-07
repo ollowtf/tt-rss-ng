@@ -67,16 +67,7 @@ var treeView = (function() {
 				}
 			},
 			callback: {
-				/*beforeClick: function(treeId, treeNode) {
-					var zTree = $.fn.zTree.getZTreeObj("tree");
-					if(treeNode.isParent) {
-						zTree.expandNode(treeNode);
-						return false;
-					} else {
-						demoIframe.attr("src", treeNode.file + ".html");
-						return true;
-					}
-				}*/
+				beforeClick: onNodeSelect
 			}
 		};
 
@@ -90,11 +81,11 @@ var treeView = (function() {
 		// zTree.selectNode(zTree.getNodeByParam("id", 101));
 	};
 
-	function onNodeSelect(e, data) {
-		/*// делаем запрос непрочитанных
-		currentNodeId = $(data.rslt.obj[0]).attr("id");
+	function onNodeSelect(treeId,treeNode) {
+		// делаем запрос непрочитанных
+		var currentNodeId = treeNode.id;
 		console.log(_module + ": activated node %s", currentNodeId);
-		obs.pub('/feedActivated', [currentNodeId])*/
+		obs.pub('/feedActivated', [currentNodeId]);
 	}
 
 	function _setUnreadCount(event, feedId, unread) {
