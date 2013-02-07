@@ -22,22 +22,20 @@ var treeView = (function() {
 			var cNode = {
 				id: 'c' + currentCategory,
 				pId: 0,
-				name: nodeName(element.title, element.unread),
-				open: false,
-				title: element.title
+				name: element.title,
+				open: true,
+				title: nodeName(element.title, element.unread)
 			};
 			feedTree.push(cNode);
 
 			// добавляем фиды по текущей категории
-			currentFeeds = _.where(feeds, {
-				'cat_id': currentCategory
-			});
-			_.each(currentFeeds, function(element, index, array) {
+			currentFeeds = _.filter(feeds, function(el) {return el.cat_id == currentCategory;});
+			_.each(currentFeeds, function(feed) {
 				var fNode = {
-					id: 'f' + element.id,
+					id: 'f' + feed.id,
 					pId: cNode.id,
-					name: nodeName(element.title, element.unread),
-					title: element.title
+					name: feed.title,
+					title: nodeName(feed.title, feed.unread)
 				};
 				feedTree.push(fNode);
 			});
@@ -51,6 +49,7 @@ var treeView = (function() {
 			view: {
 				dblClickExpand: false,
 				showLine: true,
+				showTitle: true,
 				selectedMulti: false
 			},
 			data: {
@@ -77,7 +76,8 @@ var treeView = (function() {
 
 		// инициализируем дерево
 		// ---
-		var t = $("#sidebar");
+		var t = $('<div/>').addClass('ztree');
+		$("#sidebar").append(t);
 		t = $.fn.zTree.init(t, treeSettings, feedTree);
 
 		var feedTreeObject = $.fn.zTree.getZTreeObj("feedTree");
