@@ -23,22 +23,28 @@ var treeView = (function() {
 				id: 'c' + currentCategory,
 				pId: 0,
 				name: element.title,
-				open: true,
+				open: false,
 				title: nodeName(element.title, element.unread)
 			};
-			feedTree.push(cNode);
+
 
 			// добавляем фиды по текущей категории
-			currentFeeds = _.filter(feeds, function(el) {return el.cat_id == currentCategory;});
-			_.each(currentFeeds, function(feed) {
-				var fNode = {
-					id: 'f' + feed.id,
-					pId: cNode.id,
-					name: feed.title,
-					title: nodeName(feed.title, feed.unread)
-				};
-				feedTree.push(fNode);
+			currentFeeds = _.filter(feeds, function(el) {
+				return el.cat_id == currentCategory;
 			});
+			if(_.size(currentFeeds) != 0) {
+				feedTree.push(cNode);
+				_.each(currentFeeds, function(feed) {
+					var fNode = {
+						id: 'f' + feed.id,
+						pId: cNode.id,
+						name: feed.title,
+						title: nodeName(feed.title, feed.unread)
+					};
+					feedTree.push(fNode);
+				});
+			};
+
 
 		});
 
