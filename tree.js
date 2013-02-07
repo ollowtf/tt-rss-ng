@@ -8,7 +8,11 @@ var treeView = (function() {
 	var feedTreeObject = {};
 
 	function nodeName(name, unread) {
-		return(name + ' (' + unread + ')');
+		var unreadString = '';
+		if(unread != 0) {
+			unreadString = ' (' + unread + ')';
+		};
+		return(name + unreadString);
 	};
 
 	function createTree() {
@@ -22,9 +26,9 @@ var treeView = (function() {
 			var cNode = {
 				id: 'c' + currentCategory,
 				pId: 0,
-				name: element.title,
+				title: element.title,
 				open: false,
-				title: nodeName(element.title, element.unread)
+				name: nodeName(element.title, element.unread)
 			};
 
 
@@ -38,8 +42,8 @@ var treeView = (function() {
 					var fNode = {
 						id: 'f' + feed.id,
 						pId: cNode.id,
-						name: feed.title,
-						title: nodeName(feed.title, feed.unread)
+						title: feed.title,
+						name: nodeName(feed.title, feed.unread)
 					};
 					feedTree.push(fNode);
 				});
@@ -73,12 +77,9 @@ var treeView = (function() {
 
 		// инициализируем дерево
 		// ---
-		var t = $('<div/>').addClass('ztree');
+		var t = $('<div/>').addClass('ztree').attr('id',"feedTree");
 		$("#sidebar").append(t);
 		t = $.fn.zTree.init(t, treeSettings, feedTree);
-
-		var feedTreeObject = $.fn.zTree.getZTreeObj("feedTree");
-		// zTree.selectNode(zTree.getNodeByParam("id", 101));
 	};
 
 	function onNodeSelect(treeId,treeNode) {
@@ -89,14 +90,10 @@ var treeView = (function() {
 	}
 
 	function _setUnreadCount(event, feedId, unread) {
-
-		var cE = $("#" + feedId);
-		if(unread == 0) {
-			unreadString = '';
-		} else {
-			unreadString = ' (' + unread + ')';
-		};
-		treeObject.set_text(cE, cE.data('name') + unreadString);
+		var ztree = $.fn.zTree.getZTreeObj("feedTree");
+		var node = ztree.getNodeByParam('id',feedId);
+		node.name = nodeName(node.title,unread);
+		ztree.updateNode(node);
 	};
 
 	// public
