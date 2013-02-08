@@ -6,6 +6,7 @@ var treeView = (function() {
 
 	var feedTree = [];
 	var feedTreeObject = {};
+	var boldList = [];
 
 	function nodeName(name, unread) {
 		var unreadString = '';
@@ -14,6 +15,18 @@ var treeView = (function() {
 		};
 		return(name + unreadString);
 	};
+
+	function nodeFont(unread) {
+		if(unread == 0) {
+			return('normal');
+		} else {
+			return('bold');
+		};
+	};
+
+	function getFont(treeId, node) {
+		return node.font ? node.font : {};
+	}
 
 	function createTree() {
 
@@ -28,9 +41,14 @@ var treeView = (function() {
 				pId: 0,
 				title: element.title,
 				open: false,
-				name: nodeName(element.title, element.unread)
+				name: nodeName(element.title, element.unread),
+				font: {
+					'font-weight': nodeFont(element.unread)
+				}
 			};
-
+			if(element.unread != 0) {
+				boldList.push(cNode.id);
+			};
 
 			// добавляем фиды по текущей категории
 			currentFeeds = _.filter(feeds, function(el) {
@@ -43,9 +61,15 @@ var treeView = (function() {
 						id: 'f' + feed.id,
 						pId: cNode.id,
 						title: feed.title,
-						name: nodeName(feed.title, feed.unread)
+						name: nodeName(feed.title, feed.unread),
+						font: {
+							'font-weight': nodeFont(feed.unread)
+						}
 					};
 					feedTree.push(fNode);
+					if(feed.unread != 0) {
+						boldList.push(fNode.id);
+					};
 				});
 			};
 
@@ -59,8 +83,10 @@ var treeView = (function() {
 			view: {
 				dblClickExpand: false,
 				showLine: true,
-				showTitle: true,
-				selectedMulti: false
+				showTitle: false,
+				selectedMulti: false,
+				fontCss: getFont,
+				nameIsHTML: false
 			},
 			data: {
 				simpleData: {
@@ -77,12 +103,12 @@ var treeView = (function() {
 
 		// инициализируем дерево
 		// ---
-		var t = $('<div/>').addClass('ztree').attr('id',"feedTree");
+		var t = $('<div/>').addClass('ztree').attr('id', "feedTree");
 		$("#sidebar").append(t);
 		t = $.fn.zTree.init(t, treeSettings, feedTree);
 	};
 
-	function onNodeSelect(treeId,treeNode) {
+	function onNodeSelect(treeId, treeNode) {
 		// делаем запрос непрочитанных
 		var currentNodeId = treeNode.id;
 		console.log(_module + ": activated node %s", currentNodeId);
@@ -91,11 +117,14 @@ var treeView = (function() {
 
 	function _setUnreadCount(event, feedId, unread) {
 		var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		var node = ztree.getNodeByParam('id',feedId);
-		node.name = nodeName(node.title,unread);
+		var node = ztree.getNodeByParam('id', feedId);
+		node.name = nodeName(node.title, unread);
+		node.font = {
+			'font-weight': nodeFont(unread)
+		}
+		// ztree.setting.view.fontCss['font-weight'] = nodeFont(unread);
 		ztree.updateNode(node);
 	};
-
 	// public
 	return {
 
