@@ -44,7 +44,8 @@ var treeView = (function() {
 				name: nodeName(element.title, element.unread),
 				font: {
 					'font-weight': nodeFont(element.unread)
-				}
+				},
+				iconSkin: 'category'
 			};
 			if(element.unread != 0) {
 				boldList.push(cNode.id);
@@ -64,7 +65,8 @@ var treeView = (function() {
 						name: nodeName(feed.title, feed.unread),
 						font: {
 							'font-weight': nodeFont(feed.unread)
-						}
+						},
+						iconSkin: 'feed'
 					};
 					feedTree.push(fNode);
 					if(feed.unread != 0) {

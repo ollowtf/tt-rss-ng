@@ -70,6 +70,11 @@ website:	http://code.google.com/p/jquerytree/
 .ztree li span.button.bottom_docu{background-position:-56px -36px}
 .ztree li span.button.noline_docu{ background:none;}
 
+/* folder and feed icons */
+.ztree li span.button.category_ico_open,.ztree li span.button.category_ico_close{margin-right:2px; background: url(img/folder.png) no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+.ztree li span.button.feed_ico_docu{margin-right:2px; background: url(img/feed.png) no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
+
+
 .ztree li span.button.ico_open{margin-right:2px; background-position:-110px -16px; vertical-align:top; *vertical-align:middle}
 .ztree li span.button.ico_close{margin-right:2px; background-position:-110px 0; vertical-align:top; *vertical-align:middle}
 .ztree li span.button.ico_docu{margin-right:2px; background-position:-110px -32px; vertical-align:top; *vertical-align:middle}
