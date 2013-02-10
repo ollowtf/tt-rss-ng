@@ -175,3 +175,10 @@ div.content {
 }
 
 .imagebox img {}
+
+/*-----------------------------------------------------------*/
+
+#treetoolbar {
+	padding: 4px;
+	display: inline-block;
+}

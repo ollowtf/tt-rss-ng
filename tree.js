@@ -105,9 +105,7 @@ var treeView = (function() {
 
 		// инициализируем дерево
 		// ---
-		var t = $('<div/>').addClass('ztree').attr('id', "feedTree");
-		$("#sidebar").append(t);
-		t = $.fn.zTree.init(t, treeSettings, feedTree);
+		t = $.fn.zTree.init($('#feedTree'), treeSettings, feedTree);
 	};
 
 	function onNodeSelect(treeId, treeNode) {
@@ -127,6 +125,11 @@ var treeView = (function() {
 		// ztree.setting.view.fontCss['font-weight'] = nodeFont(unread);
 		ztree.updateNode(node);
 	};
+
+	function _setFeedViewMode(event,mode) {
+		alert(mode);
+	};
+
 	// public
 	return {
 
@@ -135,6 +138,15 @@ var treeView = (function() {
 			console.log(_module + ": initializing...");
 			obs.sub('/feedsUpdated', this.createFeedTree);
 			obs.sub('/setUnreadCount', this.setUnreadCount);
+			obs.sub('/setFeedViewMode',this.setFeedViewMode);
+			// ---
+			// рисуем меню
+			$('#testButton').button().click(function() {alert('test!')});
+			// ---
+			$('#feedShowMode').buttonset();
+			$('#feedShowMode input[type=radio]').click(function() {
+				obs.pub('setFeedViewMode',[$('input[name=feedShowMode]:checked').val()]);
+			});
 		},
 
 		// обновление дерева
@@ -142,7 +154,8 @@ var treeView = (function() {
 			console.log(_module + ': feed update event. Creating tree.');
 			createTree();
 		},
-		setUnreadCount: _setUnreadCount
+		setUnreadCount: _setUnreadCount,
+		setFeedViewMode: _setFeedViewMode
 	}
 
 }());

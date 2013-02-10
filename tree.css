@@ -31,7 +31,7 @@ website:	http://code.google.com/p/jquerytree/
 	background-color:transparent; background-repeat:no-repeat; background-attachment: scroll;
 	background-image:url("./img/zTreeStandard.png"); *background-image:url("./img/zTreeStandard.gif")}
 
-.ztree li span.button.chk {width:13px; height:13px; margin:0 3px 0 0; cursor: auto}
+/*.ztree li span.button.chk {width:13px; height:13px; margin:0 3px 0 0; cursor: auto}
 .ztree li span.button.chk.checkbox_false_full {background-position:0 0}
 .ztree li span.button.chk.checkbox_false_full_focus {background-position:0 -14px}
 .ztree li span.button.chk.checkbox_false_part {background-position:0 -28px}
@@ -51,7 +51,7 @@ website:	http://code.google.com/p/jquerytree/
 .ztree li span.button.chk.radio_true_full_focus {background-position:-42px -14px}
 .ztree li span.button.chk.radio_true_part {background-position:-42px -28px}
 .ztree li span.button.chk.radio_true_part_focus {background-position:-42px -42px}
-.ztree li span.button.chk.radio_true_disable {background-position:-42px -56px}
+.ztree li span.button.chk.radio_true_disable {background-position:-42px -56px}*/
 
 .ztree li span.button.switch {width:18px; height:18px}
 .ztree li span.button.root_open{background-position:-92px -54px}

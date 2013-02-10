@@ -10,6 +10,7 @@
 	<script type="text/javascript" src="js/jq/ui/jquery.ui.widget.min.js"></script>
 	<script type="text/javascript" src="js/jq/ui/jquery.ui.mouse.min.js"></script>
 	<script type="text/javascript" src="js/jq/ui/jquery.ui.draggable.min.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.button.min.js"></script>
 	<script type="text/javascript" src="js/jq/layout/jquery.layout.min.js"></script>
 	<script type="text/javascript" src="js/jq/ztree/jquery.ztree.core-3.5.js"></script>
 	<script type="text/javascript" src="js/jq/imgcenter/jquery.imgCenter.js"></script>
@@ -27,10 +28,22 @@
 	<link rel="shortcut icon" href="img/favicon.png">                                       
 	<link type="text/css" rel="stylesheet" href="style.css">
 	<link type="text/css" rel="stylesheet" href="tree.css">
-	<link type="text/css" rel="stylesheet" href="layout.css" />	
+	<link type="text/css" rel="stylesheet" href="layout.css" />
+	<link type="text/css" rel="stylesheet" href="js/jq/ui/css/ui-lightness/jquery-ui-1.8.23.custom.css"/>	
+	
 </head>                                                                 
 <body>                                                                  
 	<div id="content" class="ui-layout-center"></div>
-	<div id="sidebar" class="ui-layout-west"></div>                                     
+	<div id="sidebar" class="ui-layout-west">
+		<div id="treeHeader">
+			<span id="feedShowMode">
+			<input type="radio" id="showAll" name="feedShowMode" checked="checked" /><label for="showAll">All</label>
+			<input type="radio" id="showUnread" name="feedShowMode" /><label for="showUnread">Unread</label>
+			</span>
+			<button id="testButton">test</button>
+		</div>
+		<div id="feedTree" class="ztree">
+		</div>
+	</div>                                     
 </body>                                                                 
 </html>
