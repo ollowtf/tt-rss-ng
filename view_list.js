@@ -78,7 +78,7 @@ var listView = (function() {
 		artId = utils.articleId(row);
 		if(row.hasClass('current')) {
 			console.log(_module + ': click on current article %d. Hiding.', artId);
-			hideArticle(row);
+			_hideArticle(row);
 		} else {
 			// ищем другие current и схлопываем
 			$('.content', $('.current').removeClass('current')).remove();
