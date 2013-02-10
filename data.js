@@ -246,11 +246,12 @@ var dataManager = (function() {
             });
         }else{
             currentFeed = Feeds[id];
+            unread = currentFeed.unread;
             currentFeed.unread = 0;
             obs.pub('/setUnreadCount', ['f' + id, currentFeed.unread]);
             // ---
             currentCategory = Categories[currentFeed.cat_id];
-            currentCategory.unread = 0;
+            currentCategory.unread = currentCategory.unread - unread;
             obs.pub('/setUnreadCount', ['c' + currentCategory.id, currentCategory.unread]);
         };
         // отправляем запрос
