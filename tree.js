@@ -151,8 +151,6 @@ var treeView = (function() {
 			obs.sub('/setFeedViewMode',this.setFeedViewMode);
 			// ---
 			// рисуем меню
-			$('#testButton').button().click(function() {alert('test!')});
-			// ---
 			$('#feedShowMode').buttonset();
 			$('#feedShowMode input[type=radio]').click(function() {
 				obs.pub('/setFeedViewMode',[$('input[name=feedShowMode]:checked').attr('id')]);

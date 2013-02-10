@@ -184,8 +184,8 @@ var dataManager = (function() {
             feed.unread--;
             cat = Categories[feed.cat_id];
             cat.unread--;
-            obs.pub('/setUnreadCount',['f'+feed.id,feed.unread]);
-            obs.pub('/setUnreadCount',['c'+cat.id,cat.unread]);
+            obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
+            obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
             // ---
             $.post(apiURL, {
                 "op": "updateArticle",
@@ -210,8 +210,8 @@ var dataManager = (function() {
             feed.unread++;
             cat = Categories[feed.cat_id];
             cat.unread++;
-            obs.pub('/setUnreadCount',['f'+feed.id,feed.unread]);
-            obs.pub('/setUnreadCount',['c'+cat.id,cat.unread]);
+            obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
+            obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
             // ---
             $.post(apiURL, {
                 "op": "updateArticle",
@@ -225,6 +225,45 @@ var dataManager = (function() {
         };
     };
 
+    function _markFeedAsRead(event, feed) {
+        // определяем параметры фида
+        var isCategory = utils.isCategory(feed);
+        var id = utils.id(feed);
+        // для каждой статьи из кеша устанавливаем флаг прочитанного
+        _.each(feedCache, function(element) {
+            element.unread = false;
+        });
+        // обновляем счётчики
+        if (isCategory) {
+            currentCategory = Categories[id];
+            currentCategory.unread = 0;
+            obs.pub('/setUnreadCount', ['c' + id, currentCategory.unread]);
+            // обнуляем непрочитанные у подчинённых фидов
+            feeds = _.filter(Feeds,function(element) {return element.cat_id == id;});
+            _.each(feeds,function(element) {
+                element.unread = 0;
+                obs.pub('/setUnreadCount', ['f' + element.id, element.unread]);
+            });
+        }else{
+            currentFeed = Feeds[id];
+            currentFeed.unread = 0;
+            obs.pub('/setUnreadCount', ['f' + id, currentFeed.unread]);
+            // ---
+            currentCategory = Categories[currentFeed.cat_id];
+            currentCategory.unread = 0;
+            obs.pub('/setUnreadCount', ['c' + currentCategory.id, currentCategory.unread]);
+        };
+        // отправляем запрос
+        $.post(apiURL, {
+            "op": "catchupFeed",
+            "seq": seq,
+            "feed_id": id,
+            "is_cat": isCategory
+        }, function(data) {
+            // ...
+        });
+    };
+
     // public:
     return {
 
@@ -235,6 +274,7 @@ var dataManager = (function() {
             obs.sub("/getHeaders", this.onGetHeaders);
             obs.sub('/setArticleRead', this.setArticleRead);
             obs.sub('/setArticleUnread', this.setArticleUnread);
+            obs.sub('/markFeedAsRead', this.markFeedAsRead);
 
             // запускаем цепочку инициализации
             console.log(_module + ": initializing ...");
@@ -279,7 +319,8 @@ var dataManager = (function() {
             feedCache = {};
         },
         setArticleRead: _setArticleRead,
-        setArticleUnread: _setArticleUnread
+        setArticleUnread: _setArticleUnread,
+        markFeedAsRead: _markFeedAsRead
     }
 
 }());

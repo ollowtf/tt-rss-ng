@@ -199,6 +199,14 @@ var listView = (function() {
 		};
 	};
 
+	function _markCurrentFeedAsRead() {
+		// тут можно задать вопрос
+		// ...
+		// отмечаем все текущие непрочитанные как прочитанные
+		$('.unread',contentBlock).removeClass('unread').addClass('read');
+		obs.pub('/markFeedAsRead',[currentFeed]);
+	};
+
 	// public
 	// ------------------------------------------------------------
 	return {
@@ -212,6 +220,8 @@ var listView = (function() {
 			obs.sub('/setCurrentUnread',this.setCurrentUnread);
 			// ---
 			obs.sub('/openCurrentLink', this.openCurrentLink);
+			// ---
+			obs.sub('/markCurrentFeedAsRead',this.markCurrentFeedAsRead);
 			// ---
 			console.log(_module + ': connected.');
 			// ---
@@ -249,7 +259,8 @@ var listView = (function() {
 		loadNextArticle: _loadNextArticle,
 		loadPrevArticle: _loadPrevArticle,
 		setCurrentUnread: _markCurrentUnread,
-		openCurrentLink: _openCurrentLink
+		openCurrentLink: _openCurrentLink,
+		markCurrentFeedAsRead: _markCurrentFeedAsRead
 	}
 
 }());

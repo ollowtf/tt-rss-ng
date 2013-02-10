@@ -15,7 +15,7 @@ var controller = (function() {
 			"u": "/setCurrentUnread",
 			"o": "/openCurrentLink",
 			"s": "/toggleSideBar",
-			"Ctrl+a": "/markCurrentFeedAsRead"
+			"Alt+r": "/markCurrentFeedAsRead"
 		};
 		_.each(keyMap, function(value, key) {
 			$(document).bind("keypress", key, function() {
