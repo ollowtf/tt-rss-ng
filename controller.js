@@ -43,6 +43,8 @@ var controller = (function() {
 			obs.sub('/feedActivated', this.activateFeed);
 			// ---
 			obs.sub('/toggleSideBar', this.toggleSideBar);
+			// ---
+			setInterval(function() {obs.pub('/getCounters')}, 60000);
 		},
 		activateFeed: function(event, feedId) {
 			console.log(_module + ": get request to activate feed %s", feedId);
