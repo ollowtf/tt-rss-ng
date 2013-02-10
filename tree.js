@@ -45,7 +45,8 @@ var treeView = (function() {
 				font: {
 					'font-weight': nodeFont(element.unread)
 				},
-				iconSkin: 'category'
+				iconSkin: 'category',
+				unread: element.unread
 			};
 			if(element.unread != 0) {
 				boldList.push(cNode.id);
@@ -66,7 +67,8 @@ var treeView = (function() {
 						font: {
 							'font-weight': nodeFont(feed.unread)
 						},
-						iconSkin: 'feed'
+						iconSkin: 'feed',
+						unread: feed.unread
 					};
 					feedTree.push(fNode);
 					if(feed.unread != 0) {
@@ -119,6 +121,7 @@ var treeView = (function() {
 		var ztree = $.fn.zTree.getZTreeObj("feedTree");
 		var node = ztree.getNodeByParam('id', feedId);
 		node.name = nodeName(node.title, unread);
+		node.unread = unread;
 		node.font = {
 			'font-weight': nodeFont(unread)
 		}
@@ -127,7 +130,14 @@ var treeView = (function() {
 	};
 
 	function _setFeedViewMode(event,mode) {
-		alert(mode);
+		// alert(mode);
+		var ztree = $.fn.zTree.getZTreeObj("feedTree");
+		var nodes = ztree.getNodesByParam('unread',0);
+		if (mode == 'showAll') {
+			ztree.showNodes(nodes);
+		}else{
+			ztree.hideNodes(nodes);
+		};
 	};
 
 	// public
@@ -145,7 +155,7 @@ var treeView = (function() {
 			// ---
 			$('#feedShowMode').buttonset();
 			$('#feedShowMode input[type=radio]').click(function() {
-				obs.pub('setFeedViewMode',[$('input[name=feedShowMode]:checked').val()]);
+				obs.pub('/setFeedViewMode',[$('input[name=feedShowMode]:checked').attr('id')]);
 			});
 		},
 
