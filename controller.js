@@ -15,6 +15,7 @@ var controller = (function() {
 			"u": "/setCurrentUnread",
 			"o": "/openCurrentLink",
 			"s": "/toggleSideBar",
+			"c": "/getCounters",
 			"Alt+r": "/markCurrentFeedAsRead"
 		};
 		_.each(keyMap, function(value, key) {

@@ -120,22 +120,24 @@ var treeView = (function() {
 	function _setUnreadCount(event, feedId, unread) {
 		var ztree = $.fn.zTree.getZTreeObj("feedTree");
 		var node = ztree.getNodeByParam('id', feedId);
-		node.name = nodeName(node.title, unread);
-		node.unread = unread;
-		node.font = {
-			'font-weight': nodeFont(unread)
-		}
-		// ztree.setting.view.fontCss['font-weight'] = nodeFont(unread);
-		ztree.updateNode(node);
+		if(node != undefined) {
+			node.name = nodeName(node.title, unread);
+			node.unread = unread;
+			node.font = {
+				'font-weight': nodeFont(unread)
+			}
+			// ztree.setting.view.fontCss['font-weight'] = nodeFont(unread);
+			ztree.updateNode(node);
+		};
 	};
 
-	function _setFeedViewMode(event,mode) {
+	function _setFeedViewMode(event, mode) {
 		// alert(mode);
 		var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		var nodes = ztree.getNodesByParam('unread',0);
-		if (mode == 'showAll') {
+		var nodes = ztree.getNodesByParam('unread', 0);
+		if(mode == 'showAll') {
 			ztree.showNodes(nodes);
-		}else{
+		} else {
 			ztree.hideNodes(nodes);
 		};
 	};
@@ -148,12 +150,12 @@ var treeView = (function() {
 			console.log(_module + ": initializing...");
 			obs.sub('/feedsUpdated', this.createFeedTree);
 			obs.sub('/setUnreadCount', this.setUnreadCount);
-			obs.sub('/setFeedViewMode',this.setFeedViewMode);
+			obs.sub('/setFeedViewMode', this.setFeedViewMode);
 			// ---
 			// рисуем меню
 			$('#feedShowMode').buttonset();
 			$('#feedShowMode input[type=radio]').click(function() {
-				obs.pub('/setFeedViewMode',[$('input[name=feedShowMode]:checked').attr('id')]);
+				obs.pub('/setFeedViewMode', [$('input[name=feedShowMode]:checked').attr('id')]);
 			});
 		},
 

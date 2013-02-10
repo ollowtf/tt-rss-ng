@@ -234,17 +234,19 @@ var dataManager = (function() {
             element.unread = false;
         });
         // обновляем счётчики
-        if (isCategory) {
+        if(isCategory) {
             currentCategory = Categories[id];
             currentCategory.unread = 0;
             obs.pub('/setUnreadCount', ['c' + id, currentCategory.unread]);
             // обнуляем непрочитанные у подчинённых фидов
-            feeds = _.filter(Feeds,function(element) {return element.cat_id == id;});
-            _.each(feeds,function(element) {
+            feeds = _.filter(Feeds, function(element) {
+                return element.cat_id == id;
+            });
+            _.each(feeds, function(element) {
                 element.unread = 0;
                 obs.pub('/setUnreadCount', ['f' + element.id, element.unread]);
             });
-        }else{
+        } else {
             currentFeed = Feeds[id];
             unread = currentFeed.unread;
             currentFeed.unread = 0;
@@ -265,6 +267,45 @@ var dataManager = (function() {
         });
     };
 
+    function _getCounters() {
+        $.ajax({
+            type: 'POST',
+            url: apiURL,
+            data: {
+                "op": "getCounters",
+                "seq": seq,
+                "output_mode": "fc"
+            },
+            success: _onCountersUpdate
+        });
+    };
+
+    function _onCountersUpdate(data) {
+        var jdata = $.parseJSON(data);
+        var content = jdata.content;
+        // ---
+        _.each(content, function(element) {
+            if(element.kind == 'cat') {
+                if(Categories[element.id] != undefined) {
+                    if(Categories[element.id].unread != element.counter) {
+                        Categories[element.id].unread = element.counter;
+                        if (element.id > 0) {
+                            obs.pub('/setUnreadCount', ['c' + element.id, element.counter]);    
+                        };
+                    };
+                };
+
+            } else {
+                if(Feeds[element.id] != undefined) {
+                    if(Feeds[element.id].unread != element.counter) {
+                        Feeds[element.id].unread = element.counter;
+                        obs.pub('/setUnreadCount', ['f' + element.id, element.counter]);
+                    };
+                };
+            };
+        });
+    };
+
     // public:
     return {
 
@@ -276,6 +317,7 @@ var dataManager = (function() {
             obs.sub('/setArticleRead', this.setArticleRead);
             obs.sub('/setArticleUnread', this.setArticleUnread);
             obs.sub('/markFeedAsRead', this.markFeedAsRead);
+            obs.sub('/getCounters', this.getCounters);
 
             // запускаем цепочку инициализации
             console.log(_module + ": initializing ...");
@@ -321,7 +363,8 @@ var dataManager = (function() {
         },
         setArticleRead: _setArticleRead,
         setArticleUnread: _setArticleUnread,
-        markFeedAsRead: _markFeedAsRead
+        markFeedAsRead: _markFeedAsRead,
+        getCounters: _getCounters
     }
 
 }());
