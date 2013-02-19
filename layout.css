@@ -2,11 +2,11 @@
     background: none repeat scroll 0 0 #FFFFFF;
     border: 1px solid #BBBBBB;
     overflow: auto;
-    padding: 10px;
+    /*padding: 10px;*/
 }
 .ui-layout-content {
     overflow: auto;
-    padding: 10px;
+    /*padding: 10px;*/
     position: relative;
 }
 .layout-child-container, .layout-content-container {

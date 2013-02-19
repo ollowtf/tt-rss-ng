@@ -34,15 +34,15 @@
 	
 </head>                                                                 
 <body>                                                                  
-	<div id="content" class="ui-layout-center"></div>
+	<div id="content" class="ui-layout-center">
+		<div class="toolbar">toolbar</div>
+		<div id="view" class="ui-layout-content"></div>
+	</div>
 	<div id="sidebar" class="ui-layout-west">
-		<div id="treeHeader">
-			<span id="feedShowMode">
-			<input type="radio" id="showAll" name="feedShowMode" checked="checked" /><label for="showAll">All</label>
-			<input type="radio" id="showUnread" name="feedShowMode" /><label for="showUnread">Unread</label>
-			</span>
+		<div class="toolbar"><b>tt-rss</b></div>
+		<div class="ui-layout-content">
+			<div id="feedTree" class="ztree">
 		</div>
-		<div id="feedTree" class="ztree">
 		</div>
 	</div>                                     
 </body>                                                                 

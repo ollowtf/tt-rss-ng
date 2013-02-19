@@ -9,7 +9,7 @@ body{
 	background: #E6E6E6;
 	float: left;
 	height: 800px;
-	padding: 5px;
+	/*padding: 5px;*/
 	width: 200px;
 }
 
@@ -20,6 +20,9 @@ body{
 	height: 800px * ;
 	overflow-x: hidden;
 	overflow-y: scroll;
+}
+
+.view {
 	padding: 5px;
 }
 
@@ -181,4 +184,14 @@ div.content {
 #treetoolbar {
 	padding: 4px;
 	display: inline-block;
+}
+
+/*-----------------------------------------------------------*/
+
+.toolbar {
+	background-color: #CCCCCC;
+	border-bottom: 1px solid #CCD;
+	clear: both;
+	padding-left: 7px;
+	vertical-align: middle;
 }

@@ -225,7 +225,7 @@ var listView = (function() {
 			// ---
 			console.log(_module + ': connected.');
 			// ---
-			contentBlock = $('#content');
+			contentBlock = $('#view');
 			// ---
 			this.activateFeed(feedId);
 		},
