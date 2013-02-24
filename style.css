@@ -11,6 +11,7 @@ body{
 	height: 800px;
 	/*padding: 5px;*/
 	width: 200px;
+	overflow: hidden;
 }
 
 #content {
@@ -18,8 +19,7 @@ body{
 	display: block;
 	float: left;
 	height: 800px * ;
-	overflow-x: hidden;
-	overflow-y: scroll;
+	overflow: hidden;
 }
 
 .view {
@@ -192,6 +192,25 @@ div.content {
 	background-color: #CCCCCC;
 	border-bottom: 1px solid #CCD;
 	clear: both;
-	padding-left: 7px;
+	padding-left: 0px;
+	padding-right: 0px;
 	vertical-align: middle;
+	clear: both;
+	display: table;
+	width:100%;
 }
+
+span#progname {
+	padding-left: 7px;
+	display: table-cell;
+	float: left;
+}
+
+.rightmenu {
+	display: table-cell;
+	float:right;
+}
+
+/*#button > span.ui-icon-settings {
+    background-image: url(http://placekitten.com/25/25)
+}*/

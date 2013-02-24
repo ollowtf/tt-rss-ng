@@ -152,11 +152,33 @@ var treeView = (function() {
 			obs.sub('/setUnreadCount', this.setUnreadCount);
 			obs.sub('/setFeedViewMode', this.setFeedViewMode);
 			// ---
-			// рисуем меню
-			$('#feedShowMode').buttonset();
+			// создаём кнопку меню
+			$('#settings').button({
+				text: false,
+				icons: {
+					primary: "ui-icon-carat-1-n"
+				}
+			});
+			$('#next').button({
+				text: false,
+				icons: {
+					primary: "ui-icon-circle-arrow-s"
+				}
+			}).click(function() {
+				obs.pub('/loadNextArticle');
+			});
+			$('#prev').button({
+				text: false,
+				icons: {
+					primary: "ui-icon-circle-arrow-n"
+				}
+			}).click(function() {
+				obs.pub('/loadPrevArticle');
+			});
+			/*$('#feedShowMode').buttonset();
 			$('#feedShowMode input[type=radio]').click(function() {
 				obs.pub('/setFeedViewMode', [$('input[name=feedShowMode]:checked').attr('id')]);
-			});
+			});*/
 		},
 
 		// обновление дерева
