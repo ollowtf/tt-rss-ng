@@ -45,6 +45,32 @@ var controller = (function() {
 			obs.sub('/toggleSideBar', this.toggleSideBar);
 			// ---
 			setInterval(function() {obs.pub('/getCounters')}, 60000);
+
+			// buttons
+			$('#next').button({
+				text: false,
+				icons: {
+					primary: "ui-icon-circle-arrow-s"
+				}
+			}).click(function() {
+				obs.pub('/loadNextArticle');
+			});
+			$('#prev').button({
+				text: false,
+				icons: {
+					primary: "ui-icon-circle-arrow-n"
+				}
+			}).click(function() {
+				obs.pub('/loadPrevArticle');
+			});
+			$('#open').button({
+				text: false,
+				icons: {
+					primary: "ui-icon-triangle-1-ne"
+				}
+			}).click(function() {
+				obs.pub('/openCurrentLink');
+			});
 		},
 		activateFeed: function(event, feedId) {
 			console.log(_module + ": get request to activate feed %s", feedId);
