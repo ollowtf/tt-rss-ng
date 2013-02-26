@@ -159,7 +159,31 @@ var treeView = (function() {
 					primary: "ui-icon-carat-1-n"
 				}
 			});
-			
+			// context menu for settings
+			$.contextMenu({
+				selector: '#settings',
+				trigger: 'left',
+				zIndex: 3,
+				items: {
+					"showAll": {
+						name: "Show all",
+						callback: function(key, opt) {
+							obs.pub('/setFeedViewMode', [key]);
+						}
+					},
+					"showUnread": {
+						name: "Show unread",
+						callback: function(key, opt) {
+							obs.pub('/setFeedViewMode', [key]);
+						}
+					},
+					"sep1": "---------",
+					"settings": {
+						name: "Settings"
+					}
+				}
+			});
+
 			/*$('#feedShowMode').buttonset();
 			$('#feedShowMode input[type=radio]').click(function() {
 				obs.pub('/setFeedViewMode', [$('input[name=feedShowMode]:checked').attr('id')]);
