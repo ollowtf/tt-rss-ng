@@ -158,8 +158,6 @@ var treeView = (function() {
 				icons: {
 					primary: "ui-icon-carat-1-n"
 				}
-			}).css({
-				'font-size':'8px'
 			});
 			
 			/*$('#feedShowMode').buttonset();

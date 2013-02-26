@@ -26,26 +26,22 @@
 	<link type="text/css" rel="stylesheet" href="style.css">
 	<link type="text/css" rel="stylesheet" href="tree.css">
 	<link type="text/css" rel="stylesheet" href="layout.css" />
-	<link type="text/css" rel="stylesheet" href="js/jq/ui/css/smoothness/jquery-ui-1.10.1.custom.css"/>	
+		
 	
 </head>                                                                 
 <body>                                                                  
 	<div id="content" class="ui-layout-center">
 		<div class="toolbar">
-			<div class="rightmenu">
-				<button id="open">open</button>
-				<button id="next">next</button>
-				<button id="prev">prev</button>
-			</div>
+			<button id="prev" class="right">prev</button>
+			<button id="next" class="right">next</button>
+			<button id="open" class="right">open</button>
 		</div>
 		<div id="view" class="ui-layout-content"></div>
 	</div>
 	<div id="sidebar" class="ui-layout-west">
 		<div class="toolbar">
 			<span id="progname"><b>tt-rss</b></span>
-			<div class="rightmenu">
-				<button id="settings">settings</button>
-			</div>
+			<button id="settings" class="right">settings</button>
 		</div>
 		<div class="ui-layout-content">
 			<div id="feedTree" class="ztree">

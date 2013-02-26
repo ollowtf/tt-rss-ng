@@ -52,8 +52,6 @@ var controller = (function() {
 				icons: {
 					primary: "ui-icon-circle-arrow-s"
 				}
-			}).css({
-				'font-size':'8px'
 			}).click(function() {
 				obs.pub('/loadNextArticle');
 			});
@@ -62,8 +60,6 @@ var controller = (function() {
 				icons: {
 					primary: "ui-icon-circle-arrow-n"
 				}
-			}).css({
-				'font-size':'8px'
 			}).click(function() {
 				obs.pub('/loadPrevArticle');
 			});
@@ -72,8 +68,6 @@ var controller = (function() {
 				icons: {
 					primary: "ui-icon-triangle-1-ne"
 				}
-			}).css({
-				'font-size':'8px'
 			}).click(function() {
 				obs.pub('/openCurrentLink');
 			});

@@ -188,6 +188,10 @@ div.content {
 
 /*-----------------------------------------------------------*/
 
+#progname b {
+	vertical-align: middle;
+}
+
 .toolbar {
 	background-color: #CCCCCC;
 	border-bottom: 1px solid #CCD;
@@ -196,8 +200,37 @@ div.content {
 	padding-right: 0px;
 	vertical-align: middle;
 	clear: both;
-	display: table;
+	display: inline-block;
 	width:100%;
+}
+
+.toolbar button {
+	display: inline-block;
+	margin: 0;
+	cursor: pointer;
+	border: 1px solid #CCCCCC;
+	border-radius: 2px;
+	padding: 0;
+	font-size: 0.9em;
+}
+
+.toolbar button:hover {
+	border: 1px solid #CC0000;
+}
+
+.button .icon-only {
+	max-width: 16px;
+	max-height: 16px;
+	vertical-align: middle;
+	padding: 0px;
+}
+
+button.left {
+	float: left;
+}
+
+button.right {
+	float: right;
 }
 
 span#progname {
