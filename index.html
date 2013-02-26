@@ -6,11 +6,17 @@
 	<script type="text/javascript" src="js/jq/jquery.min.js"></script>
 	<script type="text/javascript" src="js/jq/hotkeys/jquery.hotkeys.js"></script>
 	<script type="text/javascript" src="js/jq/scrollTo/jquery.scrollTo.js"></script>
-	<script type="text/javascript" src="js/jq/ui/jquery-ui-1.10.1.custom.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.core.min.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.widget.min.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.mouse.min.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.draggable.min.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.position.min.js"></script>
+	<script type="text/javascript" src="js/jq/ui/jquery.ui.button.min.js"></script>
 	<script type="text/javascript" src="js/jq/layout/jquery.layout.min.js"></script>
 	<script type="text/javascript" src="js/jq/ztree/jquery.ztree.core-3.5.js"></script>
 	<script type="text/javascript" src="js/jq/ztree/jquery.ztree.exhide-3.5.js"></script>
 	<script type="text/javascript" src="js/jq/imgcenter/jquery.imgCenter.js"></script>
+	<script type="text/javascript" src="js/jq/contextmenu/jquery.contextMenu.js"></script>
 	<script type="text/javascript" src="js/datejs/core.js"></script>
 	<script type="text/javascript" src="js/datejs/time.js"></script>
 	<script type="text/javascript" src="js/datejs/extras.js"></script>
@@ -26,12 +32,17 @@
 	<link type="text/css" rel="stylesheet" href="style.css">
 	<link type="text/css" rel="stylesheet" href="tree.css">
 	<link type="text/css" rel="stylesheet" href="layout.css" />
-		
-	
+	<link type="text/css" rel="stylesheet" href="js/jq/contextmenu/jquery.contextMenu.css" />
 </head>                                                                 
 <body>                                                                  
 	<div id="content" class="ui-layout-center">
 		<div class="toolbar">
+			<select id="modeSelector">
+				<option selected value="adaptive">adaptive</option>
+				<option value="all_articles">all</option>
+				<option value="marked">stared</option>
+				<option value="unread">unread</option>
+			</select>
 			<button id="prev" class="right">prev</button>
 			<button id="next" class="right">next</button>
 			<button id="open" class="right">open</button>
@@ -40,7 +51,7 @@
 	</div>
 	<div id="sidebar" class="ui-layout-west">
 		<div class="toolbar">
-			<span id="progname"><b>tt-rss</b></span>
+			<span id="progname"><b>tt-rss-ng</b></span>
 			<button id="settings" class="right">settings</button>
 		</div>
 		<div class="ui-layout-content">

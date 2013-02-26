@@ -71,6 +71,11 @@ var controller = (function() {
 			}).click(function() {
 				obs.pub('/openCurrentLink');
 			});
+			// mode select
+			$('#modeSelector').on('change',function() {
+				var mode = $('#modeSelector').val();
+				obs.pub('/viewModeChange',mode);
+			});
 		},
 		activateFeed: function(event, feedId) {
 			console.log(_module + ": get request to activate feed %s", feedId);

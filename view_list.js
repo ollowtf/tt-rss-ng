@@ -207,6 +207,16 @@ var listView = (function() {
 		obs.pub('/markFeedAsRead',[currentFeed]);
 	};
 
+	function _onModeChange(event,mode) {
+		// устанавливаем режим в params
+		_clearHeaders();
+		params.skip = 0;
+		params.view_mode = mode;
+		console.log(_module + ': headers request to dataManager');
+		obs.pub('/getHeaders', params);
+
+	};
+
 	// public
 	// ------------------------------------------------------------
 	return {
@@ -222,6 +232,8 @@ var listView = (function() {
 			obs.sub('/openCurrentLink', this.openCurrentLink);
 			// ---
 			obs.sub('/markCurrentFeedAsRead',this.markCurrentFeedAsRead);
+			// ---
+			obs.sub('/viewModeChange', this.onModeChange);
 			// ---
 			console.log(_module + ': connected.');
 			// ---
@@ -260,7 +272,8 @@ var listView = (function() {
 		loadPrevArticle: _loadPrevArticle,
 		setCurrentUnread: _markCurrentUnread,
 		openCurrentLink: _openCurrentLink,
-		markCurrentFeedAsRead: _markCurrentFeedAsRead
+		markCurrentFeedAsRead: _markCurrentFeedAsRead,
+		onModeChange: _onModeChange
 	}
 
 }());

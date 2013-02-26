@@ -179,11 +179,11 @@
 }
 /* to make room for the icon, a width needs to be set here */
 .ui-button-icon-only {
-	width: 16px;
+	width: 2.2em;
 }
 /* button elements seem to need a little more width */
 button.ui-button-icon-only {
-	width: 16px;
+	width: 2.4em;
 }
 .ui-button-icons-only {
 	width: 3.4em;
@@ -214,8 +214,8 @@ button.ui-button-icons-only {
 	padding: .4em 2.1em .4em 1em;
 }
 .ui-button-text-icons .ui-button-text {
-	/*padding-left: 2.1em;
-	padding-right: 2.1em;*/
+	padding-left: 2.1em;
+	padding-right: 2.1em;
 }
 /* no icon support for input elements, provide padding by default */
 input.ui-button {
@@ -229,12 +229,12 @@ input.ui-button {
 .ui-button-text-icons .ui-icon,
 .ui-button-icons-only .ui-icon {
 	position: absolute;
-	/*top: 50%;
-	margin-top: -8px;*/
+	top: 50%;
+	margin-top: -8px;
 }
 .ui-button-icon-only .ui-icon {
-	/*left: 50%;
-	margin-left: -8px;*/
+	left: 50%;
+	margin-left: -8px;
 }
 .ui-button-text-icon-primary .ui-button-icon-primary,
 .ui-button-text-icons .ui-button-icon-primary,
@@ -249,7 +249,7 @@ input.ui-button {
 
 /* button sets */
 .ui-buttonset {
-	/*margin-right: 7px;*/
+	margin-right: 7px;
 }
 .ui-buttonset .ui-button {
 	margin-left: 0;
@@ -348,7 +348,7 @@ button.ui-button::-moz-focus-inner {
 .ui-menu .ui-menu-item a {
 	text-decoration: none;
 	display: block;
-	/*padding: 2px .4em;*/
+	padding: 2px .4em;
 	line-height: 1.5;
 	min-height: 0; /* support: IE7 */
 	font-weight: normal;
@@ -361,7 +361,7 @@ button.ui-button::-moz-focus-inner {
 
 .ui-menu .ui-state-disabled {
 	font-weight: normal;
-	/*margin: .4em 0 .2em;*/
+	margin: .4em 0 .2em;
 	line-height: 1.5;
 }
 .ui-menu .ui-state-disabled a {
@@ -374,7 +374,7 @@ button.ui-button::-moz-focus-inner {
 }
 .ui-menu-icons .ui-menu-item a {
 	position: relative;
-	/*padding-left: 2em;*/
+	padding-left: 2em;
 }
 
 /* left-aligned */
@@ -441,7 +441,7 @@ body .ui-tooltip {
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default {
 	border: 1px solid #d3d3d3;
-	/*background: #e6e6e6 url(images/ui-bg_glass_75_e6e6e6_1x400.png) 50% 50% repeat-x;*/
+	background: #e6e6e6 url(images/ui-bg_glass_75_e6e6e6_1x400.png) 50% 50% repeat-x;
 	font-weight: normal;
 	color: #555555;
 }
@@ -458,7 +458,7 @@ body .ui-tooltip {
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus {
 	border: 1px solid #999999;
-	/*background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;*/
+	background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;
 	font-weight: normal;
 	color: #212121;
 }
@@ -754,7 +754,7 @@ body .ui-tooltip {
 ----------------------------------*/
 
 /* Corner radius */
-./*ui-corner-all,
+.ui-corner-all,
 .ui-corner-top,
 .ui-corner-left,
 .ui-corner-tl {
@@ -777,7 +777,7 @@ body .ui-tooltip {
 .ui-corner-right,
 .ui-corner-br {
 	border-bottom-right-radius: 4px;
-}*/
+}
 
 /* Overlays */
 .ui-widget-overlay {
@@ -786,8 +786,8 @@ body .ui-tooltip {
 	filter: Alpha(Opacity=30);
 }
 .ui-widget-shadow {
-	/*margin: -8px 0 0 -8px;
-	padding: 8px;*/
+	margin: -8px 0 0 -8px;
+	padding: 8px;
 	background: #aaaaaa url(images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x;
 	opacity: .3;
 	filter: Alpha(Opacity=30);

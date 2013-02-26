@@ -218,6 +218,20 @@ div.content {
 	border: 1px solid #CC0000;
 }
 
+.toolbar select {
+	display: inline-block;
+	margin: 0;
+	cursor: pointer;
+	border: 1px solid #CCCCCC;
+	border-radius: 2px;
+	padding: 0;
+	font-size: 0.9em;
+}
+
+.toolbar select:hover {
+	border: 1px solid #CC0000;
+}
+
 .button .icon-only {
 	max-width: 16px;
 	max-height: 16px;
