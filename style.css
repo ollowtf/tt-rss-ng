@@ -42,9 +42,7 @@ div.row {
 	display: block;
 }
 
-.row.current {
-	border-left: 3px solid #000000; 
-}
+
 
 /* --------------------------------------------------------- */
 
@@ -258,6 +256,17 @@ span#progname {
 
 .title {
 	cursor: pointer;
+}
+
+.current .header {
+	background-color: #CCCCCC;
+}
+
+
+.row.current {
+	/*border-left: 3px solid #000000; */
+	border-top: 1px solid #0000FF;
+	border-bottom: 1px solid #0000FF;
 }
 
 .current .titlecolumn .title { font-weight: bold; }
