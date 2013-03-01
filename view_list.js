@@ -18,6 +18,7 @@ var listView = (function() {
 
 	var rowTemplate = '<div class="header">	'+
 			'<div class="iconscolumn"><div class="<%=star%>"></div></div>'+
+			'<div class="iconscolumn"><div class="<%=publish%>"></div></div>'+
 			'<div class="updatecolumn"><%=updated%></div>'+
 			'<div class="titlecolumn"><span class="title"><%=title%></span>'+
 			'<span class="excerpt"><%=excerpt%></span></div>'+
@@ -59,7 +60,8 @@ var listView = (function() {
 				'updated': updateString,
 				'title': element.title,
 				'excerpt': ' - ' + element.excerpt,
-				'star': element.marked?'stared':'unstared'
+				'star': element.marked?'stared':'unstared',
+				'publish': element.published?'shared':'unshared'
 			}));
 			rowHeader = $('.header', newRow);
 			rowHeader.on("click", onHeaderClick);

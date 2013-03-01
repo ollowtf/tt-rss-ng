@@ -194,6 +194,8 @@ span#progname {
 	float:right;
 }
 
+/*--------------------------------------------*/
+
 .stared, .unstared {
 	cursor: pointer;
 	height: 16px;
@@ -209,6 +211,23 @@ span#progname {
 
 .unstared {
 	background-image: url('img/star_unset.png');
+}
+
+.shared, .unshared {
+	cursor: pointer;
+	height: 16px;
+	width: 16px;
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 0.2em;
+}
+
+.shared {
+	background-image: url('img/share_set.png');
+}
+
+.unshared {
+	background-image: url('img/share_unset.png');
 }
 
 /*--------------------------------------------*/
@@ -234,7 +253,8 @@ span#progname {
     float:left;
     display:inline-block;
     position: relative;
-    vertical-align: middle;
+    line-height: 1.6em;
+    height: 1.6em;
     margin-left: 0.2em;
 }
 
