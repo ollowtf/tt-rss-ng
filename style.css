@@ -1,7 +1,7 @@
 body{
     background-color: #FFFFFF; /* Цвет фона веб-страницы */
    	font-family: arial,sans-serif;
-   	font-size: 13px;	
+   	font-size: 12px;	
 	margin:0;
 }
 
@@ -24,6 +24,7 @@ body{
 
 .view {
 	padding: 5px;
+	position: absolute;
 }
 
 #footer {
@@ -47,42 +48,9 @@ div.row {
 
 /* --------------------------------------------------------- */
 
-.header {
-	clear: both;
-	cursor: pointer;
-	display: block;
-	padding-left: 7px;
-	vertical-align: middle;
-	width: 100 % ;
-}
 
-.titlerow {
-	height: 1.8em;
-	line-height: 1.8em;
-	margin-right: 8em;
-	overflow: hidden;
-	position: static;
-	width: auto;
-}
 
-.current .titlerow .title { font-weight: bold; }
 
-.current .titlerow .excerpt { display: none; }
-
-.unread .titlerow .title { font-weight: bold; }
-
-.excerpt { 
-	color: # 656565;
-}
-
-.updated {
-	color: #656565;
-	float: right;
-	line-height: 1.8em;
-	margin-right: 0.5em;
-	text-align: right;
-	text-decoration: none;
-}
 
 div.current { 		
 	background: #FFFFFF;
@@ -103,48 +71,18 @@ div.content {
 	float: right;
 }
 
-.main-link-box {
-	display: inline;
-	float: right;
-	height: 16px;
-	line-height: 1.8em;
-	margin-right: 1em;
-	vertical-align: middle;
-	width: 16px;
-}
-
-.main-link {
-	background: url('img/link.png') no-repeat scroll 0 0 transparent;
-	height: 16px;
-	opacity: 0.4;
-	position: absolute;
-	width: 16px;
-}
 
 /* --------------------------------------------------------- */
 
+.content {
+	overflow: auto;
+}
 .content p {
 	margin: 0.3em 0;
 }
 
 /* --------------------------------------------------------- */
 
-.stared, .unstared {
-	cursor: pointer;
-	display: inline;
-	float: left;
-	height: 16px;
-	vertical-align: middle;
-	width: 16px;
-}
-
-.stared {
-	background-image: url('img/star_set.png');
-}
-
-.unstared {
-	background-image: url('img/star_unset.png');
-}
 
 /* --------------------------------------------------------- */
 
@@ -153,7 +91,7 @@ div.content {
 	display: block;
 	float: left;
 	height: 16px;
-	vertical-align: baseline;
+	vertical-align: middle;
 	width: 16px;
 }
 
@@ -239,11 +177,11 @@ div.content {
 	padding: 0px;
 }
 
-button.left {
+.left {
 	float: left;
 }
 
-button.right {
+.right {
 	float: right;
 }
 
@@ -258,6 +196,76 @@ span#progname {
 	float:right;
 }
 
-/*#button > span.ui-icon-settings {
-    background-image: url(http://placekitten.com/25/25)
-}*/
+.stared, .unstared {
+	cursor: pointer;
+	height: 16px;
+	width: 16px;
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 0.2em;
+}
+
+.stared {
+	background-image: url('img/star_set.png');
+}
+
+.unstared {
+	background-image: url('img/star_unset.png');
+}
+
+/*--------------------------------------------*/
+
+
+.row { 
+	clear: both;
+	padding: 0px;
+	width:100%;
+	overflow: hidden;
+}
+
+.header {
+	clear: both;
+    height: 1.6em;
+    line-height:1.6em;
+    position: relative;
+    overflow: hidden;
+}
+
+
+.iconscolumn {
+    float:left;
+    display:inline-block;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 0.2em;
+}
+
+.titlecolumn {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: auto;
+    position: static;
+}
+
+.updatecolumn {
+    display:inline-block;
+    float:right;
+    width: auto;
+    position: static;
+    padding-right: 0.5em;
+}
+
+.title {
+	cursor: pointer;
+}
+
+.current .titlecolumn .title { font-weight: bold; }
+
+.current .titlecolumn .excerpt { display: none; }
+
+.unread .titlecolumn .title { font-weight: bold; }
+
+.excerpt { 
+	color: # 656565;
+}

@@ -9,7 +9,19 @@ var listView = (function() {
 
 	var params = {};
 
-	var rowTemplate = '<div class="header">' + '<div class="main-link-box">' + '<a class="main-link" target="_blank" href="<%=link%>"></a></div>' + '<div class="updated"><%=updated%></div>' + '<div class="titlerow">' + '<span class="title"><%=title%></span>' + '<span class="excerpt"><%=excerpt%></span>' + '</div></div>';
+	/*var rowTemplate = '<div class="header">' + 
+					'<div class="updated"><%=updated%></div>' + 
+					'<div class="titlerow">' + 
+					'<span class="title"><%=title%></span>' + 
+					'<span class="excerpt"><%=excerpt%></span>' + 
+					'</div></div>';*/
+
+	var rowTemplate = '<div class="header">	'+
+			'<div class="iconscolumn"><div class="<%=star%>"></div></div>'+
+			'<div class="updatecolumn"><%=updated%></div>'+
+			'<div class="titlecolumn"><span class="title"><%=title%></span>'+
+			'<span class="excerpt"><%=excerpt%></span></div>'+
+			'</div>';
 
 	var _module = 'ListView';
 
@@ -45,9 +57,9 @@ var listView = (function() {
 			newRow = $('<div/>').addClass('row').addClass((element.unread) ? "unread" : "read").attr('id', rowId);
 			newRow.html(template({
 				'updated': updateString,
-				'link': element.link,
 				'title': element.title,
-				'excerpt': ' - ' + element.excerpt
+				'excerpt': ' - ' + element.excerpt,
+				'star': element.marked?'stared':'unstared'
 			}));
 			rowHeader = $('.header', newRow);
 			rowHeader.on("click", onHeaderClick);
