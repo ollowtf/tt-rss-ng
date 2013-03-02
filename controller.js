@@ -76,6 +76,36 @@ var controller = (function() {
 				_toggleMultiSelect();
 			});
 			$('#actions').button().click();
+			// context menu for settings
+			$.contextMenu({
+				selector: '#actions',
+				trigger: 'left',
+				zIndex: 3,
+				items: {
+					"open": {
+						name: "open"
+					},
+					"sep1": "---------",
+					"toggleRead": {
+						name: "toggle read",
+						callback: function(key, opt) {
+							//obs.pub('/setFeedViewMode', [key]);
+						}
+					},
+					"toggleStar": {
+						name: "toggle star",
+						callback: function(key, opt) {
+							//obs.pub('/setFeedViewMode', [key]);
+						}
+					},
+					"togglePublish": {
+						name: "toggle publish",
+						callback: function(key, opt) {
+							//obs.pub('/setFeedViewMode', [key]);
+						}
+					}
+				}
+			});
 			// ---
 			$('#next').button().click(function() {
 				obs.pub('/loadNextArticle');

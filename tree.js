@@ -166,20 +166,20 @@ var treeView = (function() {
 				zIndex: 3,
 				items: {
 					"showAll": {
-						name: "Show all",
+						name: "all feeds",
 						callback: function(key, opt) {
 							obs.pub('/setFeedViewMode', [key]);
 						}
 					},
 					"showUnread": {
-						name: "Show unread",
+						name: "unread feeds",
 						callback: function(key, opt) {
 							obs.pub('/setFeedViewMode', [key]);
 						}
 					},
 					"sep1": "---------",
 					"settings": {
-						name: "Settings"
+						name: "settings"
 					}
 				}
 			});
