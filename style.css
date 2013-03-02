@@ -175,6 +175,10 @@ div.content {
 	padding: 0px;
 }
 
+button.selected {
+	background-color: #FF8AF7;
+}
+
 .left {
 	float: left;
 }
@@ -196,13 +200,13 @@ span#progname {
 
 /*--------------------------------------------*/
 
-.stared, .unstared {
+.stared, .unstared, .shared, .unshared {
 	cursor: pointer;
 	height: 16px;
 	width: 16px;
 	display: inline-block;
-	vertical-align: middle;
 	margin-right: 0.2em;
+	margin-bottom: 0.15em;
 }
 
 .stared {
@@ -213,15 +217,6 @@ span#progname {
 	background-image: url('img/star_unset.png');
 }
 
-.shared, .unshared {
-	cursor: pointer;
-	height: 16px;
-	width: 16px;
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: 0.2em;
-}
-
 .shared {
 	background-image: url('img/share_set.png');
 }
@@ -229,6 +224,7 @@ span#progname {
 .unshared {
 	background-image: url('img/share_unset.png');
 }
+
 
 /*--------------------------------------------*/
 
@@ -255,7 +251,15 @@ span#progname {
     position: relative;
     line-height: 1.6em;
     height: 1.6em;
+    padding-top: 0.15em;
     margin-left: 0.2em;
+}
+
+.iconscolumn > input {
+	height: 16px;
+	width: 16px;
+	margin-bottom: 0.15em;
+	display: inline-block;
 }
 
 .titlecolumn {
@@ -300,5 +304,9 @@ span#progname {
 }
 
 a.article-link {
+	display: none;
+}
+
+.hidden {
 	display: none;
 }

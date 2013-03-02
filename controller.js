@@ -7,6 +7,8 @@ var controller = (function() {
 	// ---
 	var currentView = '';
 
+	var multiSelect = false;
+
 	function registerHotkeys() {
 		var keyMap = {
 			"j": "/loadNextArticle",
@@ -29,6 +31,27 @@ var controller = (function() {
 
 	};
 
+	// ---
+
+	function _toggleMultiSelect() {
+		var btn =$('#multi');
+		if (btn.hasClass('selected')) {
+			obs.pub('/disableMultiSelect');
+		}else{
+			obs.pub('/enableMultiSelect');
+		};
+	};
+
+	function _multiSelectState(event,value) {
+		var btn =$('#multi');
+		multiSelect = value;
+		if (multiSelect) {
+			btn.addClass('selected');
+		}else{
+			btn.removeClass('selected');
+		};
+	}
+
 	// public
 	return {
 		init: function() {
@@ -44,31 +67,23 @@ var controller = (function() {
 			// ---
 			obs.sub('/toggleSideBar', this.toggleSideBar);
 			// ---
+			obs.sub('/stateMultiSelect',this.multiSelectState);
+			// ---
 			setInterval(function() {obs.pub('/getCounters')}, 60000);
 
 			// buttons
-			$('#next').button({
-				text: false,
-				icons: {
-					primary: "ui-icon-circle-arrow-s"
-				}
-			}).click(function() {
+			$('#multi').button().click(function() {
+				_toggleMultiSelect();
+			});
+			$('#actions').button().click();
+			// ---
+			$('#next').button().click(function() {
 				obs.pub('/loadNextArticle');
 			});
-			$('#prev').button({
-				text: false,
-				icons: {
-					primary: "ui-icon-circle-arrow-n"
-				}
-			}).click(function() {
+			$('#prev').button().click(function() {
 				obs.pub('/loadPrevArticle');
 			});
-			$('#open').button({
-				text: false,
-				icons: {
-					primary: "ui-icon-triangle-1-ne"
-				}
-			}).click(function() {
+			$('#open').button().click(function() {
 				obs.pub('/openCurrentLink');
 			});
 			// mode select
@@ -104,7 +119,8 @@ var controller = (function() {
 		toggleSideBar: function() {
 			console.log(_module + ": toggle sidebar state.");
 			appLayout.toggle('west');
-		}
+		},
+		multiSelectState: _multiSelectState
 	}
 
 }());

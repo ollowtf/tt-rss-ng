@@ -9,19 +9,13 @@ var listView = (function() {
 
 	var params = {};
 
-	/*var rowTemplate = '<div class="header">' + 
-					'<div class="updated"><%=updated%></div>' + 
-					'<div class="titlerow">' + 
-					'<span class="title"><%=title%></span>' + 
-					'<span class="excerpt"><%=excerpt%></span>' + 
-					'</div></div>';*/
-
 	var rowTemplate = '<a class="article-link" href="<%=link%>"/>'+
 			'<div class="header">	'+
-			'<div class="iconscolumn"><div class="<%=star%>"></div></div>'+
-			'<div class="iconscolumn"><div class="<%=publish%>"></div></div>'+
+			'<div class="iconscolumn checkbox <%=multi%>"><input id="chk-<%=id%>" type="checkbox"></div>'+
+			'<div class="iconscolumn"><div id="str-<%=id%>" class="<%=star%>"></div></div>'+
+			'<div class="iconscolumn"><div id="shr-<%=id%>" class="<%=publish%>"></div></div>'+
 			'<div class="updatecolumn"><%=updated%></div>'+
-			'<div class="titlecolumn"><span class="title"><%=title%></span>'+
+			'<div class="titlecolumn"><span id="hdr-<%=id%>" class="title"><%=title%></span>'+
 			'<span class="excerpt"><%=excerpt%></span></div>'+
 			'</div>';
 
@@ -58,14 +52,16 @@ var listView = (function() {
 			// ---
 			newRow = $('<div/>').addClass('row').addClass((element.unread) ? "unread" : "read").attr('id', rowId);
 			newRow.html(template({
-				'link': element.link,
-				'updated': updateString,
-				'title': element.title,
-				'excerpt': ' - ' + element.excerpt,
-				'star': element.marked?'stared':'unstared',
-				'publish': element.published?'shared':'unshared'
+				'id'		:element.id,
+				'link'		: element.link,
+				'updated'	: updateString,
+				'title'		: element.title,
+				'excerpt'	: ' - ' + element.excerpt,
+				'star'		: element.marked?'stared':'unstared',
+				'publish'	: element.published?'shared':'unshared',
+				'multi'		: 'hidden'
 			}));
-			rowHeader = $('.header', newRow);
+			rowHeader = $('.title', newRow);
 			rowHeader.on("click", onHeaderClick);
 			contentBlock.append(newRow);
 		});
@@ -90,7 +86,7 @@ var listView = (function() {
 	};
 
 	function onHeaderClick(event) {
-		row = $(event.currentTarget.parentElement);
+		row = $(event.currentTarget.parentElement.parentElement.parentElement);
 		artId = utils.articleId(row);
 		if(row.hasClass('current')) {
 			console.log(_module + ': click on current article %d. Hiding.', artId);
@@ -233,6 +229,16 @@ var listView = (function() {
 
 	};
 
+	function _enableMultiSelect() {
+		$('.checkbox').removeClass('hidden');
+		obs.pub('/stateMultiSelect',true);
+	};
+
+	function _disableMultiSelect() {
+		$('.checkbox').addClass('hidden');
+		obs.pub('/stateMultiSelect',false);
+	};
+
 	// public
 	// ------------------------------------------------------------
 	return {
@@ -250,6 +256,9 @@ var listView = (function() {
 			obs.sub('/markCurrentFeedAsRead',this.markCurrentFeedAsRead);
 			// ---
 			obs.sub('/viewModeChange', this.onModeChange);
+			// ---
+			obs.sub('/enableMultiSelect',this.enableMultiSelect);
+			obs.sub('/disableMultiSelect',this.disableMultiSelect);
 			// ---
 			console.log(_module + ': connected.');
 			// ---
@@ -289,7 +298,9 @@ var listView = (function() {
 		setCurrentUnread: _markCurrentUnread,
 		openCurrentLink: _openCurrentLink,
 		markCurrentFeedAsRead: _markCurrentFeedAsRead,
-		onModeChange: _onModeChange
+		onModeChange: _onModeChange,
+		enableMultiSelect: _enableMultiSelect,
+		disableMultiSelect: _disableMultiSelect
 	}
 
 }());
