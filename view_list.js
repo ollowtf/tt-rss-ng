@@ -16,7 +16,8 @@ var listView = (function() {
 					'<span class="excerpt"><%=excerpt%></span>' + 
 					'</div></div>';*/
 
-	var rowTemplate = '<div class="header">	'+
+	var rowTemplate = '<a class="article-link" href="<%=link%>"/>'+
+			'<div class="header">	'+
 			'<div class="iconscolumn"><div class="<%=star%>"></div></div>'+
 			'<div class="iconscolumn"><div class="<%=publish%>"></div></div>'+
 			'<div class="updatecolumn"><%=updated%></div>'+
@@ -57,6 +58,7 @@ var listView = (function() {
 			// ---
 			newRow = $('<div/>').addClass('row').addClass((element.unread) ? "unread" : "read").attr('id', rowId);
 			newRow.html(template({
+				'link': element.link,
 				'updated': updateString,
 				'title': element.title,
 				'excerpt': ' - ' + element.excerpt,
@@ -157,7 +159,7 @@ var listView = (function() {
 
 	function _openCurrentLink() {
 		row = _currentRow();
-		href = $('a.main-link', row).first().attr('href');
+		href = $('a.article-link', row).first().attr('href');
 		window.open(href, '_blank');
 	}
 
