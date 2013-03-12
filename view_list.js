@@ -9,6 +9,8 @@ var listView = (function() {
 
 	var params = {};
 
+	var multiSelect = false;
+
 	var rowTemplate = '<a class="article-link" href="<%=link%>"/>'+
 			'<div class="header">	'+
 			'<div class="iconscolumn checkbox <%=multi%>"><input id="chk-<%=id%>" type="checkbox"></div>'+
@@ -61,8 +63,12 @@ var listView = (function() {
 				'publish'	: element.published?'shared':'unshared',
 				'multi'		: 'hidden'
 			}));
-			rowHeader = $('.title', newRow);
+			var rowHeader = $('.title', newRow);
 			rowHeader.on("click", onHeaderClick);
+			// ---
+			var checkbox = $('.checkbox input',newRow);
+			checkbox.on('change',onCheckBoxChange);
+			// ---
 			contentBlock.append(newRow);
 		});
 		// ----------------------------------
@@ -97,6 +103,10 @@ var listView = (function() {
 			// ---
 			row.addClass("current");
 			console.log(_module + ': click on article %d. Loading.', artId);
+			if (!multiSelect) {
+				obs.pub('/newSelection',artId);	
+			};
+			
 			_displayArticle(artId);
 		}
 	};
@@ -115,6 +125,12 @@ var listView = (function() {
 			};
 
 		};
+	};
+
+	function onCheckBoxChange() {
+		var checked = this.checked;
+		var chk_id = utils.articleId($(this));
+		obs.pub(checked?'/addSelection':'/removeSelection',chk_id);
 	};
 
 	function _showArticle(article) {
@@ -231,12 +247,47 @@ var listView = (function() {
 
 	function _enableMultiSelect() {
 		$('.checkbox').removeClass('hidden');
+		multiSelect = true;
 		obs.pub('/stateMultiSelect',true);
 	};
 
 	function _disableMultiSelect() {
 		$('.checkbox').addClass('hidden');
+		multiSelect = false;
 		obs.pub('/stateMultiSelect',false);
+	};
+
+	function _toggleReadState(event,articles) {
+		_.each(articles,function(artId) {
+			var row = $('#row-'+artId,contentBlock);
+			if (row.hasClass('read')) {
+				row.removeClass('read').addClass('unread');
+			}else{
+				row.removeClass('unread').addClass('read');
+			};
+		});
+	};
+
+	function _toggleStarState(event,articles) {
+		_.each(articles,function(artId) {
+			var star = $('#str-'+artId,contentBlock);
+			if (star.hasClass('stared')) {
+				star.removeClass('stared').addClass('unstared');
+			}else{
+				star.removeClass('unstared').addClass('stared');
+			};
+		});
+	};
+
+	function _toggleShareState(event,articles) {
+		_.each(articles,function(artId) {
+			var share = $('#shr-'+artId,contentBlock);
+			if (share.hasClass('shared')) {
+				share.removeClass('shared').addClass('unshared');
+			}else{
+				share.removeClass('unshared').addClass('shared');
+			};
+		});
 	};
 
 	// public
@@ -259,6 +310,10 @@ var listView = (function() {
 			// ---
 			obs.sub('/enableMultiSelect',this.enableMultiSelect);
 			obs.sub('/disableMultiSelect',this.disableMultiSelect);
+			// ---
+			obs.sub('/toggleReadState',this.toggleReadState);
+			obs.sub('/toggleStarState',this.toggleStarState);
+			obs.sub('/toggleShareState',this.toggleShareState);
 			// ---
 			console.log(_module + ': connected.');
 			// ---
@@ -300,7 +355,11 @@ var listView = (function() {
 		markCurrentFeedAsRead: _markCurrentFeedAsRead,
 		onModeChange: _onModeChange,
 		enableMultiSelect: _enableMultiSelect,
-		disableMultiSelect: _disableMultiSelect
+		disableMultiSelect: _disableMultiSelect,
+		// ---
+		toggleReadState: _toggleReadState,
+		toggleStarState: _toggleStarState,
+		toggleShareState: _toggleShareState
 	}
 
 }());

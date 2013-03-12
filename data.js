@@ -306,6 +306,32 @@ var dataManager = (function() {
         });
     };
 
+    function _toggleReadState(event,articles) {
+        // находим в кэше, группируем по признаку
+        var markAsRead = {};
+        var markAsUnread = {};
+        _.each(articles,function(id) {
+            var article = feedCache[id];
+            if (article.unread) {
+                markAsRead[id]={'id':id};
+            }else{
+                markAsUnread[id]={'id':id};
+            };
+        });
+        // группируем по категориям и фидам, рассчитываем изменеия счётчиков
+        // ...
+        // выполняем запросы на изменение
+
+    };
+
+    function _toggleStarState() {
+
+    };
+
+    function _toggleShareState() {
+        
+    };
+
     // public:
     return {
 
@@ -318,6 +344,10 @@ var dataManager = (function() {
             obs.sub('/setArticleUnread', this.setArticleUnread);
             obs.sub('/markFeedAsRead', this.markFeedAsRead);
             obs.sub('/getCounters', this.getCounters);
+            // ---
+            obs.sub('/toggleReadState',this.toggleReadState);
+            obs.sub('/toggleStarState',this.toggleStarState);
+            obs.sub('/toggleShareState',this.toggleShareState);
 
             // запускаем цепочку инициализации
             console.log(_module + ": initializing ...");
@@ -364,7 +394,11 @@ var dataManager = (function() {
         setArticleRead: _setArticleRead,
         setArticleUnread: _setArticleUnread,
         markFeedAsRead: _markFeedAsRead,
-        getCounters: _getCounters
+        getCounters: _getCounters,
+        // ---
+        toggleReadState: _toggleReadState,
+        toggleStarState: _toggleStarState,
+        toggleShareState: _toggleShareState
     }
 
 }());

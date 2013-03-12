@@ -6,8 +6,10 @@ var controller = (function() {
 	var views = {};
 	// ---
 	var currentView = '';
-
+	// ---
 	var multiSelect = false;
+	// ---
+	var selectedItems = {};
 
 	function registerHotkeys() {
 		var keyMap = {
@@ -52,6 +54,29 @@ var controller = (function() {
 		};
 	}
 
+	function _addSelection(event,id) {
+		selectedItems[id]=true;
+	};
+
+	function _removeSelection(event,id) {
+		selectedItems[id]=false;
+	};
+
+	function _newSelection(event,id) {
+		selectedItems={};
+		selectedItems[id]=true;
+	};
+
+	function getSelectedItems() {
+		var selected = [];
+		_.each(selectedItems,function(element,key) {
+			if (element == true) {
+				selected.push(key);
+			};
+		});
+		return(selected);
+	};
+
 	// public
 	return {
 		init: function() {
@@ -68,6 +93,9 @@ var controller = (function() {
 			obs.sub('/toggleSideBar', this.toggleSideBar);
 			// ---
 			obs.sub('/stateMultiSelect',this.multiSelectState);
+			obs.sub('/addSelection',this.addSelection);
+			obs.sub('/removeSelection',this.removeSelection);
+			obs.sub('/newSelection',this.newSelection);
 			// ---
 			setInterval(function() {obs.pub('/getCounters')}, 60000);
 
@@ -89,19 +117,19 @@ var controller = (function() {
 					"toggleRead": {
 						name: "toggle read",
 						callback: function(key, opt) {
-							//obs.pub('/setFeedViewMode', [key]);
+							obs.pub('/toggleReadState', [getSelectedItems()]);
 						}
 					},
 					"toggleStar": {
 						name: "toggle star",
 						callback: function(key, opt) {
-							//obs.pub('/setFeedViewMode', [key]);
+							obs.pub('/toggleStarState', [getSelectedItems()]);
 						}
 					},
 					"togglePublish": {
 						name: "toggle publish",
 						callback: function(key, opt) {
-							//obs.pub('/setFeedViewMode', [key]);
+							obs.pub('/toggleShareState', [getSelectedItems()]);
 						}
 					}
 				}
@@ -150,7 +178,10 @@ var controller = (function() {
 			console.log(_module + ": toggle sidebar state.");
 			appLayout.toggle('west');
 		},
-		multiSelectState: _multiSelectState
+		multiSelectState: _multiSelectState,
+		addSelection: _addSelection,
+		removeSelection: _removeSelection,
+		newSelection: _newSelection
 	}
 
 }());
