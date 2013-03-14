@@ -328,20 +328,12 @@ var dataManager = (function() {
                 article.unread = false;
                 mapCF[feedId]--;
                 mapCC[catId]--;
-                markAsRead[id] = {
-                    'id': id,
-                    'feed_id': feedId,
-                    'cat_id': catId
-                };
+                markAsRead[id] = true;
             } else {
                 article.unread = true;
                 mapCF[feedId]++;
                 mapCC[catId]++;
-                markAsUnread[id] = {
-                    'id': id,
-                    'feed_id': feedId,
-                    'cat_id': catId
-                };
+                markAsUnread[id] = true;
             };
         });
         // ---
@@ -364,8 +356,6 @@ var dataManager = (function() {
         });
         
         // выполняем запросы на изменение
-        // ...
-
         if (_.size(markAsRead) != 0 || _.size(markAsUnread) != 0) {
 
             var ops = {
@@ -392,12 +382,88 @@ var dataManager = (function() {
 
     };
 
-    function _toggleStarState() {
+    function _toggleStarState(event, articles) {
+        var markAsStar = {};
+        var markAsUnstar = {};
+        // ---
+        _.each(articles, function(id) {
+            var article = feedCache[id];
+            // ---
+            if (article.marked) {
+                article.marked = false;
+                markAsUnstar[id] = true;
+            } else {
+                article.marked = true;
+                markAsStar[id] = true;
+            };
+        });
 
+        // выполняем запросы на изменение
+        if (_.size(markAsStar) != 0 || _.size(markAsUnstar) != 0) {
+
+            var ops = {
+                'op': 'updateArticle',
+                'seq': seq,
+                'article_ids': '',
+                'mode': 0,
+                'field': 0
+            };
+
+            if (_.size(markAsStar) != 0) {
+                ops.mode = 1;
+                ops.article_ids = _.keys(markAsStar).join();
+                $.post(apiURL,ops);
+            };
+            // ---
+            if (_.size(markAsUnstar) != 0) {
+                ops.mode = 0;
+                ops.article_ids = _.keys(markAsUnstar).join();
+                $.post(apiURL,ops);
+            };
+
+        };
     };
 
-    function _toggleShareState() {
+    function _toggleShareState(event, articles) {
+        var markAsShare = {};
+        var markAsUnshare = {};
+        // ---
+        _.each(articles, function(id) {
+            var article = feedCache[id];
+            // ---
+            if (article.published) {
+                article.published = false;
+                markAsUnshare[id] = true;
+            } else {
+                article.published = true;
+                markAsShare[id] = true;
+            };
+        });
 
+        // выполняем запросы на изменение
+        if (_.size(markAsShare) != 0 || _.size(markAsUnshare) != 0) {
+
+            var ops = {
+                'op': 'updateArticle',
+                'seq': seq,
+                'article_ids': '',
+                'mode': 0,
+                'field': 1
+            };
+
+            if (_.size(markAsShare) != 0) {
+                ops.mode = 1;
+                ops.article_ids = _.keys(markAsShare).join();
+                $.post(apiURL,ops);
+            };
+            // ---
+            if (_.size(markAsUnshare) != 0) {
+                ops.mode = 0;
+                ops.article_ids = _.keys(markAsUnshare).join();
+                $.post(apiURL,ops);
+            };
+
+        };
     };
 
     // public:
