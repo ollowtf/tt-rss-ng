@@ -11,15 +11,15 @@ var listView = (function() {
 
 	var multiSelect = false;
 
-	var rowTemplate = '<a class="article-link" href="<%=link%>"/>'+
-			'<div class="header">	'+
-			'<div class="iconscolumn checkbox <%=multi%>"><input id="chk-<%=id%>" type="checkbox"></div>'+
-			'<div class="iconscolumn star"><div id="str-<%=id%>" class="<%=star%>"></div></div>'+
-			'<div class="iconscolumn share"><div id="shr-<%=id%>" class="<%=publish%>"></div></div>'+
-			'<div class="updatecolumn"><%=updated%></div>'+
-			'<div class="titlecolumn"><span id="hdr-<%=id%>" class="title"><%=title%></span>'+
-			'<span class="excerpt"><%=excerpt%></span></div>'+
-			'</div>';
+	var rowTemplate = '<a class="article-link" href="<%=link%>"/>' +
+		'<div class="header">	' +
+		'<div class="iconscolumn checkbox <%=multi%>"><input id="chk-<%=id%>" type="checkbox"></div>' +
+		'<div class="iconscolumn star"><div id="str-<%=id%>" class="<%=star%>"></div></div>' +
+		'<div class="iconscolumn share"><div id="shr-<%=id%>" class="<%=publish%>"></div></div>' +
+		'<div class="updatecolumn"><%=updated%></div>' +
+		'<div class="titlecolumn"><span id="hdr-<%=id%>" class="title"><%=title%></span>' +
+		'<span class="excerpt"><%=excerpt%></span></div>' +
+		'</div>';
 
 	var _module = 'ListView';
 
@@ -29,10 +29,10 @@ var listView = (function() {
 
 	function articleDate(cd, ad) {
 		updateTime = new Date(ad * 1000);
-		if(cd.isBefore(updateTime)) {
-			return(updateTime.toString("HH:mm"));
+		if (cd.isBefore(updateTime)) {
+			return (updateTime.toString("HH:mm"));
 		} else {
-			return(updateTime.toString("dd-MM-yyyy"));
+			return (updateTime.toString("dd-MM-yyyy"));
 		}
 	}
 
@@ -54,61 +54,66 @@ var listView = (function() {
 			// ---
 			newRow = $('<div/>').addClass('row').addClass((element.unread) ? "unread" : "read").attr('id', rowId);
 			newRow.html(template({
-				'id'		:element.id,
-				'link'		: element.link,
-				'updated'	: updateString,
-				'title'		: element.title,
-				'excerpt'	: ' - ' + element.excerpt,
-				'star'		: element.marked?'stared':'unstared',
-				'publish'	: element.published?'shared':'unshared',
-				'multi'		: 'hidden'
+				'id': element.id,
+				'link': element.link,
+				'updated': updateString,
+				'title': element.title,
+				'excerpt': ' - ' + element.excerpt,
+				'star': element.marked ? 'stared' : 'unstared',
+				'publish': element.published ? 'shared' : 'unshared',
+				'multi': multiSelect?'':'hidden'
 			}));
 			var rowHeader = $('.title', newRow);
 			rowHeader.on("click", onHeaderClick);
 			// ---
-			var checkbox = $('.checkbox input',newRow);
-			checkbox.on('change',onCheckBoxChange);
+			var checkbox = $('.checkbox input', newRow);
+			checkbox.on('change', onCheckBoxChange);
 			// ---
 			contentBlock.append(newRow);
+			// ---
+			var starbutton = $('.star div', newRow);
+			starbutton.click(clickStarButton);
+			// ---
+			var sharebutton = $('.share div', newRow);
+			sharebutton.click(clickShareButton);
+			// ---
 		});
 		// ----------------------------------
 		// выводим кнопку "показать дальше"
-        newRow = $('<div/>').addClass('row').addClass('nav').attr('id', "nextButton");
-        header = $('<div/>').addClass('header').appendTo(newRow);
-        title = $('<div/>').addClass('titlerow');
-        titleContent = $('<span/>').addClass('title').html("load more...");
-        title.append(titleContent);
-        header.append(title);
-        // ---
-        header.click(getMoreHeaders);
-        // ---
-        var starbutton = $('.star div');
-        starbutton.click(clickStarButton);
-        // ---
-        var sharebutton = $('.share div');
-        sharebutton.click(clickShareButton);
-        // ---
-        contentBlock.append(newRow);
+		newRow = $('<div/>').addClass('row').addClass('nav').attr('id', "nextButton");
+		header = $('<div/>').addClass('header').appendTo(newRow);
+		title = $('<div/>').addClass('titlerow');
+		titleContent = $('<span/>').addClass('title').html("load more...");
+		title.append(titleContent);
+		header.append(title);
+		// ---
+		header.click(getMoreHeaders);
+		// ---
+		contentBlock.append(newRow);
 	};
 
 	function clickStarButton() {
-		obs.pub('/toggleStarState',[[utils.articleId($(this))]]);
+		obs.pub('/toggleStarState', [
+			[utils.articleId($(this))]
+		]);
 	};
 
 	function clickShareButton() {
-		obs.pub('/toggleShareState',[[utils.articleId($(this))]]);
+		obs.pub('/toggleShareState', [
+			[utils.articleId($(this))]
+		]);
 	};
 
 	function getMoreHeaders() {
-		params.skip = $(".row",contentBlock).length-1;
-        console.log(_module + ': headers request to dataManager');
+		params.skip = $(".row", contentBlock).length - 1;
+		console.log(_module + ': headers request to dataManager');
 		obs.pub('/getHeaders', params);
 	};
 
 	function onHeaderClick(event) {
 		row = $(event.currentTarget.parentElement.parentElement.parentElement);
 		artId = utils.articleId(row);
-		if(row.hasClass('current')) {
+		if (row.hasClass('current')) {
 			console.log(_module + ': click on current article %d. Hiding.', artId);
 			_hideArticle(row);
 		} else {
@@ -118,20 +123,20 @@ var listView = (function() {
 			row.addClass("current");
 			console.log(_module + ': click on article %d. Loading.', artId);
 			if (!multiSelect) {
-				obs.pub('/newSelection',artId);	
+				obs.pub('/newSelection', artId);
 			};
-			
+
 			_displayArticle(artId);
 		}
 	};
 
 	function _displayArticle(artId) {
 		article = dataManager.getArticle(artId);
-		if(article == false) {
+		if (article == false) {
 			// включаем индикатор
 			// ...
 		} else {
-			if(artId == _currentId()) {
+			if (artId == _currentId()) {
 				_showArticle(article);
 			} else {
 				// выключаем индикатор
@@ -144,7 +149,7 @@ var listView = (function() {
 	function onCheckBoxChange() {
 		var checked = this.checked;
 		var chk_id = utils.articleId($(this));
-		obs.pub(checked?'/addSelection':'/removeSelection',chk_id);
+		obs.pub(checked ? '/addSelection' : '/removeSelection', chk_id);
 	};
 
 	function _showArticle(article) {
@@ -154,8 +159,10 @@ var listView = (function() {
 		// scroll 2 top
 		_scrollToTop(row);
 		// mark as read
-		if(article.unread) {
-			_markAsRead(row);
+		if (article.unread) {
+			obs.pub('/toggleReadState', [
+				[utils.articleId(row)]
+			]);
 		};
 
 	};
@@ -164,19 +171,6 @@ var listView = (function() {
 		// удаляем контент
 		$('.content', row).remove();
 		row.removeClass('current');
-	};
-
-	function _markAsRead(row) {
-		row.filter('.unread').removeClass('unread').addClass('read');
-		//  на сообщение должны среагировать treeView (уменьшить счётчик)
-		// и dataManager (послать запрос на пометку)
-		obs.pub('/setArticleRead',[utils.articleId(row)]);
-	};
-
-	function _markCurrentUnread() {
-		row = _currentRow();
-		row.filter('.read').removeClass('read').addClass('unread');
-		obs.pub('/setArticleUnread',[utils.articleId(row)]);
 	};
 
 	function _scrollToTop(row) {
@@ -191,30 +185,30 @@ var listView = (function() {
 
 	function _currentId() {
 		currentRow = _currentRow();
-		if(currentRow == 0) {
-			return(0);
+		if (currentRow == 0) {
+			return (0);
 		} else {
-			return(utils.articleId(currentRow));
+			return (utils.articleId(currentRow));
 		};
 	};
 
 	function _currentRow() {
 
 		currentRow = $(".current", contentBlock);
-		if(currentRow.length == 0) {
-			return(0);
+		if (currentRow.length == 0) {
+			return (0);
 		} else {
-			return(currentRow);
+			return (currentRow);
 		}
 
 	}
 
 	function _loadNextArticle() {
 		currentRow = _currentRow();
-		if(currentRow != 0) {
+		if (currentRow != 0) {
 			_hideArticle(currentRow);
 			newRow = currentRow.next();
-			if(newRow.hasClass('nav')) {
+			if (newRow.hasClass('nav')) {
 				// это кнопка "далее"
 				// ..
 			} else {
@@ -227,10 +221,10 @@ var listView = (function() {
 
 	function _loadPrevArticle() {
 		currentRow = _currentRow();
-		if(currentRow != 0) {
+		if (currentRow != 0) {
 			_hideArticle(currentRow);
 			newRow = currentRow.prev();
-			if(newRow.hasClass('nav')) {
+			if (newRow.hasClass('nav')) {
 				// это кнопка "далее"
 				// ..
 			} else {
@@ -245,60 +239,59 @@ var listView = (function() {
 		// тут можно задать вопрос
 		// ...
 		// отмечаем все текущие непрочитанные как прочитанные
-		$('.unread',contentBlock).removeClass('unread').addClass('read');
-		obs.pub('/markFeedAsRead',[currentFeed]);
+		$('.unread', contentBlock).removeClass('unread').addClass('read');
+		obs.pub('/markFeedAsRead', [currentFeed]);
 	};
 
-	function _onModeChange(event,mode) {
+	function _onModeChange(event, mode) {
 		// устанавливаем режим в params
 		_clearHeaders();
 		params.skip = 0;
 		params.view_mode = mode;
 		console.log(_module + ': headers request to dataManager');
 		obs.pub('/getHeaders', params);
-
 	};
 
 	function _enableMultiSelect() {
 		$('.checkbox').removeClass('hidden');
 		multiSelect = true;
-		obs.pub('/stateMultiSelect',true);
+		obs.pub('/stateMultiSelect', true);
 	};
 
 	function _disableMultiSelect() {
 		$('.checkbox').addClass('hidden');
 		multiSelect = false;
-		obs.pub('/stateMultiSelect',false);
+		obs.pub('/stateMultiSelect', false);
 	};
 
-	function _toggleReadState(event,articles) {
-		_.each(articles,function(artId) {
-			var row = $('#row-'+artId,contentBlock);
+	function _toggleReadState(event, articles) {
+		_.each(articles, function(artId) {
+			var row = $('#row-' + artId, contentBlock);
 			if (row.hasClass('read')) {
 				row.removeClass('read').addClass('unread');
-			}else{
+			} else {
 				row.removeClass('unread').addClass('read');
 			};
 		});
 	};
 
-	function _toggleStarState(event,articles) {
-		_.each(articles,function(artId) {
-			var star = $('#str-'+artId,contentBlock);
+	function _toggleStarState(event, articles) {
+		_.each(articles, function(artId) {
+			var star = $('#str-' + artId, contentBlock);
 			if (star.hasClass('stared')) {
 				star.removeClass('stared').addClass('unstared');
-			}else{
+			} else {
 				star.removeClass('unstared').addClass('stared');
 			};
 		});
 	};
 
-	function _toggleShareState(event,articles) {
-		_.each(articles,function(artId) {
-			var share = $('#shr-'+artId,contentBlock);
+	function _toggleShareState(event, articles) {
+		_.each(articles, function(artId) {
+			var share = $('#shr-' + artId, contentBlock);
 			if (share.hasClass('shared')) {
 				share.removeClass('shared').addClass('unshared');
-			}else{
+			} else {
 				share.removeClass('unshared').addClass('shared');
 			};
 		});
@@ -314,20 +307,18 @@ var listView = (function() {
 			obs.sub('/loadNextArticle', this.loadNextArticle);
 			obs.sub('/loadPrevArticle', this.loadPrevArticle);
 			// ---
-			obs.sub('/setCurrentUnread',this.setCurrentUnread);
-			// ---
 			obs.sub('/openCurrentLink', this.openCurrentLink);
 			// ---
-			obs.sub('/markCurrentFeedAsRead',this.markCurrentFeedAsRead);
+			obs.sub('/markCurrentFeedAsRead', this.markCurrentFeedAsRead);
 			// ---
 			obs.sub('/viewModeChange', this.onModeChange);
 			// ---
-			obs.sub('/enableMultiSelect',this.enableMultiSelect);
-			obs.sub('/disableMultiSelect',this.disableMultiSelect);
+			obs.sub('/enableMultiSelect', this.enableMultiSelect);
+			obs.sub('/disableMultiSelect', this.disableMultiSelect);
 			// ---
-			obs.sub('/toggleReadState',this.toggleReadState);
-			obs.sub('/toggleStarState',this.toggleStarState);
-			obs.sub('/toggleShareState',this.toggleShareState);
+			obs.sub('/toggleReadState', this.toggleReadState);
+			obs.sub('/toggleStarState', this.toggleStarState);
+			obs.sub('/toggleShareState', this.toggleShareState);
 			// ---
 			console.log(_module + ': connected.');
 			// ---
@@ -364,7 +355,6 @@ var listView = (function() {
 		},
 		loadNextArticle: _loadNextArticle,
 		loadPrevArticle: _loadPrevArticle,
-		setCurrentUnread: _markCurrentUnread,
 		openCurrentLink: _openCurrentLink,
 		markCurrentFeedAsRead: _markCurrentFeedAsRead,
 		onModeChange: _onModeChange,

@@ -16,17 +16,28 @@ var controller = (function() {
 			"j": "/loadNextArticle",
 			"k": "/loadPrevArticle",
 			"b": "/scrollToTop",
-			"u": "/setCurrentUnread",
 			"o": "/openCurrentLink",
-			"s": "/toggleSideBar",
-			"c": "/getCounters",
-			"Alt+r": "/markCurrentFeedAsRead"
+			"f": "/toggleSideBar",
+			"c": "/markCurrentFeedAsRead"
 		};
 		_.each(keyMap, function(value, key) {
 			$(document).bind("keypress", key, function() {
 				obs.pub(value);
 			});
 		});
+		// ---
+		$(document).bind("keypress", 'r', function() {
+			obs.pub('/toggleReadState', [getSelectedItems()]);
+		});
+		// ---
+		$(document).bind("keypress", 's', function() {
+			obs.pub('/toggleStarState', [getSelectedItems()]);
+		});
+		// ---
+		$(document).bind("keypress", 'p', function() {
+			obs.pub('/toggleShareState', [getSelectedItems()]);
+		});
+
 	};
 
 	function disconnectView(viewName) {
@@ -36,45 +47,45 @@ var controller = (function() {
 	// ---
 
 	function _toggleMultiSelect() {
-		var btn =$('#multi');
+		var btn = $('#multi');
 		if (btn.hasClass('selected')) {
 			obs.pub('/disableMultiSelect');
-		}else{
+		} else {
 			obs.pub('/enableMultiSelect');
 		};
 	};
 
-	function _multiSelectState(event,value) {
-		var btn =$('#multi');
+	function _multiSelectState(event, value) {
+		var btn = $('#multi');
 		multiSelect = value;
 		if (multiSelect) {
 			btn.addClass('selected');
-		}else{
+		} else {
 			btn.removeClass('selected');
 		};
 	}
 
-	function _addSelection(event,id) {
-		selectedItems[id]=true;
+	function _addSelection(event, id) {
+		selectedItems[id] = true;
 	};
 
-	function _removeSelection(event,id) {
-		selectedItems[id]=false;
+	function _removeSelection(event, id) {
+		selectedItems[id] = false;
 	};
 
-	function _newSelection(event,id) {
-		selectedItems={};
-		selectedItems[id]=true;
+	function _newSelection(event, id) {
+		selectedItems = {};
+		selectedItems[id] = true;
 	};
 
 	function getSelectedItems() {
 		var selected = [];
-		_.each(selectedItems,function(element,key) {
+		_.each(selectedItems, function(element, key) {
 			if (element == true) {
 				selected.push(key);
 			};
 		});
-		return(selected);
+		return (selected);
 	};
 
 	// public
@@ -82,7 +93,7 @@ var controller = (function() {
 		init: function() {
 			console.log(_module + ": initializing ...");
 			// ---
-			views['listView']= listView;
+			views['listView'] = listView;
 			// ---
 			console.log(_module + ": registering hotkeys ...");
 			registerHotkeys();
@@ -92,12 +103,14 @@ var controller = (function() {
 			// ---
 			obs.sub('/toggleSideBar', this.toggleSideBar);
 			// ---
-			obs.sub('/stateMultiSelect',this.multiSelectState);
-			obs.sub('/addSelection',this.addSelection);
-			obs.sub('/removeSelection',this.removeSelection);
-			obs.sub('/newSelection',this.newSelection);
+			obs.sub('/stateMultiSelect', this.multiSelectState);
+			obs.sub('/addSelection', this.addSelection);
+			obs.sub('/removeSelection', this.removeSelection);
+			obs.sub('/newSelection', this.newSelection);
 			// ---
-			setInterval(function() {obs.pub('/getCounters')}, 60000);
+			setInterval(function() {
+				obs.pub('/getCounters')
+			}, 60000);
 
 			// buttons
 			$('#multi').button().click(function() {
@@ -145,9 +158,9 @@ var controller = (function() {
 				obs.pub('/openCurrentLink');
 			});
 			// mode select
-			$('#modeSelector').on('change',function() {
+			$('#modeSelector').on('change', function() {
 				var mode = $('#modeSelector').val();
-				obs.pub('/viewModeChange',mode);
+				obs.pub('/viewModeChange', mode);
 			});
 		},
 		activateFeed: function(event, feedId) {
@@ -158,18 +171,18 @@ var controller = (function() {
 			// ---
 			// необходимо определить представление для текущего фида
 			newView = "listView"; // тут будет вызов функции определения
-			if(newView != currentView) {
+			if (newView != currentView) {
 				// отключаем старый
 				if (currentView != '') {
-					console.log(_module+': disconnecting view %',currentView);
+					console.log(_module + ': disconnecting view %', currentView);
 					views[currentView].disconnect();
 				};
 				// ---
-				console.log(_module+': connecting view %s',newView);
+				console.log(_module + ': connecting view %s', newView);
 				currentView = newView;
 				views[currentView].connect(feedId);
-			}else{
-				console.log(_module+': activating feed %s',feedId);
+			} else {
+				console.log(_module + ': activating feed %s', feedId);
 				views[currentView].activateFeed(feedId);
 			};
 
