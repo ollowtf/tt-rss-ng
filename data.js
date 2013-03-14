@@ -77,7 +77,7 @@ var dataManager = (function() {
                 });
                 isCategoriesLoaded = true;
                 console.log(_module + ": successful categories request.");
-                if(isCategoriesLoaded == true & isFeedsLoaded == true) {
+                if (isCategoriesLoaded == true & isFeedsLoaded == true) {
                     feedsUpdated();
                 }
             }
@@ -97,7 +97,7 @@ var dataManager = (function() {
                 });
                 isFeedsLoaded = true;
                 console.log(_module + ": successful feeds request.");
-                if(isCategoriesLoaded == true & isFeedsLoaded == true) {
+                if (isCategoriesLoaded == true & isFeedsLoaded == true) {
                     feedsUpdated();
                 }
             }
@@ -176,7 +176,7 @@ var dataManager = (function() {
     function _setArticleRead(event, id) {
         // находим в кеше
         article = feedCache[id];
-        if(article.unread) {
+        if (article.unread) {
             article.unread = false;
             // ---
             // обновляем счетчики
@@ -202,7 +202,7 @@ var dataManager = (function() {
     function _setArticleUnread(event, id) {
         // находим в кеше
         article = feedCache[id];
-        if(!article.unread) {
+        if (!article.unread) {
             article.unread = true;
             // ---
             // обновляем счетчики
@@ -234,7 +234,7 @@ var dataManager = (function() {
             element.unread = false;
         });
         // обновляем счётчики
-        if(isCategory) {
+        if (isCategory) {
             currentCategory = Categories[id];
             currentCategory.unread = 0;
             obs.pub('/setUnreadCount', ['c' + id, currentCategory.unread]);
@@ -285,19 +285,19 @@ var dataManager = (function() {
         var content = jdata.content;
         // ---
         _.each(content, function(element) {
-            if(element.kind == 'cat') {
-                if(Categories[element.id] != undefined) {
-                    if(Categories[element.id].unread != element.counter) {
+            if (element.kind == 'cat') {
+                if (Categories[element.id] != undefined) {
+                    if (Categories[element.id].unread != element.counter) {
                         Categories[element.id].unread = element.counter;
                         if (element.id > 0) {
-                            obs.pub('/setUnreadCount', ['c' + element.id, element.counter]);    
+                            obs.pub('/setUnreadCount', ['c' + element.id, element.counter]);
                         };
                     };
                 };
 
             } else {
-                if(Feeds[element.id] != undefined) {
-                    if(Feeds[element.id].unread != element.counter) {
+                if (Feeds[element.id] != undefined) {
+                    if (Feeds[element.id].unread != element.counter) {
                         Feeds[element.id].unread = element.counter;
                         obs.pub('/setUnreadCount', ['f' + element.id, element.counter]);
                     };
@@ -306,21 +306,89 @@ var dataManager = (function() {
         });
     };
 
-    function _toggleReadState(event,articles) {
+    function _toggleReadState(event, articles) {
         // находим в кэше, группируем по признаку
         var markAsRead = {};
         var markAsUnread = {};
-        _.each(articles,function(id) {
+        var mapCC = {};
+        var mapCF = {};
+        _.each(articles, function(id) {
             var article = feedCache[id];
+            var feedId = article.feed_id;
+            var catId = Feeds[article.feed_id].cat_id;
+            // ---
+            if (mapCF[feedId] == undefined) {
+                mapCF[feedId] = 0;
+            };
+            if (mapCC[catId] == undefined) {
+                mapCC[catId] = 0;
+            };
+            // ---
             if (article.unread) {
-                markAsRead[id]={'id':id};
-            }else{
-                markAsUnread[id]={'id':id};
+                article.unread = false;
+                mapCF[feedId]--;
+                mapCC[catId]--;
+                markAsRead[id] = {
+                    'id': id,
+                    'feed_id': feedId,
+                    'cat_id': catId
+                };
+            } else {
+                article.unread = true;
+                mapCF[feedId]++;
+                mapCC[catId]++;
+                markAsUnread[id] = {
+                    'id': id,
+                    'feed_id': feedId,
+                    'cat_id': catId
+                };
             };
         });
-        // группируем по категориям и фидам, рассчитываем изменеия счётчиков
-        // ...
+        // ---
+        _.each(mapCF, function(value,key) {
+            if (value != 0) {
+                var currentFeed = Feeds[key];
+                var unread = currentFeed.unread+value;
+                currentFeed.unread = unread;
+                obs.pub('/setUnreadCount', ['f' + key, unread]);
+            };
+        });
+        // ---
+        _.each(mapCC, function(value,key) {
+            if (value != 0) {
+                var currentCat = Categories[key];
+                var unread = currentCat.unread+value;
+                currentCat.unread = unread;
+                obs.pub('/setUnreadCount', ['c' + key, unread]);
+            };
+        });
+        
         // выполняем запросы на изменение
+        // ...
+
+        if (_.size(markAsRead) != 0 || _.size(markAsUnread) != 0) {
+
+            var ops = {
+                'op': 'updateArticle',
+                'seq': seq,
+                'article_ids': '',
+                'mode': 0,
+                'field': 2
+            };
+
+            if (_.size(markAsRead) != 0) {
+                ops.mode = 0;
+                ops.article_ids = _.keys(markAsRead).join();
+                $.post(apiURL,ops);
+            };
+            // ---
+            if (_.size(markAsUnread) != 0) {
+                ops.mode = 1;
+                ops.article_ids = _.keys(markAsUnread).join();
+                $.post(apiURL,ops);
+            };
+
+        };
 
     };
 
@@ -329,7 +397,7 @@ var dataManager = (function() {
     };
 
     function _toggleShareState() {
-        
+
     };
 
     // public:
@@ -345,9 +413,9 @@ var dataManager = (function() {
             obs.sub('/markFeedAsRead', this.markFeedAsRead);
             obs.sub('/getCounters', this.getCounters);
             // ---
-            obs.sub('/toggleReadState',this.toggleReadState);
-            obs.sub('/toggleStarState',this.toggleStarState);
-            obs.sub('/toggleShareState',this.toggleShareState);
+            obs.sub('/toggleReadState', this.toggleReadState);
+            obs.sub('/toggleStarState', this.toggleStarState);
+            obs.sub('/toggleShareState', this.toggleShareState);
 
             // запускаем цепочку инициализации
             console.log(_module + ": initializing ...");
@@ -359,33 +427,33 @@ var dataManager = (function() {
         },
         // служебное, получение версии
         getServerVerion: function() {
-            return(serverVersion);
+            return (serverVersion);
         },
         // служебное, получение версии
         getSid: function() {
-            return(sid);
+            return (sid);
         },
         getCategories: function() {
-            return(Categories);
+            return (Categories);
         },
         getFeeds: function() {
-            return(Feeds);
+            return (Feeds);
         },
         onGetHeaders: function(event, data) {
             _getHeaders(data);
         },
         getHeaders: function(sequence) {
-            return(_.where(feedCache, {
+            return (_.where(feedCache, {
                 'seq': sequence
             }));
         },
         getArticle: function(artId) {
             article = feedCache[artId];
-            if(article.content == '') {
+            if (article.content == '') {
                 _getArticle(artId);
-                return(false);
+                return (false);
             } else {
-                return(article);
+                return (article);
             };
         },
         clearCache: function() {
