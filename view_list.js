@@ -14,8 +14,8 @@ var listView = (function() {
 	var rowTemplate = '<a class="article-link" href="<%=link%>"/>'+
 			'<div class="header">	'+
 			'<div class="iconscolumn checkbox <%=multi%>"><input id="chk-<%=id%>" type="checkbox"></div>'+
-			'<div class="iconscolumn"><div id="str-<%=id%>" class="<%=star%>"></div></div>'+
-			'<div class="iconscolumn"><div id="shr-<%=id%>" class="<%=publish%>"></div></div>'+
+			'<div class="iconscolumn star"><div id="str-<%=id%>" class="<%=star%>"></div></div>'+
+			'<div class="iconscolumn share"><div id="shr-<%=id%>" class="<%=publish%>"></div></div>'+
 			'<div class="updatecolumn"><%=updated%></div>'+
 			'<div class="titlecolumn"><span id="hdr-<%=id%>" class="title"><%=title%></span>'+
 			'<span class="excerpt"><%=excerpt%></span></div>'+
@@ -82,7 +82,21 @@ var listView = (function() {
         // ---
         header.click(getMoreHeaders);
         // ---
+        var starbutton = $('.star div');
+        starbutton.click(clickStarButton);
+        // ---
+        var sharebutton = $('.share div');
+        sharebutton.click(clickShareButton);
+        // ---
         contentBlock.append(newRow);
+	};
+
+	function clickStarButton() {
+		obs.pub('/toggleStarState',[[utils.articleId($(this))]]);
+	};
+
+	function clickShareButton() {
+		obs.pub('/toggleShareState',[[utils.articleId($(this))]]);
 	};
 
 	function getMoreHeaders() {
