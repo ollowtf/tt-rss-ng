@@ -1,10 +1,17 @@
+//     tt-rss-ng
+//     https://github.com/ollowtf/tt-rss-ng
+//     (c) 2012-2013 Pavel Grechishkin (pavel.gretchishkin@gmail.com)
+//     Distributed under the AGPL-3.0 (http://opensource.org/licenses/AGPL-3.0)
+
 // модуль для модели - назовём её dataManager
 var dataManager = (function() {
 
     // private:
     var _module = 'DataManager';
     // ---
-    var apiURL = 'proxy.php';
+    var apiURL = '';
+    var user = '';
+    var password = '';
     // ---
     var seq = 10;
     // ---
@@ -47,8 +54,8 @@ var dataManager = (function() {
             url: apiURL,
             data: {
                 'op': 'login',
-                'user': 'admin',
-                'password': ''
+                'user': user,
+                'password': password
             },
             success: onLogin
         });
@@ -340,7 +347,7 @@ var dataManager = (function() {
         _.each(mapCF, function(value,key) {
             if (value != 0) {
                 var currentFeed = Feeds[key];
-                var unread = currentFeed.unread+value;
+                var unread = Number(currentFeed.unread)+value;
                 currentFeed.unread = unread;
                 obs.pub('/setUnreadCount', ['f' + key, unread]);
             };
@@ -349,7 +356,7 @@ var dataManager = (function() {
         _.each(mapCC, function(value,key) {
             if (value != 0) {
                 var currentCat = Categories[key];
-                var unread = currentCat.unread+value;
+                var unread = Number(currentCat.unread)+value;
                 currentCat.unread = unread;
                 obs.pub('/setUnreadCount', ['c' + key, unread]);
             };
@@ -470,7 +477,11 @@ var dataManager = (function() {
     return {
 
         // инициализация
-        init: function() {
+        init: function(settings) {
+
+            apiURL = settings.api;
+            user = settings.user;
+            password = settings.password;
 
             // подписываемся на интересующие нас события
             obs.sub("/getHeaders", this.onGetHeaders);

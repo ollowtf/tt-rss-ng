@@ -1,5 +1,9 @@
+//     tt-rss-ng
+//     https://github.com/ollowtf/tt-rss-ng
+//     (c) 2012-2013 Pavel Grechishkin (pavel.gretchishkin@gmail.com)
+//     Distributed under the AGPL-3.0 (http://opensource.org/licenses/AGPL-3.0)
 
-function init() {
+function init(data) {
 
     $.fx.off = true;
 
@@ -31,13 +35,15 @@ function init() {
     // инициализируем представление дерева
     treeView.init();
     // инициализируем модель
-    dataManager.init();
+    dataManager.init(data);
 
 }
 
 // -----------------------------------------------------
 $(document).ready(function() {
 
-    init();
+    $.getJSON('settings.json',function(json) {
+        init(json);
+    });
 
 });

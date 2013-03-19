@@ -1,3 +1,8 @@
+//     tt-rss-ng
+//     https://github.com/ollowtf/tt-rss-ng
+//     (c) 2012-2013 Pavel Grechishkin (pavel.gretchishkin@gmail.com)
+//     Distributed under the AGPL-3.0 (http://opensource.org/licenses/AGPL-3.0)
+
 var listView = (function() {
 
 	// private
@@ -122,15 +127,15 @@ var listView = (function() {
 			// ---
 			row.addClass("current");
 			console.log(_module + ': click on article %d. Loading.', artId);
-			if (!multiSelect) {
-				obs.pub('/newSelection', artId);
-			};
-
 			_displayArticle(artId);
 		}
 	};
 
 	function _displayArticle(artId) {
+		if (!multiSelect) {
+				obs.pub('/newSelection', artId);
+			};
+		// ---
 		article = dataManager.getArticle(artId);
 		if (article == false) {
 			// включаем индикатор
