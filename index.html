@@ -27,6 +27,7 @@
 	<script type="text/javascript" src="data.js"></script> 
 	<script type="text/javascript" src="tree.js"></script>
 	<script type="text/javascript" src="view_list.js"></script> 
+	<script type="text/javascript" src="view_images.js"></script>
 	<script type="text/javascript" src="rss.js"></script>  
 	<link rel="shortcut icon" href="img/favicon.png">                                       
 	<link type="text/css" rel="stylesheet" href="style.css">
@@ -38,6 +39,10 @@
 	<div id="content" class="ui-layout-center">
 		<div class="toolbar">
 			
+			<select id="viewSelector">
+				<option selected value="listView">list</option>
+				<option value="imagesView">images</option>
+			</select>
 			<select id="modeSelector">
 				<option selected value="adaptive">adaptive</option>
 				<option value="all_articles">all</option>

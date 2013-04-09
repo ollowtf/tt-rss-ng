@@ -3,7 +3,7 @@
 //     (c) 2012-2013 Pavel Grechishkin (pavel.gretchishkin@gmail.com)
 //     Distributed under the AGPL-3.0 (http://opensource.org/licenses/AGPL-3.0)
 
-var listView = (function() {
+var imagesView = (function() {
 
 	// private
 	//  ----------------------------------------------------------------
@@ -26,7 +26,7 @@ var listView = (function() {
 		'<span class="excerpt"><%=excerpt%></span></div>' +
 		'</div>';
 
-	var _module = 'ListView';
+	var _module = 'ImagesView';
 
 	function _clearHeaders() {
 		contentBlock.html('');
@@ -55,34 +55,16 @@ var listView = (function() {
 		// выводим заголовки
 		_.each(headers, function(element) {
 			rowId = 'row-' + element.id;
-			updateString = articleDate(today, element.updated);
 			// ---
-			newRow = $('<div/>').addClass('row').addClass((element.unread) ? "unread" : "read").attr('id', rowId);
-			newRow.html(template({
-				'id': element.id,
-				'link': element.link,
-				'updated': updateString,
-				'title': element.title,
-				'excerpt': ' - ' + element.excerpt,
-				'star': element.marked ? 'stared' : 'unstared',
-				'publish': element.published ? 'shared' : 'unshared',
-				'multi': multiSelect?'':'hidden'
-			}));
-			var rowHeader = $('.title', newRow);
-			rowHeader.on("click", onHeaderClick);
-			// ---
-			var checkbox = $('.checkbox input', newRow);
-			checkbox.on('change', onCheckBoxChange);
-			// ---
-			contentBlock.append(newRow);
-			// ---
-			var starbutton = $('.star div', newRow);
-			starbutton.click(clickStarButton);
-			// ---
-			var sharebutton = $('.share div', newRow);
-			sharebutton.click(clickShareButton);
-			// ---
+			cd = $("<div/>").html(element.content);
+        	content = $("img", cd)[0].outerHTML;
+        	newRow = $('<div/>').addClass('imagebox').attr('id', rowId).html(content);
+        	contentBlock.append(newRow);
 		});
+
+		$("div.imagebox img").imgCenter({
+        	scaleToFit: false
+    	});
 		// ----------------------------------
 		// выводим кнопку "показать дальше"
 		newRow = $('<div/>').addClass('row').addClass('nav').attr('id', "nextButton");
@@ -208,123 +190,17 @@ var listView = (function() {
 
 	}
 
-	function _loadNextArticle() {
-		currentRow = _currentRow();
-		if (currentRow != 0) {
-			_hideArticle(currentRow);
-			newRow = currentRow.next();
-			if (newRow.hasClass('nav')) {
-				// это кнопка "далее"
-				// ..
-			} else {
-				newRow.addClass('current');
-				id = utils.articleId(newRow);
-				_displayArticle(id);
-			}
-		};
-	};
 
-	function _loadPrevArticle() {
-		currentRow = _currentRow();
-		if (currentRow != 0) {
-			_hideArticle(currentRow);
-			newRow = currentRow.prev();
-			if (newRow.hasClass('nav')) {
-				// это кнопка "далее"
-				// ..
-			} else {
-				newRow.addClass('current');
-				id = utils.articleId(newRow);
-				_displayArticle(id);
-			}
-		};
-	};
 
-	function _markCurrentFeedAsRead() {
-		// тут можно задать вопрос
-		// ...
-		// отмечаем все текущие непрочитанные как прочитанные
-		$('.unread', contentBlock).removeClass('unread').addClass('read');
-		obs.pub('/markFeedAsRead', [currentFeed]);
-	};
-
-	function _onModeChange(event, mode) {
-		// устанавливаем режим в params
-		_clearHeaders();
-		params.skip = 0;
-		params.view_mode = mode;
-		console.log(_module + ': headers request to dataManager');
-		obs.pub('/getHeaders', params);
-	};
-
-	function _enableMultiSelect() {
-		$('.checkbox').removeClass('hidden');
-		multiSelect = true;
-		obs.pub('/stateMultiSelect', true);
-	};
-
-	function _disableMultiSelect() {
-		$('.checkbox').addClass('hidden');
-		multiSelect = false;
-		obs.pub('/stateMultiSelect', false);
-	};
-
-	function _toggleReadState(event, articles) {
-		_.each(articles, function(artId) {
-			var row = $('#row-' + artId, contentBlock);
-			if (row.hasClass('read')) {
-				row.removeClass('read').addClass('unread');
-			} else {
-				row.removeClass('unread').addClass('read');
-			};
-		});
-	};
-
-	function _toggleStarState(event, articles) {
-		_.each(articles, function(artId) {
-			var star = $('#str-' + artId, contentBlock);
-			if (star.hasClass('stared')) {
-				star.removeClass('stared').addClass('unstared');
-			} else {
-				star.removeClass('unstared').addClass('stared');
-			};
-		});
-	};
-
-	function _toggleShareState(event, articles) {
-		_.each(articles, function(artId) {
-			var share = $('#shr-' + artId, contentBlock);
-			if (share.hasClass('shared')) {
-				share.removeClass('shared').addClass('unshared');
-			} else {
-				share.removeClass('unshared').addClass('shared');
-			};
-		});
-	};
 
 	// public
 	// ------------------------------------------------------------
 	return {
 		connect: function(feedId) {
-			// ---
 			obs.sub('/displayHeaders', this.displayHeaders);
-			obs.sub('/displayArticle', this.displayArticle);
+			//obs.sub('/displayArticle', this.displayArticle);
 			// ---
-			obs.sub('/loadNextArticle', this.loadNextArticle);
-			obs.sub('/loadPrevArticle', this.loadPrevArticle);
-			// ---
-			obs.sub('/openCurrentLink', this.openCurrentLink);
-			// ---
-			obs.sub('/markCurrentFeedAsRead', this.markCurrentFeedAsRead);
-			// ---
-			obs.sub('/viewModeChange', this.onModeChange);
-			// ---
-			obs.sub('/enableMultiSelect', this.enableMultiSelect);
-			obs.sub('/disableMultiSelect', this.disableMultiSelect);
-			// ---
-			obs.sub('/toggleReadState', this.toggleReadState);
-			obs.sub('/toggleStarState', this.toggleStarState);
-			obs.sub('/toggleShareState', this.toggleShareState);
+			// ...
 			// ---
 			console.log(_module + ': connected.');
 			// ---
@@ -333,7 +209,7 @@ var listView = (function() {
 			this.activateFeed(feedId);
 		},
 		disconnect: function() {
-			obs.unsub('/displayHeaders', this.displayHeaders);
+
 		},
 		activateFeed: function(feedId) {
 			console.log(_module + ': activating feed %s', feedId);
@@ -358,18 +234,7 @@ var listView = (function() {
 		},
 		displayArticle: function(event, artId) {
 			_displayArticle(artId);
-		},
-		loadNextArticle: _loadNextArticle,
-		loadPrevArticle: _loadPrevArticle,
-		openCurrentLink: _openCurrentLink,
-		markCurrentFeedAsRead: _markCurrentFeedAsRead,
-		onModeChange: _onModeChange,
-		enableMultiSelect: _enableMultiSelect,
-		disableMultiSelect: _disableMultiSelect,
-		// ---
-		toggleReadState: _toggleReadState,
-		toggleStarState: _toggleStarState,
-		toggleShareState: _toggleShareState
+		}
 	}
 
 }());

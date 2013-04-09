@@ -11,6 +11,7 @@ var controller = (function() {
 	var views = {};
 	// ---
 	var currentView = '';
+	var newView = '';
 	// ---
 	var multiSelect = false;
 	// ---
@@ -99,6 +100,7 @@ var controller = (function() {
 			console.log(_module + ": initializing ...");
 			// ---
 			views['listView'] = listView;
+			views['imagesView'] = imagesView;
 			// ---
 			console.log(_module + ": registering hotkeys ...");
 			registerHotkeys();
@@ -167,6 +169,11 @@ var controller = (function() {
 				var mode = $('#modeSelector').val();
 				obs.pub('/viewModeChange', mode);
 			});
+			// mode select
+			$('#viewSelector').on('change', function() {
+				newView = $('#viewSelector').val(); // не надо
+				// reactivate feed ... 
+			});
 		},
 		activateFeed: function(event, feedId) {
 			console.log(_module + ": get request to activate feed %s", feedId);
@@ -174,8 +181,7 @@ var controller = (function() {
 			// сбрасываем кэш модели
 			dataManager.clearCache();
 			// ---
-			// необходимо определить представление для текущего фида
-			newView = "listView"; // тут будет вызов функции определения
+			newView = $('#viewSelector').val();
 			if (newView != currentView) {
 				// отключаем старый
 				if (currentView != '') {

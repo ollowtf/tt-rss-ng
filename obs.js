@@ -10,8 +10,8 @@ var obs = (function() {
         sub: function(key, handler) {
             $("body").on(key, handler);
         },
-        unsub: function(key) {
-        	$("body").off(key);
+        unsub: function(key,handler) {
+        	$("body").off(key,handler);
         },
         pub: function(key,params) {
             $("body").trigger(key,params);
