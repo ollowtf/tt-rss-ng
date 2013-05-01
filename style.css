@@ -310,3 +310,11 @@ a.article-link {
 .hidden {
 	display: none;
 }
+
+.ui-dialog {
+	border: 1px solid #ccc;
+}
+
+.no-close .ui-dialog-titlebar-close {
+	display: none;
+}

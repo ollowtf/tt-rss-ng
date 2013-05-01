@@ -482,6 +482,7 @@ var dataManager = (function() {
             apiURL = settings.api;
             user = settings.user;
             password = settings.password;
+            sid = settings.session;
 
             // подписываемся на интересующие нас события
             obs.sub("/getHeaders", this.onGetHeaders);
@@ -496,7 +497,8 @@ var dataManager = (function() {
 
             // запускаем цепочку инициализации
             console.log(_module + ": initializing ...");
-            version();
+            // ---
+            updateFeeds()
 
         },
         test: function() {

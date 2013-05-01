@@ -1,0 +1,31 @@
+<div id="content" class="ui-layout-center">
+	<div class="toolbar">
+		
+		<select id="viewSelector">
+			<option selected value="listView">list</option>
+			<option value="imagesView">images</option>
+		</select>
+		<select id="modeSelector">
+			<option selected value="adaptive">adaptive</option>
+			<option value="all_articles">all</option>
+			<option value="marked">stared</option>
+			<option value="unread">unread</option>
+		</select>
+		<button id="multi">multi</button>
+		<button id="actions">actions</button>
+		<button id="prev" class="right">prev</button>
+		<button id="next" class="right">next</button>
+		<button id="open" class="right">open</button>
+	</div>
+	<div id="view" class="ui-layout-content"></div>
+</div>
+<div id="sidebar" class="ui-layout-west">
+	<div class="toolbar">
+		<span id="progname"><b>tt-rss-ng</b></span>
+		<button id="settings" class="right">settings</button>
+	</div>
+	<div class="ui-layout-content">
+		<div id="feedTree" class="ztree">
+	</div>
+	</div>
+</div>  
