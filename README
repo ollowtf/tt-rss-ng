@@ -6,7 +6,8 @@ Some icons by Yusuke Kamiyamane (http://p.yusukekamiyamane.com/). Licensed under
 
 Installation
 ---
-Copy/rename settings.json.tmpl to settings.json and fill up values.
+Copy/rename settings.json.tmpl to settings.json and fill up values. 
+Authentification dialog appears if user and password fields are empty.
 
 
 Notes
