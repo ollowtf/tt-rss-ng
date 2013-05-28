@@ -62,9 +62,10 @@ var imagesView = (function() {
         	contentBlock.append(newRow);
 		});
 
-		$("div.imagebox img").imgCenter({
-        	scaleToFit: false
-    	});
+		// $("div.imagebox img").imgCenter({
+  		//       	scaleToFit: false
+  		//   	});
+		$("div.imagebox img").fitImage();
 		// ----------------------------------
 		// выводим кнопку "показать дальше"
 		newRow = $('<div/>').addClass('row').addClass('nav').attr('id', "nextButton");

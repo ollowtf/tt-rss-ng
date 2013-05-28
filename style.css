@@ -115,8 +115,8 @@ div.content {
 	float: left;
 	width: 150px;
 	height: 150px;
-	margin: 4px;
 	overflow: hidden;
+	position:relative;
 }
 
 .imageform {
@@ -134,7 +134,11 @@ div.content {
 
 
 
-.imagebox img {}
+.imagebox img {
+	top: 50%;
+	left: 50%;
+	position: absolute;
+}
 
 /*-----------------------------------------------------------*/
 
