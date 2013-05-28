@@ -103,15 +103,36 @@ div.content {
 
 /* --------------------------------------------------------- */
 
+.imagerow {
+	width: 100%;
+	clear: both;
+	/*border: 1px solid #f00;*/
+}
+
 .imagebox {
-	border: 1px solid # ccc;
+	border: 1px solid #ccc;
 	display: block;
 	float: left;
-	height: 200px;
-	margin: 2px;
+	width: 150px;
+	height: 150px;
+	margin: 4px;
 	overflow: hidden;
-	width: 200px;
 }
+
+.imageform {
+	width: 100%;
+	clear: both;
+	background: #2E3436;
+	color: #FFF;
+	/*background: #FFFFFF;*/
+	border-top: 1px solid #00F;
+	border-bottom: 1px solid #00F;
+	padding: 10px;
+	overflow: auto;
+	display: block;
+}
+
+
 
 .imagebox img {}
 
@@ -317,4 +338,58 @@ a.article-link {
 
 .no-close .ui-dialog-titlebar-close {
 	display: none;
+}
+
+/*--------------------------------------------*/
+
+.bic {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    padding: 2px;
+    position:relative;
+    overflow: hidden;
+}
+
+.sic {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #ccc;
+    padding: 0px;
+    position:relative;
+    overflow: hidden;
+    margin-right: 15px;
+}
+
+.bi {
+  	margin: auto;
+  	position:absolute;
+  	top:50%;
+  	left:50%;
+}
+
+.si {
+  	/*margin: auto;
+  	position:absolute;
+  	top:50%;
+  	left:50%;*/
+}
+
+.dsc {
+    width: auto;
+    padding: 0px;
+    position:relative;
+    overflow: hidden;
+}
+
+.dsc a {
+	color: #FFF;
+}
+
+.cnt {
+	padding: 2px;
+	margin-left: 15px;
+    height: 400px;
+    width:auto;
+    float: left;
 }
