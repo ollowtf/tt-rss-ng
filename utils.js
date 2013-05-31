@@ -19,6 +19,9 @@ var utils = (function() {
 		},
 		articleId: function(row) {
 			return(Number(row.attr("id").slice(4)));
+		},
+		integerDivision: function(x, y){
+    		return x/y>>0
 		}
 	}
 }());
