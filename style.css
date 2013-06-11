@@ -103,45 +103,6 @@ div.content {
 
 /* --------------------------------------------------------- */
 
-.imagerow {
-	width: 100%;
-	clear: both;
-	/*border: 1px solid #f00;*/
-}
-
-.imagebox {
-	border: 1px solid #ccc;
-	display: block;
-	float: left;
-	width: 150px;
-	height: 150px;
-	overflow: hidden;
-	position:relative;
-}
-
-.imageform {
-	width: 100%;
-	clear: both;
-	background: #2E3436;
-	color: #FFF;
-	/*background: #FFFFFF;*/
-	border-top: 1px solid #00F;
-	border-bottom: 1px solid #00F;
-	padding: 10px;
-	overflow: auto;
-	display: block;
-}
-
-
-
-.imagebox img {
-	/*top: 50%;
-	left: 50%;
-	position: absolute;*/
-}
-
-/*-----------------------------------------------------------*/
-
 #treetoolbar {
 	padding: 4px;
 	display: inline-block;
@@ -346,6 +307,45 @@ a.article-link {
 
 /*--------------------------------------------*/
 
+.imagerow {
+	width: 100%;
+	clear: both;
+	/*border: 1px solid #f00;*/
+}
+
+.imagebox {
+	border: 1px solid #ccc;
+	display: block;
+	float: left;
+	width: 150px;
+	height: 150px;
+	overflow: hidden;
+	position:relative;
+	background-color: #E6D8B3;
+	margin: 3px;
+}
+
+.imageform {
+	width: 100%;
+	clear: both;
+	background-color: #2E3436;
+	color: #D7DADB;
+	/*background: #FFFFFF;*/
+	border-top: 1px solid #00F;
+	border-bottom: 1px solid #00F;
+	padding: 10px;
+	overflow: auto;
+	display: block;
+}
+
+.imagebox img {
+	top: 50%;
+	left: 50%;
+	position: absolute;
+}
+
+/*-----------------------------------------------------------*/
+
 .bic {
     width: 400px;
     height: 400px;
@@ -363,6 +363,7 @@ a.article-link {
     position:relative;
     overflow: hidden;
     margin-right: 15px;
+    display: inline-block;
 }
 
 .bi {
@@ -373,21 +374,22 @@ a.article-link {
 }
 
 .si {
-  	/*margin: auto;
+  	margin: auto;
   	position:absolute;
   	top:50%;
-  	left:50%;*/
+  	left:50%;
 }
 
 .dsc {
     width: auto;
     padding: 0px;
     position:relative;
-    overflow: hidden;
+    overflow-x:hidden;
+	overflow-y:auto;
 }
 
 .dsc a {
-	color: #FFF;
+	color: #86BCD9;
 }
 
 .cnt {
@@ -396,4 +398,10 @@ a.article-link {
     height: 400px;
     width:auto;
     float: left;
+}
+
+.sicrow {
+	overflow-x:auto;
+	overflow-y:hidden;
+	white-space: nowrap;
 }

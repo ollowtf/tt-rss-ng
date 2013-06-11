@@ -93,10 +93,10 @@ var imagesView = (function() {
 
 		});
 
-		$("div.imagebox img").imgCenter({
+		/*$("div.imagebox img").imgCenter({
   		       	scaleToFit: false
-  		   	}).removeClass('new');
-		//$("div.imagebox img").fitImage();
+  		   	}).removeClass('new');*/
+		$("div.imagebox.new img").fitImage().parent().removeClass('new');
 		// ----------------------------------
 		// выводим кнопку "показать дальше"
 		newRow = $('<div/>').addClass('row').addClass('nav').attr('id', "nextButton");
@@ -203,17 +203,27 @@ var imagesView = (function() {
 		var dsc = $('<div/>').addClass('dsc');
 		dsc.append($('<h/>').html(article.title));
 		dsc.append(tmpDiv);
+		cnt.css({
+			'width': imageform.width() - bic.width()-40
+		});
 		cnt.append(dsc);
 
 		if (clonedImages.size() > 1) {
 			// выводим миниатюры
-			dsc.css({'height': cnt.height()-100});
+			
+			dsc.css({
+				'height': cnt.height()-100
+			});
+
+			// creating row of thumbs
+			var currentThumbRow = $('<div/>').addClass('sicrow').css({
+				'height': 110,
+				'width': cnt.width()
+			}).appendTo(cnt);
 			_.each(clonedImages,function(element) {
-				var sic = $('<div/>').addClass('sic').addClass('left');
-				sic.appendTo(cnt);
-				$(element).appendTo(sic).imgCenter({
-  		       		scaleToFit: false
-  		   		});
+				var sic = $('<div/>').addClass('sic');
+				sic.appendTo(currentThumbRow);
+				$(element).addClass('si').appendTo(sic).fitImage();
 			});
 		}else{
 			// только описание
