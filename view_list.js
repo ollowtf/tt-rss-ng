@@ -110,9 +110,8 @@ var listView = (function() {
 	};
 
 	function getMoreHeaders() {
-		params.skip = $(".row", contentBlock).length - 1;
-		console.log(_module + ': headers request to dataManager');
-		obs.pub('/getHeaders', params);
+		console.log(_module + ': request for headers');
+		obs.pub('/getHeaders');
 	};
 
 	function onHeaderClick(event) {
@@ -251,10 +250,8 @@ var listView = (function() {
 	function _onModeChange(event, mode) {
 		// устанавливаем режим в params
 		_clearHeaders();
-		params.skip = 0;
-		params.view_mode = mode;
 		console.log(_module + ': headers request to dataManager');
-		obs.pub('/getHeaders', params);
+		obs.pub('/getHeaders');
 	};
 
 	function _enableMultiSelect() {
@@ -305,7 +302,7 @@ var listView = (function() {
 	// public
 	// ------------------------------------------------------------
 	return {
-		connect: function(feedId) {
+		connect: function() {
 			// ---
 			obs.sub('/displayHeaders', this.displayHeaders);
 			obs.sub('/displayArticle', this.displayArticle);
@@ -326,36 +323,24 @@ var listView = (function() {
 			obs.sub('/toggleStarState', this.toggleStarState);
 			obs.sub('/toggleShareState', this.toggleShareState);
 			// ---
-			console.log(_module + ': connected.');
-			// ---
 			contentBlock = $('#view');
 			// ---
-			this.activateFeed(feedId);
+			console.log(_module + ': connected.');
 		},
 		disconnect: function() {
 			obs.unsub('/displayHeaders', this.displayHeaders);
 		},
-		activateFeed: function(feedId) {
+		setSource: function(feedId) {
 			console.log(_module + ': activating feed %s', feedId);
 			currentFeed = feedId;
-			// очищаем всё что есть
+			// clear view
 			_clearHeaders();
-			// индикатор загрузки
+			// progress indicator
 			// ...
-			// запрашиваем заголовки
-			params = {
-				skip: 0,
-				id: utils.id(currentFeed),
-				isCategory: utils.isCategory(currentFeed),
-				view_mode: 'adaptive',
-				show_content: 1,
-			};
-			console.log(_module + ': headers request to dataManager');
-			obs.pub('/getHeaders', params);
+			console.log(_module + ': request for headers');
+			obs.pub('/getHeaders');
 		},
-		displayHeaders: function(event, seq) {
-			_displayHeaders(event, seq);
-		},
+		displayHeaders: _displayHeaders,
 		displayArticle: function(event, artId) {
 			_displayArticle(artId);
 		},

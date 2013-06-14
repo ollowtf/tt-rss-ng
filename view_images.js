@@ -288,29 +288,30 @@ var imagesView = (function() {
 	// public
 	// ------------------------------------------------------------
 	return {
-		connect: function(feedId) {
+		connect: function() {
 			obs.sub('/displayHeaders', this.displayHeaders);
 			//obs.sub('/displayArticle', this.displayArticle);
 			// ---
-			// ...
+			obs.sub('/loadNextArticle', this.loadNextArticle);
+			obs.sub('/loadPrevArticle', this.loadPrevArticle);
 			// ---
-			console.log(_module + ': connected.');
+			// ...
 			// ---
 			contentBlock = $('#view');
 			// ---
-			this.activateFeed(feedId);
+			console.log(_module + ': connected.');
 		},
 		disconnect: function() {
-
+			obs.unsub('/displayHeaders', this.displayHeaders);
 		},
-		activateFeed: function(feedId) {
+		setSource: function(feedId) {
 			console.log(_module + ': activating feed %s', feedId);
 			currentFeed = feedId;
-			// очищаем всё что есть
+			// clear view
 			_clearHeaders();
-			// индикатор загрузки
+			// progress indicator
 			// ...
-			// запрашиваем заголовки
+			// 
 			params = {
 				skip: 0,
 				id: utils.id(currentFeed),

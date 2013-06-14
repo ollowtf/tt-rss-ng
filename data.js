@@ -26,6 +26,10 @@ var dataManager = (function() {
     var Feeds = {};
     // ---
     var feedCache = {};
+    // ---
+    var currentSource = '';
+    var currentViewMode = '';
+    var params = {};
 
     function version() {
 
@@ -118,10 +122,10 @@ var dataManager = (function() {
         obs.pub("/feedsUpdated");
     }
 
-    function _getHeaders(params) {
+    function _getHeaders() {
 
         seq++;
-        console.log(_module + ': headers request for seq %d', seq);
+        console.log(_module + ': API headers request seq=%d', seq);
         console.log(params);
         $.ajax({
             type: 'POST',
@@ -131,18 +135,18 @@ var dataManager = (function() {
                 "seq": seq,
                 "feed_id": params.id,
                 "is_cat": params.isCategory,
-                "skip": params.skip,
+                "skip": _.size(feedCache),
                 "limit": 50,
-                "view_mode": params.view_mode,
+                "view_mode": currentViewMode,
                 "show_excerpt": 1,
                 "show_content": params.show_content,
                 "include_attachments": 0
             },
-            success: onHeadersResponse
+            success: _getHeadersSuccess
         });
     }
 
-    function onHeadersResponse(data) {
+    function _getHeadersSuccess(data) {
         jdata = $.parseJSON(data);
         rseq = jdata.seq;
         headers = jdata.content;
@@ -274,7 +278,8 @@ var dataManager = (function() {
         });
     };
 
-    function _getCounters() {
+    function _updateCounters() {
+        console.log(_module + ": updating counters...");
         $.ajax({
             type: 'POST',
             url: apiURL,
@@ -473,6 +478,36 @@ var dataManager = (function() {
         };
     };
 
+    // clear model's cache
+    function _clearCache() {
+        feedCache = {};
+    };
+
+    function _setSource(source,ViewMode) {
+        if (source != currentSource) {
+            _clearCache();
+            currentSource = source;
+        };
+        if (ViewMode != currentViewMode) {
+            currentViewMode = ViewMode;
+        };
+        // ---
+        // запрашиваем заголовки
+        params = {
+            skip: 0,
+            id: utils.id(currentSource),
+            isCategory: utils.isCategory(currentSource),
+            view_mode: currentViewMode,
+            show_content: 1,
+        };
+
+    };
+
+    function _onModeChange(event, mode) {
+        currentViewMode = mode;
+        _clearCache();
+    }
+
     // public:
     return {
 
@@ -489,7 +524,9 @@ var dataManager = (function() {
             obs.sub('/setArticleRead', this.setArticleRead);
             obs.sub('/setArticleUnread', this.setArticleUnread);
             obs.sub('/markFeedAsRead', this.markFeedAsRead);
-            obs.sub('/getCounters', this.getCounters);
+            obs.sub('/updateCounters', this.updateCounters);
+            // ---
+            obs.sub('/viewModeChange', this.onModeChange);
             // ---
             obs.sub('/toggleReadState', this.toggleReadState);
             obs.sub('/toggleStarState', this.toggleStarState);
@@ -535,13 +572,13 @@ var dataManager = (function() {
                 return (article);
             };
         },
-        clearCache: function() {
-            feedCache = {};
-        },
+        setSource: _setSource,
         setArticleRead: _setArticleRead,
         setArticleUnread: _setArticleUnread,
         markFeedAsRead: _markFeedAsRead,
-        getCounters: _getCounters,
+        updateCounters: _updateCounters,
+        // ---
+        onModeChange: _onModeChange,
         // ---
         toggleReadState: _toggleReadState,
         toggleStarState: _toggleStarState,

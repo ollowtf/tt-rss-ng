@@ -119,7 +119,7 @@ var treeView = (function() {
 		// делаем запрос непрочитанных
 		var currentNodeId = treeNode.id;
 		console.log(_module + ": activated node %s", currentNodeId);
-		obs.pub('/feedActivated', [currentNodeId]);
+		obs.pub('/selectSource', [currentNodeId]);
 	}
 
 	function _setUnreadCount(event, feedId, unread) {
