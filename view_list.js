@@ -304,31 +304,28 @@ var listView = (function() {
 	return {
 		connect: function() {
 			// ---
-			obs.sub('/displayHeaders', this.displayHeaders);
-			obs.sub('/displayArticle', this.displayArticle);
-			// ---
-			obs.sub('/loadNextArticle', this.loadNextArticle);
-			obs.sub('/loadPrevArticle', this.loadPrevArticle);
-			// ---
-			obs.sub('/openCurrentLink', this.openCurrentLink);
-			// ---
-			obs.sub('/markCurrentFeedAsRead', this.markCurrentFeedAsRead);
-			// ---
-			obs.sub('/viewModeChange', this.onModeChange);
-			// ---
-			obs.sub('/enableMultiSelect', this.enableMultiSelect);
-			obs.sub('/disableMultiSelect', this.disableMultiSelect);
-			// ---
-			obs.sub('/toggleReadState', this.toggleReadState);
-			obs.sub('/toggleStarState', this.toggleStarState);
-			obs.sub('/toggleShareState', this.toggleShareState);
+
+			obs.msub(_module,{
+				'/displayHeaders': this.displayHeaders,
+				'/displayArticle': this.displayArticle,
+				'/loadNextArticle': this.loadNextArticle,
+				'/loadPrevArticle': this.loadPrevArticle,
+				'/openCurrentLink': this.openCurrentLink,
+				'/markCurrentFeedAsRead': this.markCurrentFeedAsRead,
+				'/viewModeChange': this.onModeChange,
+				'/enableMultiSelect': this.enableMultiSelect,
+				'/disableMultiSelect': this.disableMultiSelect,
+				'/toggleReadState': this.toggleReadState,
+				'/toggleStarState': this.toggleStarState,
+				'/toggleShareState': this.toggleShareState
+			});
+			
 			// ---
 			contentBlock = $('#view');
-			// ---
 			console.log(_module + ': connected.');
 		},
 		disconnect: function() {
-			obs.unsub('/displayHeaders', this.displayHeaders);
+			obs.munsub(_module);
 		},
 		setSource: function(feedId) {
 			console.log(_module + ': activating feed %s', feedId);

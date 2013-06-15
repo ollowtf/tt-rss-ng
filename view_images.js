@@ -289,20 +289,19 @@ var imagesView = (function() {
 	// ------------------------------------------------------------
 	return {
 		connect: function() {
-			obs.sub('/displayHeaders', this.displayHeaders);
-			//obs.sub('/displayArticle', this.displayArticle);
-			// ---
-			obs.sub('/loadNextArticle', this.loadNextArticle);
-			obs.sub('/loadPrevArticle', this.loadPrevArticle);
-			// ---
-			// ...
+			
+			obs.msub(_module,{
+				'/displayHeaders': this.displayHeaders,
+				'/loadNextArticle': this.loadNextArticle,
+				'/loadPrevArticle': this.loadPrevArticle
+			});
 			// ---
 			contentBlock = $('#view');
 			// ---
 			console.log(_module + ': connected.');
 		},
 		disconnect: function() {
-			obs.unsub('/displayHeaders', this.displayHeaders);
+			obs.munsub(_module);
 		},
 		setSource: function(feedId) {
 			console.log(_module + ': activating feed %s', feedId);
