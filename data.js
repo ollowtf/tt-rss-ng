@@ -519,33 +519,32 @@ var dataManager = (function() {
             password = settings.password;
             sid = settings.session;
 
-            // подписываемся на интересующие нас события
-            obs.sub("/getHeaders", this.onGetHeaders);
-            obs.sub('/setArticleRead', this.setArticleRead);
-            obs.sub('/setArticleUnread', this.setArticleUnread);
-            obs.sub('/markFeedAsRead', this.markFeedAsRead);
-            obs.sub('/updateCounters', this.updateCounters);
-            // ---
-            obs.sub('/viewModeChange', this.onModeChange);
-            // ---
-            obs.sub('/toggleReadState', this.toggleReadState);
-            obs.sub('/toggleStarState', this.toggleStarState);
-            obs.sub('/toggleShareState', this.toggleShareState);
-
-            // запускаем цепочку инициализации
+            // subs
+            obs.msub(_module,{
+                '/getHeaders': this.onGetHeaders,
+                '/setArticleRead': this.setArticleRead,
+                '/setArticleUnread': this.setArticleUnread,
+                '/markFeedAsRead': this.markFeedAsRead,
+                '/updateCounters': this.updateCounters,
+                '/viewModeChange': this.onModeChange,
+                '/toggleReadState': this.toggleReadState,
+                '/toggleStarState': this.toggleStarState,
+                '/toggleShareState': this.toggleShareState
+            });
+            
+            // init
             console.log(_module + ": initializing ...");
-            // ---
             updateFeeds()
 
         },
         test: function() {
             console.log(_module + ": successful test call. Server version %s", serverVersion);
         },
-        // служебное, получение версии
+        // version request
         getServerVerion: function() {
             return (serverVersion);
         },
-        // служебное, получение версии
+        // session request
         getSid: function() {
             return (sid);
         },

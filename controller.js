@@ -106,15 +106,17 @@ var controller = (function() {
 			console.log(_module + ": registering hotkeys ...");
 			registerHotkeys();
 			// ---
-			console.log(_module + ": waiting for events ...");
-			obs.sub('/selectSource', this.activateFeed);
-			// ---
-			obs.sub('/toggleSideBar', this.toggleSideBar);
-			// ---
-			obs.sub('/stateMultiSelect', this.multiSelectState);
-			obs.sub('/addSelection', this.addSelection);
-			obs.sub('/removeSelection', this.removeSelection);
-			obs.sub('/newSelection', this.newSelection);
+			
+			// subs
+			obs.msub(_module,{
+				'/selectSource': this.activateFeed,
+				'/toggleSideBar': this.toggleSideBar,
+				'/stateMultiSelect': this.multiSelectState,
+				'/addSelection': this.addSelection,
+				'/removeSelection': this.removeSelection,
+				'/newSelection': this.newSelection
+			});
+
 			// ---
 			setInterval(function() {
 				obs.pub('/updateCounters')
@@ -181,6 +183,8 @@ var controller = (function() {
 				};
 				
 			});
+
+			console.log(_module + ": waiting for events ...");
 		},
 		activateFeed: function(event, feedId) {
 			console.log(_module + ": activating feed %s", feedId);
