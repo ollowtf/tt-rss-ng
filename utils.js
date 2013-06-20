@@ -12,9 +12,9 @@ var utils = (function() {
 		},
 		isCategory: function(feedId) {
 			if(feedId[0] == "f") {
-				return(0);
+				return(false);
 			} else if(feedId[0] == "c") {
-				return(1);
+				return(true);
 			}
 		},
 		articleId: function(row) {

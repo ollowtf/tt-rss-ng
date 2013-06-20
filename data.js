@@ -31,154 +31,90 @@ var dataManager = (function() {
     var currentViewMode = '';
     var params = {};
 
-    function version() {
-
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'getVersion'
-            },
-            success: onVersion
-        });
-    }
-
-    function onVersion(data) {
-        serverVersion = $.parseJSON(data).content.version;
-        console.log(_module + ": successful version request. Version=%s", serverVersion);
-        // тут мы проверяем, что версия нам подходит
-        login();
-    }
-
-    function login() {
-
-        // пробуем получить sid
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'login',
-                'user': user,
-                'password': password
-            },
-            success: onLogin
-        });
-
-    }
-
-    function onLogin(data) {
-        sid = $.parseJSON(data).content.session_id;
-        console.log(_module + ": successful login request. SID=%s", sid);
-        // вызываем функцию получения категорий и фидов
-        updateFeeds();
+    function apiCall(apiParams, success) {
+        apiParams.sid = sid;
+        console.log(_module + ": API call");
+        console.log(apiParams);
+        $.post(apiURL, $.toJSON(apiParams), success);
     }
 
     function updateFeeds() {
 
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'getCategories'
-            },
-            success: function(data) {
-                rCategories = $.parseJSON(data).content;
-                _.each(rCategories, function(value) {
-                    Categories[value.id] = value;
-                });
-                isCategoriesLoaded = true;
-                console.log(_module + ": successful categories request.");
-                if (isCategoriesLoaded == true & isFeedsLoaded == true) {
-                    feedsUpdated();
-                }
+        apiCall({
+            "op": "getCategories"
+        }, function(data) {
+            rCategories = data.content;
+            _.each(rCategories, function(value) {
+                Categories[value.id] = value;
+            });
+            isCategoriesLoaded = true;
+            console.log(_module + ": successful categories request.");
+            if (isCategoriesLoaded == true & isFeedsLoaded == true) {
+                feedsUpdated();
             }
         });
 
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'getFeeds',
-                'cat_id': -3
-            },
-            success: function(data) {
-                rFeeds = $.parseJSON(data).content;
-                _.each(rFeeds, function(value) {
-                    Feeds[value.id] = value;
-                });
-                isFeedsLoaded = true;
-                console.log(_module + ": successful feeds request.");
-                if (isCategoriesLoaded == true & isFeedsLoaded == true) {
-                    feedsUpdated();
-                }
+        apiCall({
+            "op": "getFeeds",
+            "cat_id": -3
+        }, function(data) {
+            rFeeds = data.content;
+            _.each(rFeeds, function(value) {
+                Feeds[value.id] = value;
+            });
+            isFeedsLoaded = true;
+            console.log(_module + ": successful feeds request.");
+            if (isCategoriesLoaded == true & isFeedsLoaded == true) {
+                feedsUpdated();
             }
         });
     }
 
     function feedsUpdated() {
-        // на этот вызов должно среагировать представление
-        console.log(_module + ": publish feeds update");
-        // вызываем функцию получения
+        console.log(_module + ": feeds loaded");
         obs.pub("/feedsUpdated");
     }
 
     function _getHeaders() {
-
-        seq++;
-        console.log(_module + ': API headers request seq=%d', seq);
-        console.log(params);
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                "op": "getHeadlines",
-                "seq": seq,
-                "feed_id": params.id,
-                "is_cat": params.isCategory,
-                "skip": _.size(feedCache),
-                "limit": 50,
-                "view_mode": currentViewMode,
-                "show_excerpt": 1,
-                "show_content": params.show_content,
-                "include_attachments": 0
-            },
-            success: _getHeadersSuccess
-        });
+        apiCall({
+            "op": "getHeadlines",
+            "seq": seq++,
+            "feed_id": params.id,
+            "is_cat": params.isCategory,
+            "skip": _.size(feedCache),
+            "limit": 50,
+            "view_mode": currentViewMode,
+            "show_excerpt": true,
+            "show_content": params.show_content,
+            "include_attachments": false
+        }, _getHeadersSuccess);
     }
 
-    function _getHeadersSuccess(data) {
-        jdata = $.parseJSON(data);
+    function _getHeadersSuccess(jdata) {
         rseq = jdata.seq;
         headers = jdata.content;
         console.log(_module + ': headers response for seq %d', rseq);
-        // записываем в кеш
+        //console.log(headers);
+        // filling up cache
         _.each(headers, function(value) {
             value['seq'] = rseq;
             feedCache[value.id] = value;
         });
         console.log(_module + ': cached %d headers', _.size(headers));
         console.log(_module + ': %d headers in cache', _.size(feedCache));
-        // публикуем заголовки
         obs.pub('/displayHeaders', rseq);
     };
 
     function _getArticle(id) {
         // ajax request
-        seq++;
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                "op": "getArticle",
-                "seq": seq,
-                "article_id": id
-            },
-            success: onArticleResponse
-        });
+        apiCall({
+            "op": "getArticle",
+            "seq": seq++,
+            "article_id": id
+        },onArticleResponse);
     }
 
-    function onArticleResponse(data) {
-        jdata = $.parseJSON(data);
+    function onArticleResponse(jdata) {
         article = jdata.content;
         feedCache[article.id] = article;
         obs.pub('/displayArticle', article.id);
@@ -198,7 +134,7 @@ var dataManager = (function() {
             obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
             obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
             // ---
-            $.post(apiURL, {
+            apiCall({
                 "op": "updateArticle",
                 "seq": seq,
                 "article_ids": id,
@@ -211,12 +147,12 @@ var dataManager = (function() {
     };
 
     function _setArticleUnread(event, id) {
-        // находим в кеше
+        // find article in cache
         article = feedCache[id];
         if (!article.unread) {
             article.unread = true;
             // ---
-            // обновляем счетчики
+            // updating counters
             feed = Feeds[article.feed_id];
             feed.unread++;
             cat = Categories[feed.cat_id];
@@ -224,7 +160,7 @@ var dataManager = (function() {
             obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
             obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
             // ---
-            $.post(apiURL, {
+            apiCall({
                 "op": "updateArticle",
                 "seq": seq,
                 "article_ids": id,
@@ -268,7 +204,7 @@ var dataManager = (function() {
             obs.pub('/setUnreadCount', ['c' + currentCategory.id, currentCategory.unread]);
         };
         // отправляем запрос
-        $.post(apiURL, {
+        apiCall({
             "op": "catchupFeed",
             "seq": seq,
             "feed_id": id,
@@ -280,22 +216,15 @@ var dataManager = (function() {
 
     function _updateCounters() {
         console.log(_module + ": updating counters...");
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                "op": "getCounters",
-                "seq": seq,
-                "output_mode": "fc"
-            },
-            success: _onCountersUpdate
-        });
+        apiCall({
+            "op": "getCounters",
+            "seq": seq,
+            "output_mode": "fc"
+        },_onCountersUpdate);
     };
 
-    function _onCountersUpdate(data) {
-        var jdata = $.parseJSON(data);
+    function _onCountersUpdate(jdata) {
         var content = jdata.content;
-        // ---
         _.each(content, function(element) {
             if (element.kind == 'cat') {
                 if (Categories[element.id] != undefined) {
@@ -349,24 +278,24 @@ var dataManager = (function() {
             };
         });
         // ---
-        _.each(mapCF, function(value,key) {
+        _.each(mapCF, function(value, key) {
             if (value != 0) {
                 var currentFeed = Feeds[key];
-                var unread = Number(currentFeed.unread)+value;
+                var unread = Number(currentFeed.unread) + value;
                 currentFeed.unread = unread;
                 obs.pub('/setUnreadCount', ['f' + key, unread]);
             };
         });
         // ---
-        _.each(mapCC, function(value,key) {
+        _.each(mapCC, function(value, key) {
             if (value != 0) {
                 var currentCat = Categories[key];
-                var unread = Number(currentCat.unread)+value;
+                var unread = Number(currentCat.unread) + value;
                 currentCat.unread = unread;
                 obs.pub('/setUnreadCount', ['c' + key, unread]);
             };
         });
-        
+
         // выполняем запросы на изменение
         if (_.size(markAsRead) != 0 || _.size(markAsUnread) != 0) {
 
@@ -381,13 +310,13 @@ var dataManager = (function() {
             if (_.size(markAsRead) != 0) {
                 ops.mode = 0;
                 ops.article_ids = _.keys(markAsRead).join();
-                $.post(apiURL,ops);
+                apiCall(ops);
             };
             // ---
             if (_.size(markAsUnread) != 0) {
                 ops.mode = 1;
                 ops.article_ids = _.keys(markAsUnread).join();
-                $.post(apiURL,ops);
+                apiCall(ops);
             };
 
         };
@@ -424,13 +353,13 @@ var dataManager = (function() {
             if (_.size(markAsStar) != 0) {
                 ops.mode = 1;
                 ops.article_ids = _.keys(markAsStar).join();
-                $.post(apiURL,ops);
+                apiCall(ops);
             };
             // ---
             if (_.size(markAsUnstar) != 0) {
                 ops.mode = 0;
                 ops.article_ids = _.keys(markAsUnstar).join();
-                $.post(apiURL,ops);
+                apiCall(ops);
             };
 
         };
@@ -466,24 +395,25 @@ var dataManager = (function() {
             if (_.size(markAsShare) != 0) {
                 ops.mode = 1;
                 ops.article_ids = _.keys(markAsShare).join();
-                $.post(apiURL,ops);
+                apiCall(ops);
             };
             // ---
             if (_.size(markAsUnshare) != 0) {
                 ops.mode = 0;
                 ops.article_ids = _.keys(markAsUnshare).join();
-                $.post(apiURL,ops);
+                apiCall(ops);
             };
 
         };
     };
 
     // clear model's cache
+
     function _clearCache() {
         feedCache = {};
     };
 
-    function _setSource(source,ViewMode) {
+    function _setSource(source, ViewMode) {
         if (source != currentSource) {
             _clearCache();
             currentSource = source;
@@ -498,7 +428,7 @@ var dataManager = (function() {
             id: utils.id(currentSource),
             isCategory: utils.isCategory(currentSource),
             view_mode: currentViewMode,
-            show_content: 1,
+            show_content: true,
         };
 
     };
@@ -520,7 +450,7 @@ var dataManager = (function() {
             sid = settings.session;
 
             // subs
-            obs.msub(_module,{
+            obs.msub(_module, {
                 '/getHeaders': this.onGetHeaders,
                 '/setArticleRead': this.setArticleRead,
                 '/setArticleUnread': this.setArticleUnread,
@@ -531,7 +461,7 @@ var dataManager = (function() {
                 '/toggleStarState': this.toggleStarState,
                 '/toggleShareState': this.toggleShareState
             });
-            
+
             // init
             console.log(_module + ": initializing ...");
             updateFeeds()

@@ -17,12 +17,8 @@ $(document).ready(function() {
 function start() {
 
     $.getJSON('settings.json').done(function(json) {
-        if (!(json.user=="admin"&&json.password=="")) {
-            // checking
-            if (json.user==""||json.password=="") {
-                // login dialog
-                loginbox(json,init,start);
-            };
+        if (json.user=="" || json.password=="") {
+            loginbox(json,init,start);
         }else{
             login(json,init,start);    
         };
@@ -65,19 +61,15 @@ function loginbox(data,success,fail) {
 
 function login(data, success, fail) {
     // пробуем получить sid
-    $.ajax({
-        type: 'POST',
-        url: data.api,
-        data: {
-            'op': 'login',
-            'user': data.user,
-            'password': data.password
-        }
-    }).done(function(answer) {
+    $.post(data.api, $.toJSON({
+            "op": "login",
+            "user": data.user,
+            "password": data.password,
+            "sid": false
+        })).done(function(answer) {
         // checking answer
-        var ja=$.parseJSON(answer);
-        if (ja.status==0) {
-            data.session = ja.content.session_id;
+        if (answer.status==0) {
+            data.session = answer.content.session_id;
             (success)(data);
         }else{
             // show something
@@ -91,6 +83,7 @@ function init(data) {
 
     $('#loginbox').dialog('close');
 
+    //
     // getting app html :)
     $.ajax({
         url: "app.html"
