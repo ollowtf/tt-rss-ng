@@ -22,11 +22,35 @@ var dataManager = (function() {
     var isCategoriesLoaded = false;
     var isFeedsLoaded = false;
     // ---
-    var Categories = {};
     var Feeds = {};
+    var Categories = {};
     // ---
     var feedCache = {};
+
+    // ---------------------------------------------
+    
+    var tmplGroup = Backbone.Model.extend({});
+    var tmplGroups = Backbone.Collection.extend({
+        model: tmplGroup
+    });
+    var groups = new tmplGroups();
+    groups.on("add", function(group) {
+        console.log("%s: added group: %s", _module,group.get("title"));
+    })
     // ---
+    var tmplChannel = Backbone.Model.extend({});
+    var tmplChannels = Backbone.Collection.extend({
+        model: tmplChannel
+    });
+    var channels = new tmplChannels();
+    // ---
+    var tmplItem = Backbone.Model.extend({});
+    var tmplItems = Backbone.Collection.extend({
+        model: tmplChannel
+    });
+    var items = new tmplItems();
+
+    // ---------------------------------------------
     var currentSource = '';
     var currentViewMode = '';
     var params = {};
@@ -43,12 +67,12 @@ var dataManager = (function() {
         apiCall({
             "op": "getCategories"
         }, function(data) {
-            rCategories = data.content;
-            _.each(rCategories, function(value) {
+            console.info(_module + ": successful categories request.");
+            _.each(data.content, function(value) {
                 Categories[value.id] = value;
+                groups.add(value);
             });
             isCategoriesLoaded = true;
-            console.log(_module + ": successful categories request.");
             if (isCategoriesLoaded == true & isFeedsLoaded == true) {
                 feedsUpdated();
             }
@@ -58,12 +82,12 @@ var dataManager = (function() {
             "op": "getFeeds",
             "cat_id": -3
         }, function(data) {
-            rFeeds = data.content;
-            _.each(rFeeds, function(value) {
+            console.info(_module + ": successful feeds request.");
+            _.each(data.content, function(value) {
                 Feeds[value.id] = value;
+                channels.add(value);
             });
             isFeedsLoaded = true;
-            console.log(_module + ": successful feeds request.");
             if (isCategoriesLoaded == true & isFeedsLoaded == true) {
                 feedsUpdated();
             }
@@ -71,6 +95,9 @@ var dataManager = (function() {
     }
 
     function feedsUpdated() {
+        channels.each(function(channel){
+            channel.set("group",groups.get(channel.get("cat_id")));
+        });
         console.log(_module + ": feeds loaded");
         obs.pub("/feedsUpdated");
     }
@@ -93,12 +120,14 @@ var dataManager = (function() {
     function _getHeadersSuccess(jdata) {
         rseq = jdata.seq;
         headers = jdata.content;
-        console.log(_module + ': headers response for seq %d', rseq);
-        //console.log(headers);
+        console.log('%s: headers response for seq %d',_module, rseq);
         // filling up cache
         _.each(headers, function(value) {
             value['seq'] = rseq;
             feedCache[value.id] = value;
+            var newItem = new tmplItem(value);
+            newItem.set("channel",channels.get(value.feed_id));
+            items.add(newItem);
         });
         console.log(_module + ': cached %d headers', _.size(headers));
         console.log(_module + ': %d headers in cache', _.size(feedCache));
