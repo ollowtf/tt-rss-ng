@@ -29,7 +29,14 @@ var dataManager = (function() {
 
     // ---------------------------------------------
     
-    var tmplGroup = Backbone.Model.extend({});
+    var tmplGroup = Backbone.Model.extend({
+        sid: function() {
+            return("g"+this.id);
+        },
+        isGroup: function() {
+            return(true);
+        }
+    });
     var tmplGroups = Backbone.Collection.extend({
         model: tmplGroup
     });
@@ -38,7 +45,14 @@ var dataManager = (function() {
         console.log("%s: added group: %s", _module,group.get("title"));
     })
     // ---
-    var tmplChannel = Backbone.Model.extend({});
+    var tmplChannel = Backbone.Model.extend({
+        sid: function() {
+            return("c"+this.id);
+        },
+        isGroup: function() {
+            return(false);
+        }
+    });
     var tmplChannels = Backbone.Collection.extend({
         model: tmplChannel
     });
@@ -51,13 +65,16 @@ var dataManager = (function() {
     var items = new tmplItems();
 
     // ---------------------------------------------
+    
     var currentSource = '';
     var currentViewMode = '';
     var params = {};
 
+    // ------------------------------------------------
+
     function apiCall(apiParams, success) {
         apiParams.sid = sid;
-        console.log(_module + ": API call");
+        console.info("%s: API call", _module);
         console.log(apiParams);
         $.post(apiURL, $.toJSON(apiParams), success);
     }
@@ -118,20 +135,17 @@ var dataManager = (function() {
     }
 
     function _getHeadersSuccess(jdata) {
-        rseq = jdata.seq;
-        headers = jdata.content;
-        console.log('%s: headers response for seq %d',_module, rseq);
-        // filling up cache
-        _.each(headers, function(value) {
-            value['seq'] = rseq;
-            feedCache[value.id] = value;
+        console.log("%s: headers response for seq %d, %d",_module, jdata.seq ,_.size());
+        console.log("%s: %d items", _module);
+        // ------------------------------------------------
+        _.each(jdata.content, function(value) {
             var newItem = new tmplItem(value);
             newItem.set("channel",channels.get(value.feed_id));
+            newItem.set("visible",false);
             items.add(newItem);
         });
-        console.log(_module + ': cached %d headers', _.size(headers));
-        console.log(_module + ': %d headers in cache', _.size(feedCache));
-        obs.pub('/displayHeaders', rseq);
+        // ------------------------------------------------
+        obs.pub('/displayHeaders');
     };
 
     function _getArticle(id) {
@@ -144,13 +158,14 @@ var dataManager = (function() {
     }
 
     function onArticleResponse(jdata) {
+        
         article = jdata.content;
         feedCache[article.id] = article;
         obs.pub('/displayArticle', article.id);
     };
 
     function _setArticleRead(event, id) {
-        // находим в кеше
+        /*// находим в кеше
         article = feedCache[id];
         if (article.unread) {
             article.unread = false;
@@ -172,11 +187,11 @@ var dataManager = (function() {
             }, function(data) {
                 // ...
             });
-        };
+        };*/
     };
 
     function _setArticleUnread(event, id) {
-        // find article in cache
+        /*// find article in cache
         article = feedCache[id];
         if (!article.unread) {
             article.unread = true;
@@ -198,11 +213,11 @@ var dataManager = (function() {
             }, function(data) {
                 // ...
             });
-        };
+        };*/
     };
 
     function _markFeedAsRead(event, feed) {
-        // определяем параметры фида
+        /*// определяем параметры фида
         var isCategory = utils.isCategory(feed);
         var id = utils.id(feed);
         // для каждой статьи из кеша устанавливаем флаг прочитанного
@@ -240,11 +255,11 @@ var dataManager = (function() {
             "is_cat": isCategory
         }, function(data) {
             // ...
-        });
+        });*/
     };
 
     function _updateCounters() {
-        console.log(_module + ": updating counters...");
+        console.log("%s: updating counters...",_module);
         apiCall({
             "op": "getCounters",
             "seq": seq,
@@ -253,7 +268,7 @@ var dataManager = (function() {
     };
 
     function _onCountersUpdate(jdata) {
-        var content = jdata.content;
+        /*var content = jdata.content;
         _.each(content, function(element) {
             if (element.kind == 'cat') {
                 if (Categories[element.id] != undefined) {
@@ -273,7 +288,7 @@ var dataManager = (function() {
                     };
                 };
             };
-        });
+        });*/
     };
 
     function _toggleReadState(event, articles) {
@@ -439,12 +454,12 @@ var dataManager = (function() {
     // clear model's cache
 
     function _clearCache() {
-        feedCache = {};
+        items.reset();
     };
 
     function _setSource(source, ViewMode) {
         if (source != currentSource) {
-            _clearCache();
+            items.reset();
             currentSource = source;
         };
         if (ViewMode != currentViewMode) {
@@ -492,12 +507,9 @@ var dataManager = (function() {
             });
 
             // init
-            console.log(_module + ": initializing ...");
-            updateFeeds()
+            console.log("%s: initializing ...", _module);
+            updateFeeds();
 
-        },
-        test: function() {
-            console.log(_module + ": successful test call. Server version %s", serverVersion);
         },
         // version request
         getServerVerion: function() {
@@ -507,24 +519,34 @@ var dataManager = (function() {
         getSid: function() {
             return (sid);
         },
+        getGroups: function() {
+            return(groups);
+        },
+        // obsoleted
         getCategories: function() {
             return (Categories);
         },
+        getChannels: function() {
+            return(channels);
+        },
+        getItems: function() {
+            return(items);
+        },
+        // obsoleted
         getFeeds: function() {
             return (Feeds);
         },
         onGetHeaders: function(event, data) {
             _getHeaders(data);
         },
-        getHeaders: function(sequence) {
-            return (_.where(feedCache, {
-                'seq': sequence
-            }));
+        getHeaders: function() {
+            return (items.where({"visible": false}));
         },
-        getArticle: function(artId) {
-            article = feedCache[artId];
+        // rename to "getItem"
+        getArticle: function(id) {
+            article = items.get(id);
             if (article.content == '') {
-                _getArticle(artId);
+                _getArticle(id);
                 return (false);
             } else {
                 return (article);

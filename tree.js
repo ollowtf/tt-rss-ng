@@ -6,7 +6,8 @@
 var treeView = (function() {
 
 	// private
-	//  ...
+	// ------------------------------------------------
+
 	var _module = 'TreeView';
 
 	var feedTree = [];
@@ -15,78 +16,84 @@ var treeView = (function() {
 
 	function nodeName(name, unread) {
 		var unreadString = '';
-		if(unread != 0) {
+		if (unread != 0) {
 			unreadString = ' (' + unread + ')';
 		};
-		return(name + unreadString);
+		return (name + unreadString);
 	};
 
 	function nodeFont(unread) {
-		if(unread == 0) {
-			return('normal');
+		if (unread == 0) {
+			return ('normal');
 		} else {
-			return('bold');
+			return ('bold');
+		};
+	};
+
+	function nodeSkin(model) {
+		if (model.has("group")) {
+			return("feed");
+		}else{
+			return("category");
 		};
 	};
 
 	function getFont(treeId, node) {
-		return node.font ? node.font : {};
+		// ---
+		return (node.font ? node.font : {});
 	}
+
+	function treeNode(model) {
+		var title = model.get("title");
+		var unread = model.get("unread");
+		var parent = 0;
+		if (model.has("group")) {
+			parent=model.get("group").sid();
+		};
+		// --- 
+		var node = {
+			"id": model.sid(),
+			"pId": parent,
+			"title": title,
+			"open": false,
+			"name": nodeName(title, unread),
+			"font": {
+				"font-weight": nodeFont(unread)
+			},
+			"iconSkin": nodeSkin(model),
+			"unread": unread
+		};
+		return(node);
+	};
+
+	// ------------------------------------------------
 
 	function createTree() {
 
-		// формируем json-структуру фидов
-		// ---
-		feeds = dataManager.getFeeds();
-		_.each(dataManager.getCategories(), function(element, index, array) {
-
-			var currentCategory = element.id;
-			var cNode = {
-				id: 'c' + currentCategory,
-				pId: 0,
-				title: element.title,
-				open: false,
-				name: nodeName(element.title, element.unread),
-				font: {
-					'font-weight': nodeFont(element.unread)
-				},
-				iconSkin: 'category',
-				unread: element.unread
+		// creating json tree
+		channels = dataManager.getChannels();
+		dataManager.getGroups().each(function(group) {
+			// ------------------------------------------------
+			var gNode = treeNode(group);
+			feedTree.push(gNode);
+			if (gNode.unread != 0) {
+				boldList.push(gNode.id);
 			};
-			if(element.unread != 0) {
-				boldList.push(cNode.id);
-			};
-
-			// добавляем фиды по текущей категории
-			currentFeeds = _.filter(feeds, function(el) {
-				return el.cat_id == currentCategory;
+			// ---
+			childChannels = channels.where({
+				"cat_id": parseInt(group.id)
 			});
-			if(_.size(currentFeeds) != 0) {
+			_.each(childChannels, function(channel) {
+				var cNode = treeNode(channel);
 				feedTree.push(cNode);
-				_.each(currentFeeds, function(feed) {
-					var fNode = {
-						id: 'f' + feed.id,
-						pId: cNode.id,
-						title: feed.title,
-						name: nodeName(feed.title, feed.unread),
-						font: {
-							'font-weight': nodeFont(feed.unread)
-						},
-						iconSkin: 'feed',
-						unread: feed.unread
-					};
-					feedTree.push(fNode);
-					if(feed.unread != 0) {
-						boldList.push(fNode.id);
-					};
-				});
-			};
-
-
+				if (cNode.unread != 0) {
+					boldList.push(cNode.id);
+				};
+			});
+			// ------------------------------------------------
 		});
-
-		// устанавливаем настройки
-		// ---
+		
+		// tree settings
 		var treeSettings = {
 			treeId: "feedTree",
 			view: {
@@ -110,28 +117,27 @@ var treeView = (function() {
 			}
 		};
 
-		// инициализируем дерево
-		// ---
+		// init tree
 		t = $.fn.zTree.init($('#feedTree'), treeSettings, feedTree);
+
 	};
 
 	function onNodeSelect(treeId, treeNode) {
 		// делаем запрос непрочитанных
 		var currentNodeId = treeNode.id;
-		console.log(_module + ": activated node %s", currentNodeId);
+		console.log("%s: activated node %s", _module, currentNodeId);
 		obs.pub('/selectSource', [currentNodeId]);
 	}
 
 	function _setUnreadCount(event, feedId, unread) {
 		var ztree = $.fn.zTree.getZTreeObj("feedTree");
 		var node = ztree.getNodeByParam('id', feedId);
-		if(node != undefined) {
+		if (node != undefined) {
 			node.name = nodeName(node.title, unread);
 			node.unread = unread;
 			node.font = {
 				'font-weight': nodeFont(unread)
 			}
-			// ztree.setting.view.fontCss['font-weight'] = nodeFont(unread);
 			ztree.updateNode(node);
 		};
 	};
@@ -140,7 +146,7 @@ var treeView = (function() {
 		// alert(mode);
 		var ztree = $.fn.zTree.getZTreeObj("feedTree");
 		var nodes = ztree.getNodesByParam('unread', 0);
-		if(mode == 'showAll') {
+		if (mode == 'showAll') {
 			ztree.showNodes(nodes);
 		} else {
 			ztree.hideNodes(nodes);
@@ -152,18 +158,20 @@ var treeView = (function() {
 
 		// инициализация
 		init: function() {
-			console.log(_module + ": initializing...");
+			console.log("%s: initializing...", _module);
+			// ------------------------------------------------
 			obs.sub('/feedsUpdated', this.createFeedTree);
 			obs.sub('/setUnreadCount', this.setUnreadCount);
 			obs.sub('/setFeedViewMode', this.setFeedViewMode);
-			// ---
-			// создаём кнопку меню
+			// ------------------------------------------------
+			// menu button
 			$('#settings').button({
 				text: false,
 				icons: {
 					primary: "ui-icon-carat-1-n"
 				}
 			});
+			// ------------------------------------------------
 			// context menu for settings
 			$.contextMenu({
 				selector: '#settings',
@@ -188,16 +196,11 @@ var treeView = (function() {
 					}
 				}
 			});
-
-			/*$('#feedShowMode').buttonset();
-			$('#feedShowMode input[type=radio]').click(function() {
-				obs.pub('/setFeedViewMode', [$('input[name=feedShowMode]:checked').attr('id')]);
-			});*/
 		},
 
 		// обновление дерева
 		createFeedTree: function() {
-			console.log(_module + ': feed update event. Creating tree.');
+			console.log("%s: feed update event. Creating tree.", _module);
 			createTree();
 		},
 		setUnreadCount: _setUnreadCount,

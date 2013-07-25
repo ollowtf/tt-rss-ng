@@ -187,7 +187,8 @@ var controller = (function() {
 			console.log(_module + ": waiting for events ...");
 		},
 		activateFeed: function(event, feedId) {
-			console.log(_module + ": activating feed %s", feedId);
+			
+			console.log("%s: activating feed %s", _module, feedId);
 			// ---
 			currentSource = feedId;
 			// ---
@@ -198,15 +199,15 @@ var controller = (function() {
 			if (newView != currentView) {
 				// disconnect old view if exists
 				if (currentView != '') {
-					console.log(_module + ': disconnecting view %', currentView);
+					console.log("%s: disconnecting view %", _module, currentView);
 					views[currentView].disconnect();
 				};
 				// ---
-				console.log(_module + ': connecting view %s', newView);
+				console.log("%s: connecting view %s", _module, newView);
 				currentView = newView;
 				views[currentView].connect();
 			};
-			console.log(_module + ': loading source %s', feedId);
+			console.log("%s: loading source %s", _module, feedId);
 			views[currentView].setSource(feedId);
 
 		},

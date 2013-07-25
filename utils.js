@@ -11,9 +11,9 @@ var utils = (function() {
 			return(Number(feedId.slice(1)));
 		},
 		isCategory: function(feedId) {
-			if(feedId[0] == "f") {
+			if(feedId[0] == "c") {
 				return(false);
-			} else if(feedId[0] == "c") {
+			} else if(feedId[0] == "g") {
 				return(true);
 			}
 		},
