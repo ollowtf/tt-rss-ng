@@ -41,19 +41,20 @@ var listView = (function() {
 		}
 	}
 
-	function _displayHeaders(event, seq) {
-		console.log(_module + ': displaying headers for seq %d', seq);
+	function _displayHeaders(event) {
+		console.log("%s: displaying headers", _module);
 		// удаляем кнопку получения новых
 		$("#nextButton").remove();
 		// ---
 		today = Date.today();
 		// ---
-		headers = dataManager.getHeaders(seq);
+		headers = dataManager.getHeaders();
 		// ---
 		// компилируем шаблон
 		template = _.template(rowTemplate);
 		// выводим заголовки
-		_.each(headers, function(element) {
+		_.each(headers, function(item) {
+			var element=item.attributes;
 			rowId = 'row-' + element.id;
 			updateString = articleDate(today, element.updated);
 			// ---
@@ -118,35 +119,51 @@ var listView = (function() {
 		row = $(event.currentTarget.parentElement.parentElement.parentElement);
 		artId = utils.articleId(row);
 		if (row.hasClass('current')) {
-			console.log(_module + ': click on current article %d. Hiding.', artId);
-			_hideArticle(row);
+			console.log("%s: click on current article %d. Hiding.", _module, artId);
+			_hideItem(row);
 		} else {
 			// ищем другие current и схлопываем
 			$('.content', $('.current').removeClass('current')).remove();
 			// ---
 			row.addClass("current");
-			console.log(_module + ': click on article %d. Loading.', artId);
-			_displayArticle(artId);
+			console.log("%s: click on article %d. Loading.", _module, artId);
+			_displayItem(artId);
 		}
 	};
 
-	function _displayArticle(artId) {
+	function _displayItem(id) {
 		if (!multiSelect) {
-				obs.pub('/newSelection', artId);
+				obs.pub('/newSelection', id);
 			};
 		// ---
-		article = dataManager.getArticle(artId);
-		if (article == false) {
+		item = dataManager.getItem(id);
+		if (item == false) {
 			// включаем индикатор
 			// ...
 		} else {
-			if (artId == _currentId()) {
-				_showArticle(article);
+			if (id == _currentId()) {
+				_showItem(item);
 			} else {
 				// выключаем индикатор
 				// ...
 			};
 
+		};
+	};
+
+	function _showItem(item) {
+		item.set("visible",true);
+		var article = item.attributes;
+		rowSelector = "#row-" + article.id;
+		row = $(rowSelector);
+		content = $('<div/>').addClass('content').html(article.content).appendTo(row);
+		// scroll 2 top
+		_scrollToTop(row);
+		// mark as read
+		if (article.unread) {
+			obs.pub('/toggleReadState', [
+				[item.id]
+			]);
 		};
 	};
 
@@ -156,22 +173,9 @@ var listView = (function() {
 		obs.pub(checked ? '/addSelection' : '/removeSelection', chk_id);
 	};
 
-	function _showArticle(article) {
-		rowSelector = "#row-" + article.id;
-		row = $(rowSelector);
-		content = $('<div/>').addClass('content').html(article.content).appendTo(row);
-		// scroll 2 top
-		_scrollToTop(row);
-		// mark as read
-		if (article.unread) {
-			obs.pub('/toggleReadState', [
-				[utils.articleId(row)]
-			]);
-		};
+	
 
-	};
-
-	function _hideArticle(row) {
+	function _hideItem(row) {
 		// удаляем контент
 		$('.content', row).remove();
 		row.removeClass('current');
@@ -210,7 +214,7 @@ var listView = (function() {
 	function _loadNextArticle() {
 		currentRow = _currentRow();
 		if (currentRow != 0) {
-			_hideArticle(currentRow);
+			_hideItem(currentRow);
 			newRow = currentRow.next();
 			if (newRow.hasClass('nav')) {
 				// это кнопка "далее"
@@ -218,7 +222,7 @@ var listView = (function() {
 			} else {
 				newRow.addClass('current');
 				id = utils.articleId(newRow);
-				_displayArticle(id);
+				_displayItem(id);
 			}
 		};
 	};
@@ -226,7 +230,7 @@ var listView = (function() {
 	function _loadPrevArticle() {
 		currentRow = _currentRow();
 		if (currentRow != 0) {
-			_hideArticle(currentRow);
+			_hideItem(currentRow);
 			newRow = currentRow.prev();
 			if (newRow.hasClass('nav')) {
 				// это кнопка "далее"
@@ -234,7 +238,7 @@ var listView = (function() {
 			} else {
 				newRow.addClass('current');
 				id = utils.articleId(newRow);
-				_displayArticle(id);
+				_displayItem(id);
 			}
 		};
 	};
@@ -338,8 +342,8 @@ var listView = (function() {
 			obs.pub('/getHeaders');
 		},
 		displayHeaders: _displayHeaders,
-		displayArticle: function(event, artId) {
-			_displayArticle(artId);
+		displayArticle: function(event, id) {
+			_displayItem(id);
 		},
 		loadNextArticle: _loadNextArticle,
 		loadPrevArticle: _loadPrevArticle,

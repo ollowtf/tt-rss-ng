@@ -86,7 +86,6 @@ var dataManager = (function() {
         }, function(data) {
             console.info(_module + ": successful categories request.");
             _.each(data.content, function(value) {
-                Categories[value.id] = value;
                 groups.add(value);
             });
             isCategoriesLoaded = true;
@@ -101,7 +100,6 @@ var dataManager = (function() {
         }, function(data) {
             console.info(_module + ": successful feeds request.");
             _.each(data.content, function(value) {
-                Feeds[value.id] = value;
                 channels.add(value);
             });
             isFeedsLoaded = true;
@@ -114,7 +112,11 @@ var dataManager = (function() {
     function feedsUpdated() {
         channels.each(function(channel){
             channel.set("group",groups.get(channel.get("cat_id")));
+            channel.set("delta",0);
         });
+       /* groups.each(function(group) {
+            group.set("delta",0);
+        });*/
         console.log(_module + ": feeds loaded");
         obs.pub("/feedsUpdated");
     }
@@ -135,8 +137,7 @@ var dataManager = (function() {
     }
 
     function _getHeadersSuccess(jdata) {
-        console.log("%s: headers response for seq %d, %d",_module, jdata.seq ,_.size());
-        console.log("%s: %d items", _module);
+        console.log("%s: headers response seq=%d, count=%d",_module, jdata.seq ,_.size(jdata.content));
         // ------------------------------------------------
         _.each(jdata.content, function(value) {
             var newItem = new tmplItem(value);
@@ -164,62 +165,11 @@ var dataManager = (function() {
         obs.pub('/displayArticle', article.id);
     };
 
-    function _setArticleRead(event, id) {
-        /*// находим в кеше
-        article = feedCache[id];
-        if (article.unread) {
-            article.unread = false;
-            // ---
-            // обновляем счетчики
-            feed = Feeds[article.feed_id];
-            feed.unread--;
-            cat = Categories[feed.cat_id];
-            cat.unread--;
-            obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
-            obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
-            // ---
-            apiCall({
-                "op": "updateArticle",
-                "seq": seq,
-                "article_ids": id,
-                "mode": 0,
-                "field": 2
-            }, function(data) {
-                // ...
-            });
-        };*/
-    };
-
-    function _setArticleUnread(event, id) {
-        /*// find article in cache
-        article = feedCache[id];
-        if (!article.unread) {
-            article.unread = true;
-            // ---
-            // updating counters
-            feed = Feeds[article.feed_id];
-            feed.unread++;
-            cat = Categories[feed.cat_id];
-            cat.unread++;
-            obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
-            obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
-            // ---
-            apiCall({
-                "op": "updateArticle",
-                "seq": seq,
-                "article_ids": id,
-                "mode": 1,
-                "field": 2
-            }, function(data) {
-                // ...
-            });
-        };*/
-    };
-
     function _markFeedAsRead(event, feed) {
-        /*// определяем параметры фида
         var isCategory = utils.isCategory(feed);
         var id = utils.id(feed);
+        /*// определяем параметры фида
+       
         // для каждой статьи из кеша устанавливаем флаг прочитанного
         _.each(feedCache, function(element) {
             element.unread = false;
@@ -246,8 +196,8 @@ var dataManager = (function() {
             currentCategory = Categories[currentFeed.cat_id];
             currentCategory.unread = currentCategory.unread - unread;
             obs.pub('/setUnreadCount', ['c' + currentCategory.id, currentCategory.unread]);
-        };
-        // отправляем запрос
+        };*/
+        // ------------------------------------------------
         apiCall({
             "op": "catchupFeed",
             "seq": seq,
@@ -255,7 +205,7 @@ var dataManager = (function() {
             "is_cat": isCategory
         }, function(data) {
             // ...
-        });*/
+        });
     };
 
     function _updateCounters() {
@@ -291,8 +241,100 @@ var dataManager = (function() {
         });*/
     };
 
-    function _toggleReadState(event, articles) {
-        // находим в кэше, группируем по признаку
+    function _toggleItemsState(field,ids) {
+        var groupTrue = [];
+        var groupFalse = [];
+        var requestTemplates = [];
+        _.each(ids,function(id) {
+            var item = items.get(id);
+            if (item.get(field)==true) {
+                groupFalse.push(id);
+            }else{
+                groupTrue.push(id);
+            };
+        });
+        // ------------------------------------------------
+        if (_.size(groupTrue) != 0) {
+            requestTemplates.push({
+                "ids": groupTrue,
+                "value": true
+            });
+        };
+        if (_.size(groupFalse) != 0) {
+            requestTemplates.push({
+                "ids": groupFalse,
+                "value": false
+            });
+        };
+        // ------------------------------------------------
+        _.each(requestTemplates,function(request) {
+            var dbfield=-1;
+            if (field=="unread") {
+                dbfield=2;
+            }else if (field=="star") {
+                dbfield=0;
+            }else if (field=="share") {
+                dbfield=1;
+            };
+            var dbops={
+                "op": "updateArticle",
+                "seq": seq++,
+                "article_ids": request.ids.join(),
+                "mode": request.value ? 1 : 0,
+                "field": dbfield
+            };
+            // ---
+            apiCall(dbops, function() {_changeItemsState(field,request.ids,request.value)});
+        });
+    };
+
+    function _changeItemsState(field, ids, value) {
+        console.info("%s: changing %s status for ids %s to %s",_module, field, ids.join(),value);
+        var changedChannels = {};
+        _.each(ids,function(id) {
+            var item = items.get(id);
+            item.set(field,value);
+            // ---
+            if (field=="unread") {
+                var channel = item.get("channel");
+                changedChannels[channel.id]=channel;
+                var delta = value ? 1: -1;
+                channel.set("unread",channel.get("unread")+ delta);
+                channel.set("delta", channel.get("delta")+delta);
+            };
+        });
+        // ---
+        if (field=="unread") {
+            _refreshCounters(changedChannels);
+        };
+    };
+
+    function _refreshCounters(changedChannels) {
+        var deltasum=0;
+        var changedGroups = {};
+        // ------------------------------------------------
+        _.each(changedChannels,function(channel) {
+            obs.pub('/setUnreadCount', [channel.sid(), channel.get("unread")]);
+            var delta = channel.get("delta");
+            channel.set("delta",0);
+            var group = channel.get("group");
+            changedGroups[group.id]=group;
+            group.set("unread",group.get("unread")+ delta);
+            //group.set("delta", group.get("delta")+delta);
+            deltasum=+delta;
+        });
+        // ------------------------------------------------
+        _.each(changedGroups,function(group) {
+            obs.pub('/setUnreadCount', [group.sid(), group.get("unread")]);
+            //group.set("delta",0);
+        });
+    };
+
+    function _toggleReadState(event, ids) {
+        
+        _toggleItemsState("unread",ids);
+
+        /*// находим в кэше, группируем по признаку
         var markAsRead = {};
         var markAsUnread = {};
         var mapCC = {};
@@ -338,117 +380,16 @@ var dataManager = (function() {
                 currentCat.unread = unread;
                 obs.pub('/setUnreadCount', ['c' + key, unread]);
             };
-        });
-
-        // выполняем запросы на изменение
-        if (_.size(markAsRead) != 0 || _.size(markAsUnread) != 0) {
-
-            var ops = {
-                'op': 'updateArticle',
-                'seq': seq,
-                'article_ids': '',
-                'mode': 0,
-                'field': 2
-            };
-
-            if (_.size(markAsRead) != 0) {
-                ops.mode = 0;
-                ops.article_ids = _.keys(markAsRead).join();
-                apiCall(ops);
-            };
-            // ---
-            if (_.size(markAsUnread) != 0) {
-                ops.mode = 1;
-                ops.article_ids = _.keys(markAsUnread).join();
-                apiCall(ops);
-            };
-
-        };
+        });*/
 
     };
 
-    function _toggleStarState(event, articles) {
-        var markAsStar = {};
-        var markAsUnstar = {};
-        // ---
-        _.each(articles, function(id) {
-            var article = feedCache[id];
-            // ---
-            if (article.marked) {
-                article.marked = false;
-                markAsUnstar[id] = true;
-            } else {
-                article.marked = true;
-                markAsStar[id] = true;
-            };
-        });
-
-        // выполняем запросы на изменение
-        if (_.size(markAsStar) != 0 || _.size(markAsUnstar) != 0) {
-
-            var ops = {
-                'op': 'updateArticle',
-                'seq': seq,
-                'article_ids': '',
-                'mode': 0,
-                'field': 0
-            };
-
-            if (_.size(markAsStar) != 0) {
-                ops.mode = 1;
-                ops.article_ids = _.keys(markAsStar).join();
-                apiCall(ops);
-            };
-            // ---
-            if (_.size(markAsUnstar) != 0) {
-                ops.mode = 0;
-                ops.article_ids = _.keys(markAsUnstar).join();
-                apiCall(ops);
-            };
-
-        };
+    function _toggleStarState(event, ids) {
+        _toggleItemsState("star",ids);
     };
 
     function _toggleShareState(event, articles) {
-        var markAsShare = {};
-        var markAsUnshare = {};
-        // ---
-        _.each(articles, function(id) {
-            var article = feedCache[id];
-            // ---
-            if (article.published) {
-                article.published = false;
-                markAsUnshare[id] = true;
-            } else {
-                article.published = true;
-                markAsShare[id] = true;
-            };
-        });
-
-        // выполняем запросы на изменение
-        if (_.size(markAsShare) != 0 || _.size(markAsUnshare) != 0) {
-
-            var ops = {
-                'op': 'updateArticle',
-                'seq': seq,
-                'article_ids': '',
-                'mode': 0,
-                'field': 1
-            };
-
-            if (_.size(markAsShare) != 0) {
-                ops.mode = 1;
-                ops.article_ids = _.keys(markAsShare).join();
-                apiCall(ops);
-            };
-            // ---
-            if (_.size(markAsUnshare) != 0) {
-                ops.mode = 0;
-                ops.article_ids = _.keys(markAsUnshare).join();
-                apiCall(ops);
-            };
-
-        };
+        _toggleItemsState("share",ids);
     };
 
     // clear model's cache
@@ -496,8 +437,6 @@ var dataManager = (function() {
             // subs
             obs.msub(_module, {
                 '/getHeaders': this.onGetHeaders,
-                '/setArticleRead': this.setArticleRead,
-                '/setArticleUnread': this.setArticleUnread,
                 '/markFeedAsRead': this.markFeedAsRead,
                 '/updateCounters': this.updateCounters,
                 '/viewModeChange': this.onModeChange,
@@ -543,7 +482,7 @@ var dataManager = (function() {
             return (items.where({"visible": false}));
         },
         // rename to "getItem"
-        getArticle: function(id) {
+        getItem: function(id) {
             article = items.get(id);
             if (article.content == '') {
                 _getArticle(id);
@@ -553,8 +492,6 @@ var dataManager = (function() {
             };
         },
         setSource: _setSource,
-        setArticleRead: _setArticleRead,
-        setArticleUnread: _setArticleUnread,
         markFeedAsRead: _markFeedAsRead,
         updateCounters: _updateCounters,
         // ---
