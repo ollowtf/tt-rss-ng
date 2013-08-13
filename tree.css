@@ -10,12 +10,12 @@ website:	http://code.google.com/p/jquerytree/
 
 .ztree * {padding:0; margin:0; font-size:12px; font-family: Verdana, Arial, Helvetica, AppleGothic, sans-serif}
 .ztree {margin:0; padding:5px; color:#333}
-.ztree li{padding:0; margin:0; list-style:none; line-height:14px; text-align:left; white-space:nowrap; outline:0}
+.ztree li{padding:0; margin:0; list-style:none; line-height:14px; text-align:left; outline:0}
 .ztree li ul{ margin:0; padding:0 0 0 18px}
 .ztree li ul.line{ background:url(./img/line_conn.gif) 0 0 repeat-y;}
 
-.ztree li a {padding:1px 3px 0 0; margin:0; cursor:pointer; height:17px; color:#333; background-color: transparent;
-	text-decoration:none; vertical-align:top; display: inline-block}
+/*.ztree li a {padding:1px 3px 0 0; margin:0; cursor:pointer; height:17px; color:#333; background-color: transparent;
+	text-decoration:none; vertical-align:top; display: inline-block}*/
 .ztree li a:hover {text-decoration:underline}
 .ztree li a.curSelectedNode {padding-top:0px; background-color:#FFE6B0; color:black; height:16px; border:1px #FFB951 solid; opacity:0.8;}
 .ztree li a.curSelectedNode_Edit {padding-top:0px; background-color:#FFE6B0; color:black; height:16px; border:1px #FFB951 solid; opacity:0.8;}
@@ -30,28 +30,6 @@ website:	http://code.google.com/p/jquerytree/
 	border:0 none; cursor: pointer;outline:none;
 	background-color:transparent; background-repeat:no-repeat; background-attachment: scroll;
 	background-image:url("./img/zTreeStandard.png"); *background-image:url("./img/zTreeStandard.gif")}
-
-/*.ztree li span.button.chk {width:13px; height:13px; margin:0 3px 0 0; cursor: auto}
-.ztree li span.button.chk.checkbox_false_full {background-position:0 0}
-.ztree li span.button.chk.checkbox_false_full_focus {background-position:0 -14px}
-.ztree li span.button.chk.checkbox_false_part {background-position:0 -28px}
-.ztree li span.button.chk.checkbox_false_part_focus {background-position:0 -42px}
-.ztree li span.button.chk.checkbox_false_disable {background-position:0 -56px}
-.ztree li span.button.chk.checkbox_true_full {background-position:-14px 0}
-.ztree li span.button.chk.checkbox_true_full_focus {background-position:-14px -14px}
-.ztree li span.button.chk.checkbox_true_part {background-position:-14px -28px}
-.ztree li span.button.chk.checkbox_true_part_focus {background-position:-14px -42px}
-.ztree li span.button.chk.checkbox_true_disable {background-position:-14px -56px}
-.ztree li span.button.chk.radio_false_full {background-position:-28px 0}
-.ztree li span.button.chk.radio_false_full_focus {background-position:-28px -14px}
-.ztree li span.button.chk.radio_false_part {background-position:-28px -28px}
-.ztree li span.button.chk.radio_false_part_focus {background-position:-28px -42px}
-.ztree li span.button.chk.radio_false_disable {background-position:-28px -56px}
-.ztree li span.button.chk.radio_true_full {background-position:-42px 0}
-.ztree li span.button.chk.radio_true_full_focus {background-position:-42px -14px}
-.ztree li span.button.chk.radio_true_part {background-position:-42px -28px}
-.ztree li span.button.chk.radio_true_part_focus {background-position:-42px -42px}
-.ztree li span.button.chk.radio_true_disable {background-position:-42px -56px}*/
 
 .ztree li span.button.switch {width:18px; height:18px}
 .ztree li span.button.root_open{background-position:-92px -54px}
@@ -100,3 +78,64 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
 	padding:0;
 	background:none;
 }*/
+
+/* ---------------------------------- */
+
+.tree {margin:0; padding:5px; color:#333}
+
+.tree * {
+    padding:0;
+    margin:0;
+    font-size:12px;
+    font-family: Verdana, Arial, Helvetica, AppleGothic, sans-serif
+}
+
+.tree li {
+    padding:0;
+    margin:0;
+    list-style:none;
+    line-height:18px;
+    text-align:left;
+    outline:0
+}
+
+.tree li ul {
+    margin:0;
+    padding:0 0 0 18px;
+}
+
+.tnlink {
+	position: relative;
+}
+
+.tree a:hover {
+	background-color: #FF0000;
+}
+
+.tnheader {
+    clear: both;
+    height: 1.6em;
+    line-height: 1.6em;
+    overflow: hidden;
+    position: relative;
+}
+
+.tncounter {
+    border-radius: 3px;
+    background-color: #0000FF;
+    color: #FFFFFF;
+    display: inline-block;
+    float: right;
+    position: static;
+    width: auto;
+    padding: 4px;
+    line-height: 0.7em;
+    font-weight: bold;
+}
+.tntitle {
+    overflow: hidden;
+    position: static;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: auto;
+}

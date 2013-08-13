@@ -86,7 +86,8 @@ function init(data) {
     //
     // getting app html :)
     $.ajax({
-        url: "app.html"
+        url: "app.html",
+        cache: false
     }).done(function(answer) {
         $('body').html(answer);
         // ---

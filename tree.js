@@ -17,9 +17,15 @@ var treeView = (function() {
 	function nodeName(name, unread) {
 		var unreadString = '';
 		if (unread != 0) {
-			unreadString = ' (' + unread + ')';
+			unreadString = "<div class='tncounter'>"+unread+"</div>"
 		};
-		return (name + unreadString);
+		//return (name + unreadString);
+		//return ("<div class='channeltitle'>"+unreadString+"<span class='channel'>"+name+"</span></div>");
+		var tnhtml="<div class='tnheader'>"+
+        unreadString+
+        "<div class='tntitle'>"+name+"</div>"+
+        "</div>";
+        return(tnhtml);
 	};
 
 	function nodeFont(unread) {
@@ -66,59 +72,90 @@ var treeView = (function() {
 		return(node);
 	};
 
+	function tnHeader(model) {
+		var title = model.get("title");
+		var unread = model.get("unread");
+		var unreadString = '';
+		if (unread != 0) {
+			unreadString = "<div class='tncounter'>"+unread+"</div>"
+		};
+		var tnhtml="<div class='tnheader'>"+
+        unreadString+
+        "<div class='tntitle'>"+title+"</div></div>";
+        return(tnhtml);
+	};
+
 	// ------------------------------------------------
 
 	function createTree() {
 
+		var channelTree = $('#channelTree');
+		// ---
 		// creating json tree
 		channels = dataManager.getChannels();
 		dataManager.getGroups().each(function(group) {
 			// ------------------------------------------------
-			var gNode = treeNode(group);
+			var tn_a = $('<a/>').addClass("tnlink");
+			tn_a.append(tnHeader(group));
+			var tn_li = $('<li/>');
+			tn_li.append(tn_a);
+			
+
+			/*var gNode = treeNode(group);
 			feedTree.push(gNode);
 			if (gNode.unread != 0) {
 				boldList.push(gNode.id);
-			};
+			};*/
 			// ---
 			childChannels = channels.where({
 				"cat_id": parseInt(group.id)
 			});
+			tn_ul = $('<ul/>');
 			_.each(childChannels, function(channel) {
-				var cNode = treeNode(channel);
-				feedTree.push(cNode);
-				if (cNode.unread != 0) {
-					boldList.push(cNode.id);
-				};
+				var tn_a = $('<a/>').addClass("tnlink");
+				tn_a.append(tnHeader(channel));
+				var tn_li = $('<li/>');
+				tn_li.append(tn_a);
+				// ---
+				tn_ul.append(tn_li);
+				// var cNode = treeNode(channel);
+				// feedTree.push(cNode);
+				// if (cNode.unread != 0) {
+				// 	boldList.push(cNode.id);
+				// };
 			});
+			tn_li.append(tn_ul);
+			// ---
+			channelTree.append(tn_li);
 			// ------------------------------------------------
 		});
 		
-		// tree settings
-		var treeSettings = {
-			treeId: "feedTree",
-			view: {
-				dblClickExpand: false,
-				showLine: true,
-				showTitle: false,
-				selectedMulti: false,
-				fontCss: getFont,
-				nameIsHTML: false
-			},
-			data: {
-				simpleData: {
-					enable: true,
-					idKey: "id",
-					pIdKey: "pId",
-					rootPId: ""
-				}
-			},
-			callback: {
-				beforeClick: onNodeSelect
-			}
-		};
+		// // tree settings
+		// var treeSettings = {
+		// 	treeId: "feedTree",
+		// 	view: {
+		// 		dblClickExpand: false,
+		// 		showLine: true,
+		// 		showTitle: false,
+		// 		selectedMulti: false,
+		// 		//fontCss: getFont,
+		// 		nameIsHTML: true
+		// 	},
+		// 	data: {
+		// 		simpleData: {
+		// 			enable: true,
+		// 			idKey: "id",
+		// 			pIdKey: "pId",
+		// 			rootPId: ""
+		// 		}
+		// 	},
+		// 	callback: {
+		// 		beforeClick: onNodeSelect
+		// 	}
+		// };
 
-		// init tree
-		t = $.fn.zTree.init($('#feedTree'), treeSettings, feedTree);
+		// // init tree
+		// t = $.fn.zTree.init($('#feedTree'), treeSettings, feedTree);
 
 	};
 
@@ -130,27 +167,27 @@ var treeView = (function() {
 	}
 
 	function _setUnreadCount(event, feedId, unread) {
-		var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		var node = ztree.getNodeByParam('id', feedId);
-		if (node != undefined) {
-			node.name = nodeName(node.title, unread);
-			node.unread = unread;
-			node.font = {
-				'font-weight': nodeFont(unread)
-			}
-			ztree.updateNode(node);
-		};
+		// var ztree = $.fn.zTree.getZTreeObj("feedTree");
+		// var node = ztree.getNodeByParam('id', feedId);
+		// if (node != undefined) {
+		// 	node.name = nodeName(node.title, unread);
+		// 	node.unread = unread;
+		// 	node.font = {
+		// 		'font-weight': nodeFont(unread)
+		// 	}
+		// 	ztree.updateNode(node);
+		// };
 	};
 
 	function _setFeedViewMode(event, mode) {
-		// alert(mode);
-		var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		var nodes = ztree.getNodesByParam('unread', 0);
-		if (mode == 'showAll') {
-			ztree.showNodes(nodes);
-		} else {
-			ztree.hideNodes(nodes);
-		};
+	// 	// alert(mode);
+	// 	var ztree = $.fn.zTree.getZTreeObj("feedTree");
+	// 	var nodes = ztree.getNodesByParam('unread', 0);
+	// 	if (mode == 'showAll') {
+	// 		ztree.showNodes(nodes);
+	// 	} else {
+	// 		ztree.hideNodes(nodes);
+	// 	};
 	};
 
 	// public
