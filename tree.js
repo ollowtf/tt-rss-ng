@@ -14,27 +14,6 @@ var treeView = (function() {
 	var feedTreeObject = {};
 	var boldList = [];
 
-	function nodeName(name, unread) {
-		var unreadString = '';
-		if (unread != 0) {
-			unreadString = "<div class='tncounter'>"+unread+"</div>"
-		};
-		//return (name + unreadString);
-		//return ("<div class='channeltitle'>"+unreadString+"<span class='channel'>"+name+"</span></div>");
-		var tnhtml="<div class='tnheader'>"+
-        unreadString+
-        "<div class='tntitle'>"+name+"</div>"+
-        "</div>";
-        return(tnhtml);
-	};
-
-	function nodeFont(unread) {
-		if (unread == 0) {
-			return ('normal');
-		} else {
-			return ('bold');
-		};
-	};
 
 	function nodeSkin(model) {
 		if (model.has("group")) {
@@ -49,40 +28,36 @@ var treeView = (function() {
 		return (node.font ? node.font : {});
 	}
 
-	function treeNode(model) {
+	function tnElement(model) {
 		var title = model.get("title");
 		var unread = model.get("unread");
-		var parent = 0;
-		if (model.has("group")) {
-			parent=model.get("group").sid();
-		};
-		// --- 
-		var node = {
-			"id": model.sid(),
-			"pId": parent,
-			"title": title,
-			"open": false,
-			"name": nodeName(title, unread),
-			"font": {
-				"font-weight": nodeFont(unread)
-			},
-			"iconSkin": nodeSkin(model),
-			"unread": unread
-		};
-		return(node);
-	};
-
-	function tnHeader(model) {
-		var title = model.get("title");
-		var unread = model.get("unread");
-		var unreadString = '';
+		// ---
+		var tn_li = $('<li/>');
+		var tn_a = $('<a/>').addClass("tnlink");
+		var tn_header = $('<div/>').addClass("tnheader").attr("id","tnh_"+model.sid());
+		var tn_title=$('<div/>').addClass("tntitle").html(title);
 		if (unread != 0) {
-			unreadString = "<div class='tncounter'>"+unread+"</div>"
+			tn_title.addClass("tnunread");
+			var tn_counter = $('<div/>').addClass("tncounter").html(unread);
+			tn_header.append(tn_counter);
 		};
-		var tnhtml="<div class='tnheader'>"+
-        unreadString+
-        "<div class='tntitle'>"+title+"</div></div>";
-        return(tnhtml);
+		var tn_iconbox = $('<div/>').addClass("iconscolumn");
+		var tn_icon = $('<div/>');
+		if (model.isGroup()) {
+			tn_icon.addClass("tngroup");
+		}else{
+			tn_icon.addClass("tnchannel");
+		};
+		tn_iconbox.append(tn_icon);
+		// ---
+		tn_header.append(tn_iconbox);
+		tn_header.append(tn_title);
+		tn_a.append(tn_header);
+		tn_li.append(tn_a);
+		// ---
+		tn_header.click(onNodeSelect);
+		// ---
+		return(tn_li);
 	};
 
 	// ------------------------------------------------
@@ -95,34 +70,25 @@ var treeView = (function() {
 		channels = dataManager.getChannels();
 		dataManager.getGroups().each(function(group) {
 			// ------------------------------------------------
-			var tn_a = $('<a/>').addClass("tnlink");
-			tn_a.append(tnHeader(group));
-			var tn_li = $('<li/>');
-			tn_li.append(tn_a);
 			
-
-			/*var gNode = treeNode(group);
-			feedTree.push(gNode);
-			if (gNode.unread != 0) {
-				boldList.push(gNode.id);
-			};*/
+			var tn_li = tnElement(group);
+			// ---
+			if (group.get('unread') != 0) {
+				boldList.push(group.sid());
+			};
 			// ---
 			childChannels = channels.where({
 				"cat_id": parseInt(group.id)
 			});
 			tn_ul = $('<ul/>');
 			_.each(childChannels, function(channel) {
-				var tn_a = $('<a/>').addClass("tnlink");
-				tn_a.append(tnHeader(channel));
-				var tn_li = $('<li/>');
-				tn_li.append(tn_a);
+				
+				var tn_li = tnElement(channel);
 				// ---
 				tn_ul.append(tn_li);
-				// var cNode = treeNode(channel);
-				// feedTree.push(cNode);
-				// if (cNode.unread != 0) {
-				// 	boldList.push(cNode.id);
-				// };
+				if (channel.get('unread') != 0) {
+				 	boldList.push(channel.sid());
+				};
 			});
 			tn_li.append(tn_ul);
 			// ---
@@ -130,6 +96,8 @@ var treeView = (function() {
 			// ------------------------------------------------
 		});
 		
+
+
 		// // tree settings
 		// var treeSettings = {
 		// 	treeId: "feedTree",
@@ -159,11 +127,14 @@ var treeView = (function() {
 
 	};
 
-	function onNodeSelect(treeId, treeNode) {
-		// делаем запрос непрочитанных
-		var currentNodeId = treeNode.id;
-		console.log("%s: activated node %s", _module, currentNodeId);
-		obs.pub('/selectSource', [currentNodeId]);
+	function onNodeSelect(event) {
+		
+		$('div.tnheader').removeClass("tncurrent");
+		var tn_header = $(event.currentTarget);
+		tn_header.addClass("tncurrent");
+		var sid = tn_header.attr("id").slice(4);
+		console.log("%s: activated node %s", _module, sid);
+		obs.pub('/selectSource', [sid]);
 	}
 
 	function _setUnreadCount(event, feedId, unread) {

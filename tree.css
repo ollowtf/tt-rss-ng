@@ -118,6 +118,7 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
     line-height: 1.6em;
     overflow: hidden;
     position: relative;
+    cursor: pointer;
 }
 
 .tncounter {
@@ -138,4 +139,33 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
     text-overflow: ellipsis;
     white-space: nowrap;
     width: auto;
+}
+
+.tntitle:hover {
+    text-decoration: underline;
+}
+
+.tnunread {
+    font-weight: bold;
+}
+
+.tncurrent {
+    background-color: #00FC00;
+}
+
+.tngroup, .tnchannel, .tnlabels, .tnlabel, .tnspecial {
+    cursor: pointer;
+    height: 16px;
+    width: 16px;
+    display: inline-block;
+    margin-right: 0.2em;
+    margin-bottom: 0.15em;
+}
+
+.tngroup {
+    background-image: url('img/folder.png');
+}
+
+.tnchannel {
+    background-image: url('img/feed.png');
 }
