@@ -123,7 +123,7 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
 
 .tncounter {
     border-radius: 3px;
-    background-color: #0000FF;
+    background-color: #888888;
     color: #FFFFFF;
     display: inline-block;
     float: right;
@@ -150,7 +150,8 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
 }
 
 .tncurrent {
-    background-color: #00FC00;
+    background-color: #BDBDBD;
+    border-radius: 4px 4px 4px 4px;
 }
 
 .tngroup, .tnchannel, .tnlabels, .tnlabel, .tnspecial {

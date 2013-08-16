@@ -159,7 +159,6 @@ var dataManager = (function() {
     }
 
     function onArticleResponse(jdata) {
-        
         article = jdata.content;
         feedCache[article.id] = article;
         obs.pub('/displayArticle', article.id);
@@ -314,7 +313,7 @@ var dataManager = (function() {
         var changedGroups = {};
         // ------------------------------------------------
         _.each(changedChannels,function(channel) {
-            obs.pub('/setUnreadCount', [channel.sid(), channel.get("unread")]);
+            obs.pub('/setUnreadCount', [channel]);
             var delta = channel.get("delta");
             channel.set("delta",0);
             var group = channel.get("group");
@@ -325,63 +324,13 @@ var dataManager = (function() {
         });
         // ------------------------------------------------
         _.each(changedGroups,function(group) {
-            obs.pub('/setUnreadCount', [group.sid(), group.get("unread")]);
+            obs.pub('/setUnreadCount', [group]);
             //group.set("delta",0);
         });
     };
 
     function _toggleReadState(event, ids) {
-        
         _toggleItemsState("unread",ids);
-
-        /*// находим в кэше, группируем по признаку
-        var markAsRead = {};
-        var markAsUnread = {};
-        var mapCC = {};
-        var mapCF = {};
-        _.each(articles, function(id) {
-            var article = feedCache[id];
-            var feedId = article.feed_id;
-            var catId = Feeds[article.feed_id].cat_id;
-            // ---
-            if (mapCF[feedId] == undefined) {
-                mapCF[feedId] = 0;
-            };
-            if (mapCC[catId] == undefined) {
-                mapCC[catId] = 0;
-            };
-            // ---
-            if (article.unread) {
-                article.unread = false;
-                mapCF[feedId]--;
-                mapCC[catId]--;
-                markAsRead[id] = true;
-            } else {
-                article.unread = true;
-                mapCF[feedId]++;
-                mapCC[catId]++;
-                markAsUnread[id] = true;
-            };
-        });
-        // ---
-        _.each(mapCF, function(value, key) {
-            if (value != 0) {
-                var currentFeed = Feeds[key];
-                var unread = Number(currentFeed.unread) + value;
-                currentFeed.unread = unread;
-                obs.pub('/setUnreadCount', ['f' + key, unread]);
-            };
-        });
-        // ---
-        _.each(mapCC, function(value, key) {
-            if (value != 0) {
-                var currentCat = Categories[key];
-                var unread = Number(currentCat.unread) + value;
-                currentCat.unread = unread;
-                obs.pub('/setUnreadCount', ['c' + key, unread]);
-            };
-        });*/
-
     };
 
     function _toggleStarState(event, ids) {
@@ -393,7 +342,6 @@ var dataManager = (function() {
     };
 
     // clear model's cache
-
     function _clearCache() {
         items.reset();
     };

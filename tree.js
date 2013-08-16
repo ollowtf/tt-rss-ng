@@ -10,36 +10,19 @@ var treeView = (function() {
 
 	var _module = 'TreeView';
 
-	var feedTree = [];
-	var feedTreeObject = {};
-	var boldList = [];
-
-
-	function nodeSkin(model) {
-		if (model.has("group")) {
-			return("feed");
-		}else{
-			return("category");
-		};
-	};
-
-	function getFont(treeId, node) {
-		// ---
-		return (node.font ? node.font : {});
-	}
-
 	function tnElement(model) {
 		var title = model.get("title");
 		var unread = model.get("unread");
 		// ---
-		var tn_li = $('<li/>');
-		var tn_a = $('<a/>').addClass("tnlink");
+		var tn_a = $('<a/>').addClass("tnlink").attr("id","tnl_"+model.sid());
 		var tn_header = $('<div/>').addClass("tnheader").attr("id","tnh_"+model.sid());
 		var tn_title=$('<div/>').addClass("tntitle").html(title);
 		if (unread != 0) {
 			tn_title.addClass("tnunread");
 			var tn_counter = $('<div/>').addClass("tncounter").html(unread);
 			tn_header.append(tn_counter);
+		}else{
+			tn_a.addClass("tnread")
 		};
 		var tn_iconbox = $('<div/>').addClass("iconscolumn");
 		var tn_icon = $('<div/>');
@@ -53,17 +36,13 @@ var treeView = (function() {
 		tn_header.append(tn_iconbox);
 		tn_header.append(tn_title);
 		tn_a.append(tn_header);
-		tn_li.append(tn_a);
 		// ---
-		tn_header.click(onNodeSelect);
+		tn_header.click(nodeClick);
 		// ---
-		return(tn_li);
+		return(tn_a);
 	};
 
-	// ------------------------------------------------
-
 	function createTree() {
-
 		var channelTree = $('#channelTree');
 		// ---
 		// creating json tree
@@ -71,97 +50,51 @@ var treeView = (function() {
 		dataManager.getGroups().each(function(group) {
 			// ------------------------------------------------
 			
-			var tn_li = tnElement(group);
-			// ---
-			if (group.get('unread') != 0) {
-				boldList.push(group.sid());
-			};
+			var tn_li = $('<li/>');
+			tn_li.append(tnElement(group));
 			// ---
 			childChannels = channels.where({
 				"cat_id": parseInt(group.id)
 			});
 			tn_ul = $('<ul/>');
 			_.each(childChannels, function(channel) {
-				
-				var tn_li = tnElement(channel);
+				var tn_li = $('<li/>');
+				tn_li.append(tnElement(channel));
 				// ---
 				tn_ul.append(tn_li);
-				if (channel.get('unread') != 0) {
-				 	boldList.push(channel.sid());
-				};
 			});
 			tn_li.append(tn_ul);
 			// ---
 			channelTree.append(tn_li);
 			// ------------------------------------------------
 		});
-		
-
-
-		// // tree settings
-		// var treeSettings = {
-		// 	treeId: "feedTree",
-		// 	view: {
-		// 		dblClickExpand: false,
-		// 		showLine: true,
-		// 		showTitle: false,
-		// 		selectedMulti: false,
-		// 		//fontCss: getFont,
-		// 		nameIsHTML: true
-		// 	},
-		// 	data: {
-		// 		simpleData: {
-		// 			enable: true,
-		// 			idKey: "id",
-		// 			pIdKey: "pId",
-		// 			rootPId: ""
-		// 		}
-		// 	},
-		// 	callback: {
-		// 		beforeClick: onNodeSelect
-		// 	}
-		// };
-
-		// // init tree
-		// t = $.fn.zTree.init($('#feedTree'), treeSettings, feedTree);
-
 	};
 
-	function onNodeSelect(event) {
-		
-		$('div.tnheader').removeClass("tncurrent");
+	function nodeClick(event) {
+		$('div.tnheader').parent().parent().removeClass("tncurrent");
 		var tn_header = $(event.currentTarget);
-		tn_header.addClass("tncurrent");
+		tn_header.parent().parent().addClass("tncurrent");
 		var sid = tn_header.attr("id").slice(4);
 		console.log("%s: activated node %s", _module, sid);
 		obs.pub('/selectSource', [sid]);
 	}
 
-	function _setUnreadCount(event, feedId, unread) {
-		// var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		// var node = ztree.getNodeByParam('id', feedId);
-		// if (node != undefined) {
-		// 	node.name = nodeName(node.title, unread);
-		// 	node.unread = unread;
-		// 	node.font = {
-		// 		'font-weight': nodeFont(unread)
-		// 	}
-		// 	ztree.updateNode(node);
-		// };
+	function _setUnreadCount(event, model) {
+		// ---
+		var tn = $("#tnl_"+model.sid()).replaceWith(tnElement(model));
 	};
 
 	function _setFeedViewMode(event, mode) {
-	// 	// alert(mode);
-	// 	var ztree = $.fn.zTree.getZTreeObj("feedTree");
-	// 	var nodes = ztree.getNodesByParam('unread', 0);
-	// 	if (mode == 'showAll') {
-	// 		ztree.showNodes(nodes);
-	// 	} else {
-	// 		ztree.hideNodes(nodes);
-	// 	};
+		var nodes = $('.tnread');
+	 	if (mode == 'showAll') {
+	 		nodes.show();
+	 	} else {
+	 		nodes.hide();
+	 	};
 	};
 
 	// public
+	// ------------------------------------------------
 	return {
 
 		// инициализация
@@ -206,7 +139,6 @@ var treeView = (function() {
 			});
 		},
 
-		// обновление дерева
 		createFeedTree: function() {
 			console.log("%s: feed update event. Creating tree.", _module);
 			createTree();

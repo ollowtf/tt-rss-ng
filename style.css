@@ -262,6 +262,8 @@ span#progname {
     width: auto;
     position: static;
     padding-right: 0.5em;
+    font-size: x-small;
+    font-weight: bold;
 }
 
 .title {
@@ -269,7 +271,7 @@ span#progname {
 }
 
 .current .header {
-	background-color: #CCCCCC;
+	background-color: #EEEEEE;
 }
 
 
@@ -286,7 +288,7 @@ span#progname {
 .unread .titlecolumn .title { font-weight: bold; }
 
 .excerpt { 
-	color: # 656565;
+	color: #555555;
 }
 
 a.article-link {
