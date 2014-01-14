@@ -127,7 +127,7 @@ var dataManager = (function() {
             "seq": seq++,
             "feed_id": params.id,
             "is_cat": params.isCategory,
-            "skip": _.size(feedCache),
+            "skip": items.size(),
             "limit": 50,
             "view_mode": currentViewMode,
             "show_excerpt": true,
@@ -217,6 +217,9 @@ var dataManager = (function() {
     };
 
     function _onCountersUpdate(jdata) {
+
+        var reqseq = jdata.seq; // int
+
         /*var content = jdata.content;
         _.each(content, function(element) {
             if (element.kind == 'cat') {
@@ -283,11 +286,11 @@ var dataManager = (function() {
                 "field": dbfield
             };
             // ---
-            apiCall(dbops, function() {_changeItemsState(field,request.ids,request.value)});
+            apiCall(dbops, function() {_changeItemsState(seq,field,request.ids,request.value)});
         });
     };
 
-    function _changeItemsState(field, ids, value) {
+    function _changeItemsState(rseq,field, ids, value) {
         console.info("%s: changing %s status for ids %s to %s",_module, field, ids.join(),value);
         var changedChannels = {};
         _.each(ids,function(id) {
@@ -304,7 +307,7 @@ var dataManager = (function() {
         });
         // ---
         if (field=="unread") {
-            _refreshCounters(changedChannels);
+            _refreshCounters(rseq,changedChannels);
         };
     };
 
@@ -313,6 +316,8 @@ var dataManager = (function() {
         var changedGroups = {};
         // ------------------------------------------------
         _.each(changedChannels,function(channel) {
+            
+            //channel.set("useq",rseq);
             obs.pub('/setUnreadCount', [channel]);
             var delta = channel.get("delta");
             channel.set("delta",0);
@@ -347,8 +352,8 @@ var dataManager = (function() {
     };
 
     function _setSource(source, ViewMode) {
+        items.reset();
         if (source != currentSource) {
-            items.reset();
             currentSource = source;
         };
         if (ViewMode != currentViewMode) {
