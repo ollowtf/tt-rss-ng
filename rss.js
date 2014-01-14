@@ -114,12 +114,12 @@ function init(data) {
             }
         });
 
-        // инициализируем контроллер
+
         controller.init();
-        // инициализируем представление дерева
         treeView.init();
-        // инициализируем модель
         dataManager.init(data);
+        // ---
+        obs.pub("/start");
 
     });
 

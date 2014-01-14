@@ -19,9 +19,7 @@ var dataManager = (function() {
     var apiLevel;
     var sid;
     // ---
-    var isCategoriesLoaded = false;
-    var isFeedsLoaded = false;
-    // ---
+    var FeedTree={};
     var Feeds = {};
     var Categories = {};
     // ---
@@ -30,6 +28,7 @@ var dataManager = (function() {
     // ---------------------------------------------
     
     var tmplGroup = Backbone.Model.extend({
+        idAttribute: "bare_id",
         sid: function() {
             return("g"+this.id);
         },
@@ -42,10 +41,11 @@ var dataManager = (function() {
     });
     var groups = new tmplGroups();
     groups.on("add", function(group) {
-        console.log("%s: added group: %s", _module,group.get("title"));
+        console.log("%s: added group: %s", _module,group.get("name"));
     })
     // ---
     var tmplChannel = Backbone.Model.extend({
+        idAttribute: "bare_id",
         sid: function() {
             return("c"+this.id);
         },
@@ -79,55 +79,69 @@ var dataManager = (function() {
         $.post(apiURL, $.toJSON(apiParams), success);
     }
 
-    function updateFeeds() {
-
+    function getFeedTree() {
         apiCall({
-            "op": "getCategories"
-        }, function(data) {
-            console.info(_module + ": successful categories request.");
-            _.each(data.content, function(value) {
-                groups.add(value);
-            });
-            isCategoriesLoaded = true;
-            if (isCategoriesLoaded == true & isFeedsLoaded == true) {
-                feedsUpdated();
-            }
-        });
-
-        apiCall({
-            "op": "getFeeds",
-            "cat_id": -3
-        }, function(data) {
-            console.info(_module + ": successful feeds request.");
-            _.each(data.content, function(value) {
-                channels.add(value);
-            });
-            isFeedsLoaded = true;
-            if (isCategoriesLoaded == true & isFeedsLoaded == true) {
-                feedsUpdated();
-            }
+            "op": "getFeedTree"
+        }, function(data){
+            console.info(_module + ": successful tree request.");
+            FeedTree = data.content.categories;
+            processFeedTree();
         });
     }
 
-    function feedsUpdated() {
-        channels.each(function(channel){
-            channel.set("group",groups.get(channel.get("cat_id")));
-            channel.set("delta",0);
-        });
-       /* groups.each(function(group) {
-            group.set("delta",0);
-        });*/
+    function processFeedTree() {
+
+        // recursive
+        parseTreeData(FeedTree);
+        // ---
         console.log(_module + ": feeds loaded");
         obs.pub("/feedsUpdated");
+        obs.pub("/updateCounters");
     }
 
+    function parseTreeData(treeNode,parentGroup) {
+        if (treeNode.items == undefined) {
+            return;
+        }
+        // ---
+        var utime = Date.today();
+        // ---
+        _.each(treeNode.items, function(item){
+            if (item.type != undefined) {
+                // category
+                var newGroup = new tmplGroup(item);
+                newGroup.set("parent",parentGroup);
+                newGroup.set("utime",utime);
+                groups.add(newGroup);
+                parseTreeData(item, newGroup);
+                // ---
+            }else{
+                // feed
+                var newChannel = new tmplChannel(item);
+                newChannel.set("parent",parentGroup);
+                newChannel.set("utime",utime);
+                channels.add(newChannel);
+            }
+        });
+    }
+
+    // ---
+
     function _getHeaders() {
+        
+        var skip=0;
+        if ((currentViewMode == "adaptive") || (currentViewMode == "unread")) {
+            skip = _.size(items.where({"unread": true}));
+        }else{
+            skip = _.size(items);
+        }
+
         apiCall({
             "op": "getHeadlines",
             "seq": seq++,
             "feed_id": params.id,
             "is_cat": params.isCategory,
-            "skip": items.size(),
+            "skip": skip,
             "limit": 50,
             "view_mode": currentViewMode,
             "show_excerpt": true,
@@ -389,6 +403,7 @@ var dataManager = (function() {
 
             // subs
             obs.msub(_module, {
+                '/start': this.start,
                 '/getHeaders': this.onGetHeaders,
                 '/markFeedAsRead': this.markFeedAsRead,
                 '/updateCounters': this.updateCounters,
@@ -400,8 +415,9 @@ var dataManager = (function() {
 
             // init
             console.log("%s: initializing ...", _module);
-            updateFeeds();
-
+        },
+        start: function() {
+            getFeedTree();
         },
         // version request
         getServerVerion: function() {
@@ -427,6 +443,9 @@ var dataManager = (function() {
         // obsoleted
         getFeeds: function() {
             return (Feeds);
+        },
+        getFeedTree: function() {
+            return (FeedTree);
         },
         onGetHeaders: function(event, data) {
             _getHeaders(data);

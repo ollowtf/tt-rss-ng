@@ -83,6 +83,7 @@ var listView = (function() {
 			var sharebutton = $('.share div', newRow);
 			sharebutton.click(clickShareButton);
 			// ---
+			item.set("visible",true); // !!!
 		});
 		// ----------------------------------
 		// выводим кнопку "показать дальше"

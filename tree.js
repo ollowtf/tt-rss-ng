@@ -44,10 +44,12 @@ var treeView = (function() {
 
 	function createTree() {
 		var channelTree = $('#channelTree');
-		// ---
-		// creating json tree
 		channels = dataManager.getChannels();
-		dataManager.getGroups().each(function(group) {
+		groups = dataManager.getGroups();
+		// ---
+		createNodes(channelTree, dataManager.getFeedTree());
+
+		/*_.each(function(group) {
 			// ------------------------------------------------
 			
 			var tn_li = $('<li/>');
@@ -67,8 +69,27 @@ var treeView = (function() {
 			// ---
 			channelTree.append(tn_li);
 			// ------------------------------------------------
-		});
+		}); */
 	};
+
+	function createNodes(parentDiv,treeNode) {
+		if (treeNode.items == undefined) {
+            return;
+        }
+        // ---
+		_.each(treeNode.items, function(item){
+            if (item.type != undefined) {
+                // category
+                /*var tn_li = $('<li/>');
+				tn_li.append(tnElement(group));
+                createNodes(,item);*/
+                // ---
+            }else{
+                // feed
+                // ...
+            }
+        });
+	}
 
 	function nodeClick(event) {
 		$('div.tnheader').parent().parent().removeClass("tncurrent");
