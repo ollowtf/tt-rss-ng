@@ -11,7 +11,7 @@ var treeView = (function() {
 	var _module = 'TreeView';
 
 	function tnElement(model) {
-		var title = model.get("title");
+		var title = model.get("name");
 		var unread = model.get("unread");
 		// ---
 		var tn_a = $('<a/>').addClass("tnlink").attr("id","tnl_"+model.sid());
@@ -22,8 +22,10 @@ var treeView = (function() {
 			var tn_counter = $('<div/>').addClass("tncounter").html(unread);
 			tn_header.append(tn_counter);
 		}else{
-			tn_a.addClass("tnread")
+			tn_a.addClass("tnread");
 		};
+		tn_a.addClass("tnread")
+		// ---
 		var tn_iconbox = $('<div/>').addClass("iconscolumn");
 		var tn_icon = $('<div/>');
 		if (model.isGroup()) {
@@ -39,6 +41,8 @@ var treeView = (function() {
 		// ---
 		tn_header.click(nodeClick);
 		// ---
+		//model.set("tree_element", tn_a); // for future use
+		// ---
 		return(tn_a);
 	};
 
@@ -48,45 +52,32 @@ var treeView = (function() {
 		groups = dataManager.getGroups();
 		// ---
 		createNodes(channelTree, dataManager.getFeedTree());
-
-		/*_.each(function(group) {
-			// ------------------------------------------------
-			
-			var tn_li = $('<li/>');
-			tn_li.append(tnElement(group));
-			// ---
-			childChannels = channels.where({
-				"cat_id": parseInt(group.id)
-			});
-			tn_ul = $('<ul/>');
-			_.each(childChannels, function(channel) {
-				var tn_li = $('<li/>');
-				tn_li.append(tnElement(channel));
-				// ---
-				tn_ul.append(tn_li);
-			});
-			tn_li.append(tn_ul);
-			// ---
-			channelTree.append(tn_li);
-			// ------------------------------------------------
-		}); */
 	};
 
-	function createNodes(parentDiv,treeNode) {
+	function createNodes(parentDiv, treeNode) {
 		if (treeNode.items == undefined) {
             return;
         }
         // ---
+        var model = {};
 		_.each(treeNode.items, function(item){
             if (item.type != undefined) {
                 // category
-                /*var tn_li = $('<li/>');
-				tn_li.append(tnElement(group));
-                createNodes(,item);*/
+                model = groups.get(item.bare_id);
+                var tn_li = $('<li/>');
+                var tn_ul = $('<ul/>');
+				tn_li.append(tnElement(model));
+                createNodes(tn_ul,item);
+                tn_li.append(tn_ul);
                 // ---
+                parentDiv.append(tn_li);
             }else{
                 // feed
-                // ...
+                model = channels.get(item.bare_id);
+                var tn_li = $('<li/>');
+				tn_li.append(tnElement(model));
+				// ---
+				parentDiv.append(tn_li);
             }
         });
 	}

@@ -23,6 +23,8 @@ var dataManager = (function() {
     var Feeds = {};
     var Categories = {};
     // ---
+    var utime = new Date();
+    // ---
     var feedCache = {};
 
     // ---------------------------------------------
@@ -104,14 +106,11 @@ var dataManager = (function() {
             return;
         }
         // ---
-        var utime = Date.today();
-        // ---
         _.each(treeNode.items, function(item){
             if (item.type != undefined) {
                 // category
                 var newGroup = new tmplGroup(item);
                 newGroup.set("parent",parentGroup);
-                newGroup.set("utime",utime);
                 groups.add(newGroup);
                 parseTreeData(item, newGroup);
                 // ---
@@ -119,7 +118,7 @@ var dataManager = (function() {
                 // feed
                 var newChannel = new tmplChannel(item);
                 newChannel.set("parent",parentGroup);
-                newChannel.set("utime",utime);
+                newChannel.set("delta",0);
                 channels.add(newChannel);
             }
         });
@@ -223,38 +222,35 @@ var dataManager = (function() {
 
     function _updateCounters() {
         console.log("%s: updating counters...",_module);
+        utime = new Date();
         apiCall({
             "op": "getCounters",
             "seq": seq,
             "output_mode": "fc"
-        },_onCountersUpdate);
+        }, function(data) {
+            _onCountersUpdate(data.content, utime);
+        });
     };
 
-    function _onCountersUpdate(jdata) {
-
-        var reqseq = jdata.seq; // int
-
-        /*var content = jdata.content;
-        _.each(content, function(element) {
-            if (element.kind == 'cat') {
-                if (Categories[element.id] != undefined) {
-                    if (Categories[element.id].unread != element.counter) {
-                        Categories[element.id].unread = element.counter;
-                        if (element.id > 0) {
-                            obs.pub('/setUnreadCount', ['c' + element.id, element.counter]);
-                        };
-                    };
-                };
-
+    function _onCountersUpdate(content, rtime) {
+        if (rtime != utime) {
+            return;
+        }
+        var model = {};
+        _.each(content, function(item) {
+            if (item.kind == 'cat') {
+                model = groups.get(item.id);
             } else {
-                if (Feeds[element.id] != undefined) {
-                    if (Feeds[element.id].unread != element.counter) {
-                        Feeds[element.id].unread = element.counter;
-                        obs.pub('/setUnreadCount', ['f' + element.id, element.counter]);
-                    };
+                model = channels.get(item.id);
+            };
+            if (model != undefined) {
+                if (model.get("unread") != item.counter) {
+                    model.set("unread", item.counter);
+                    model.set("utime", utime);
+                    obs.pub('/setUnreadCount', [model]);
                 };
             };
-        });*/
+        });
     };
 
     function _toggleItemsState(field,ids) {
@@ -287,6 +283,7 @@ var dataManager = (function() {
             var dbfield=-1;
             if (field=="unread") {
                 dbfield=2;
+                utime = new Date();
             }else if (field=="star") {
                 dbfield=0;
             }else if (field=="share") {
@@ -300,18 +297,25 @@ var dataManager = (function() {
                 "field": dbfield
             };
             // ---
-            apiCall(dbops, function() {_changeItemsState(seq,field,request.ids,request.value)});
+            apiCall(dbops, 
+                function() {
+                    _changeItemsState(utime,field,request.ids,request.value)
+                });
         });
     };
 
-    function _changeItemsState(rseq,field, ids, value) {
+    function _changeItemsState(rtime,field, ids, value) {
         console.info("%s: changing %s status for ids %s to %s",_module, field, ids.join(),value);
+        var updateUnread = true;
+        if (rtime != utime) {
+            updateUnread = false;
+        }
         var changedChannels = {};
         _.each(ids,function(id) {
             var item = items.get(id);
             item.set(field,value);
             // ---
-            if (field=="unread") {
+            if (field=="unread" && updateUnread) {
                 var channel = item.get("channel");
                 changedChannels[channel.id]=channel;
                 var delta = value ? 1: -1;
@@ -320,8 +324,8 @@ var dataManager = (function() {
             };
         });
         // ---
-        if (field=="unread") {
-            _refreshCounters(rseq,changedChannels);
+        if (field=="unread" && updateUnread) {
+            _refreshCounters(changedChannels);
         };
     };
 
@@ -335,7 +339,7 @@ var dataManager = (function() {
             obs.pub('/setUnreadCount', [channel]);
             var delta = channel.get("delta");
             channel.set("delta",0);
-            var group = channel.get("group");
+            var group = channel.get("parent");
             changedGroups[group.id]=group;
             group.set("unread",group.get("unread")+ delta);
             //group.set("delta", group.get("delta")+delta);
@@ -453,7 +457,6 @@ var dataManager = (function() {
         getHeaders: function() {
             return (items.where({"visible": false}));
         },
-        // rename to "getItem"
         getItem: function(id) {
             article = items.get(id);
             if (article.content == '') {
