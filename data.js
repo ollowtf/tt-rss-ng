@@ -145,7 +145,8 @@ var dataManager = (function() {
             "view_mode": currentViewMode,
             "show_excerpt": true,
             "show_content": params.show_content,
-            "include_attachments": false
+            "include_attachments": false,
+            "include_nested": true
         }, _getHeadersSuccess);
     }
 
@@ -330,25 +331,26 @@ var dataManager = (function() {
     };
 
     function _refreshCounters(changedChannels) {
-        var deltasum=0;
         var changedGroups = {};
-        // ------------------------------------------------
         _.each(changedChannels,function(channel) {
             
             //channel.set("useq",rseq);
             obs.pub('/setUnreadCount', [channel]);
             var delta = channel.get("delta");
             channel.set("delta",0);
-            var group = channel.get("parent");
-            changedGroups[group.id]=group;
-            group.set("unread",group.get("unread")+ delta);
-            //group.set("delta", group.get("delta")+delta);
-            deltasum=+delta;
+            if (channel.get("parent") != undefined) {
+                var cg = channel.get("parent");
+                while (cg != undefined) {
+                    changedGroups[cg.id]=cg;
+                    cg.set("unread",cg.get("unread")+ delta);
+                    // ---
+                    cg = cg.get("parent");
+                }
+            }
         });
         // ------------------------------------------------
         _.each(changedGroups,function(group) {
             obs.pub('/setUnreadCount', [group]);
-            //group.set("delta",0);
         });
     };
 
