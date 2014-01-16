@@ -61,7 +61,7 @@ var treeView = (function() {
         // ---
         var model = {};
 		_.each(treeNode.items, function(item){
-            if (item.type != undefined) {
+            if (item.type == "category") {
                 // category
                 model = groups.get(item.bare_id);
                 var tn_li = $('<li/>');

@@ -107,7 +107,7 @@ var dataManager = (function() {
         }
         // ---
         _.each(treeNode.items, function(item){
-            if (item.type != undefined) {
+            if (item.type == "category") {
                 // category
                 var newGroup = new tmplGroup(item);
                 newGroup.set("parent",parentGroup);
