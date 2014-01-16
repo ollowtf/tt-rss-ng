@@ -181,35 +181,6 @@ var dataManager = (function() {
     function _markFeedAsRead(event, feed) {
         var isCategory = utils.isCategory(feed);
         var id = utils.id(feed);
-        /*// определяем параметры фида
-       
-        // для каждой статьи из кеша устанавливаем флаг прочитанного
-        _.each(feedCache, function(element) {
-            element.unread = false;
-        });
-        // обновляем счётчики
-        if (isCategory) {
-            currentCategory = Categories[id];
-            currentCategory.unread = 0;
-            obs.pub('/setUnreadCount', ['c' + id, currentCategory.unread]);
-            // обнуляем непрочитанные у подчинённых фидов
-            feeds = _.filter(Feeds, function(element) {
-                return element.cat_id == id;
-            });
-            _.each(feeds, function(element) {
-                element.unread = 0;
-                obs.pub('/setUnreadCount', ['f' + element.id, element.unread]);
-            });
-        } else {
-            currentFeed = Feeds[id];
-            unread = currentFeed.unread;
-            currentFeed.unread = 0;
-            obs.pub('/setUnreadCount', ['f' + id, currentFeed.unread]);
-            // ---
-            currentCategory = Categories[currentFeed.cat_id];
-            currentCategory.unread = currentCategory.unread - unread;
-            obs.pub('/setUnreadCount', ['c' + currentCategory.id, currentCategory.unread]);
-        };*/
         // ------------------------------------------------
         apiCall({
             "op": "catchupFeed",
@@ -217,7 +188,7 @@ var dataManager = (function() {
             "feed_id": id,
             "is_cat": isCategory
         }, function(data) {
-            // ...
+            obs.pub("/updateCounters");
         });
     };
 
