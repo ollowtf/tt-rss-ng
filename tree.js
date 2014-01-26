@@ -145,7 +145,11 @@ var treeView = (function() {
 					},
 					"sep1": "---------",
 					"settings": {
-						name: "settings"
+						name: "settings",
+						callback: function(key,opt) {
+							var prefs = location.href;
+							window.open(prefs.replace(location.pathname,"/prefs.php"), '_blank');
+						}
 					}
 				}
 			});
