@@ -68,8 +68,8 @@ var imagesView = (function() {
 		var currentRowThumbsCount = lastRow.children('.imagebox').size();
 
 		// выводим заголовки
-		_.each(headers, function(element) {
-
+		_.each(headers, function(item) {
+			var element=item.attributes;
 			rowId = 'row-' + element.id;
 			// ---
 			cd = $("<div/>").html(element.content);
@@ -90,7 +90,8 @@ var imagesView = (function() {
         		lastRow = $('<div/>').addClass('imagerow').appendTo(contentBlock);
         		currentRowThumbsCount=0;
         	};
-
+        	// ---
+			item.set("visible",true); // !!!
 		});
 
 		/*$("div.imagebox img").imgCenter({
@@ -124,9 +125,8 @@ var imagesView = (function() {
 	};
 
 	function getMoreHeaders() {
-		params.skip = $(".imagebox", contentBlock).size() - 1;
-		console.log(_module + ': headers request to dataManager');
-		obs.pub('/getHeaders', params);
+		console.log(_module + ': request for headers');
+		obs.pub('/getHeaders');
 	};
 
 	function onHeaderClick(event) {
