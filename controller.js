@@ -10,6 +10,7 @@ var controller = (function() {
 	// ---
 	var views = {};
 	// ---
+	var currentSource = '';
 	var currentView = '';
 	var newView = '';
 	// ---
@@ -105,18 +106,20 @@ var controller = (function() {
 			console.log(_module + ": registering hotkeys ...");
 			registerHotkeys();
 			// ---
-			console.log(_module + ": waiting for events ...");
-			obs.sub('/feedActivated', this.activateFeed);
-			// ---
-			obs.sub('/toggleSideBar', this.toggleSideBar);
-			// ---
-			obs.sub('/stateMultiSelect', this.multiSelectState);
-			obs.sub('/addSelection', this.addSelection);
-			obs.sub('/removeSelection', this.removeSelection);
-			obs.sub('/newSelection', this.newSelection);
+			
+			// subs
+			obs.msub(_module,{
+				'/selectSource': this.activateFeed,
+				'/toggleSideBar': this.toggleSideBar,
+				'/stateMultiSelect': this.multiSelectState,
+				'/addSelection': this.addSelection,
+				'/removeSelection': this.removeSelection,
+				'/newSelection': this.newSelection
+			});
+
 			// ---
 			setInterval(function() {
-				obs.pub('/getCounters')
+				obs.pub('/updateCounters')
 			}, 60000);
 
 			// buttons
@@ -164,38 +167,48 @@ var controller = (function() {
 			$('#open').button().click(function() {
 				obs.pub('/openCurrentLink');
 			});
-			// mode select
+			// read mode
 			$('#modeSelector').on('change', function() {
 				var mode = $('#modeSelector').val();
+				console.log(_module + ": read_mode=%s", mode);
 				obs.pub('/viewModeChange', mode);
 			});
-			// mode select
+			// view
 			$('#viewSelector').on('change', function() {
 				newView = $('#viewSelector').val(); // не надо
+				console.log(_module + ": view=%s", newView);
 				// reactivate feed ... 
+				if (currentSource != '') {
+					obs.pub('/selectSource', [currentSource]);
+				};
+				
 			});
+
+			console.log(_module + ": waiting for events ...");
 		},
 		activateFeed: function(event, feedId) {
-			console.log(_module + ": get request to activate feed %s", feedId);
+			
+			console.log("%s: activating feed %s", _module, feedId);
 			// ---
-			// сбрасываем кэш модели
-			dataManager.clearCache();
+			currentSource = feedId;
+			// ---
+			var mode = $('#modeSelector').val();
+			dataManager.setSource(currentSource,mode);
 			// ---
 			newView = $('#viewSelector').val();
 			if (newView != currentView) {
-				// отключаем старый
+				// disconnect old view if exists
 				if (currentView != '') {
-					console.log(_module + ': disconnecting view %', currentView);
+					console.log("%s: disconnecting view %", _module, currentView);
 					views[currentView].disconnect();
 				};
 				// ---
-				console.log(_module + ': connecting view %s', newView);
+				console.log("%s: connecting view %s", _module, newView);
 				currentView = newView;
-				views[currentView].connect(feedId);
-			} else {
-				console.log(_module + ': activating feed %s', feedId);
-				views[currentView].activateFeed(feedId);
+				views[currentView].connect();
 			};
+			console.log("%s: loading source %s", _module, feedId);
+			views[currentView].setSource(feedId);
 
 		},
 		toggleSideBar: function() {

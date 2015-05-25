@@ -41,19 +41,20 @@ var listView = (function() {
 		}
 	}
 
-	function _displayHeaders(event, seq) {
-		console.log(_module + ': displaying headers for seq %d', seq);
+	function _displayHeaders(event) {
+		console.log("%s: displaying headers", _module);
 		// удаляем кнопку получения новых
 		$("#nextButton").remove();
 		// ---
 		today = Date.today();
 		// ---
-		headers = dataManager.getHeaders(seq);
+		headers = dataManager.getHeaders();
 		// ---
 		// компилируем шаблон
 		template = _.template(rowTemplate);
 		// выводим заголовки
-		_.each(headers, function(element) {
+		_.each(headers, function(item) {
+			var element=item.attributes;
 			rowId = 'row-' + element.id;
 			updateString = articleDate(today, element.updated);
 			// ---
@@ -82,6 +83,7 @@ var listView = (function() {
 			var sharebutton = $('.share div', newRow);
 			sharebutton.click(clickShareButton);
 			// ---
+			item.set("visible",true); // !!!
 		});
 		// ----------------------------------
 		// выводим кнопку "показать дальше"
@@ -110,44 +112,59 @@ var listView = (function() {
 	};
 
 	function getMoreHeaders() {
-		params.skip = $(".row", contentBlock).length - 1;
-		console.log(_module + ': headers request to dataManager');
-		obs.pub('/getHeaders', params);
+		console.log(_module + ': request for headers');
+		obs.pub('/getHeaders');
 	};
 
 	function onHeaderClick(event) {
 		row = $(event.currentTarget.parentElement.parentElement.parentElement);
 		artId = utils.articleId(row);
 		if (row.hasClass('current')) {
-			console.log(_module + ': click on current article %d. Hiding.', artId);
-			_hideArticle(row);
+			console.log("%s: click on current article %d. Hiding.", _module, artId);
+			_hideItem(row);
 		} else {
 			// ищем другие current и схлопываем
 			$('.content', $('.current').removeClass('current')).remove();
 			// ---
 			row.addClass("current");
-			console.log(_module + ': click on article %d. Loading.', artId);
-			_displayArticle(artId);
+			console.log("%s: click on article %d. Loading.", _module, artId);
+			_displayItem(artId);
 		}
 	};
 
-	function _displayArticle(artId) {
+	function _displayItem(id) {
 		if (!multiSelect) {
-				obs.pub('/newSelection', artId);
+				obs.pub('/newSelection', id);
 			};
 		// ---
-		article = dataManager.getArticle(artId);
-		if (article == false) {
+		item = dataManager.getItem(id);
+		if (item == false) {
 			// включаем индикатор
 			// ...
 		} else {
-			if (artId == _currentId()) {
-				_showArticle(article);
+			if (id == _currentId()) {
+				_showItem(item);
 			} else {
 				// выключаем индикатор
 				// ...
 			};
 
+		};
+	};
+
+	function _showItem(item) {
+		item.set("visible",true);
+		var article = item.attributes;
+		rowSelector = "#row-" + article.id;
+		row = $(rowSelector);
+		content = $('<div/>').addClass('content').html(article.content).appendTo(row);
+		// scroll 2 top
+		_scrollToTop(row);
+		// mark as read
+		if (article.unread) {
+			obs.pub('/toggleReadState', [
+				[item.id]
+			]);
 		};
 	};
 
@@ -157,22 +174,9 @@ var listView = (function() {
 		obs.pub(checked ? '/addSelection' : '/removeSelection', chk_id);
 	};
 
-	function _showArticle(article) {
-		rowSelector = "#row-" + article.id;
-		row = $(rowSelector);
-		content = $('<div/>').addClass('content').html(article.content).appendTo(row);
-		// scroll 2 top
-		_scrollToTop(row);
-		// mark as read
-		if (article.unread) {
-			obs.pub('/toggleReadState', [
-				[utils.articleId(row)]
-			]);
-		};
+	
 
-	};
-
-	function _hideArticle(row) {
+	function _hideItem(row) {
 		// удаляем контент
 		$('.content', row).remove();
 		row.removeClass('current');
@@ -211,7 +215,7 @@ var listView = (function() {
 	function _loadNextArticle() {
 		currentRow = _currentRow();
 		if (currentRow != 0) {
-			_hideArticle(currentRow);
+			_hideItem(currentRow);
 			newRow = currentRow.next();
 			if (newRow.hasClass('nav')) {
 				// это кнопка "далее"
@@ -219,7 +223,7 @@ var listView = (function() {
 			} else {
 				newRow.addClass('current');
 				id = utils.articleId(newRow);
-				_displayArticle(id);
+				_displayItem(id);
 			}
 		};
 	};
@@ -227,7 +231,7 @@ var listView = (function() {
 	function _loadPrevArticle() {
 		currentRow = _currentRow();
 		if (currentRow != 0) {
-			_hideArticle(currentRow);
+			_hideItem(currentRow);
 			newRow = currentRow.prev();
 			if (newRow.hasClass('nav')) {
 				// это кнопка "далее"
@@ -235,7 +239,7 @@ var listView = (function() {
 			} else {
 				newRow.addClass('current');
 				id = utils.articleId(newRow);
-				_displayArticle(id);
+				_displayItem(id);
 			}
 		};
 	};
@@ -251,10 +255,8 @@ var listView = (function() {
 	function _onModeChange(event, mode) {
 		// устанавливаем режим в params
 		_clearHeaders();
-		params.skip = 0;
-		params.view_mode = mode;
 		console.log(_module + ': headers request to dataManager');
-		obs.pub('/getHeaders', params);
+		obs.pub('/getHeaders');
 	};
 
 	function _enableMultiSelect() {
@@ -305,59 +307,44 @@ var listView = (function() {
 	// public
 	// ------------------------------------------------------------
 	return {
-		connect: function(feedId) {
+		connect: function() {
 			// ---
-			obs.sub('/displayHeaders', this.displayHeaders);
-			obs.sub('/displayArticle', this.displayArticle);
-			// ---
-			obs.sub('/loadNextArticle', this.loadNextArticle);
-			obs.sub('/loadPrevArticle', this.loadPrevArticle);
-			// ---
-			obs.sub('/openCurrentLink', this.openCurrentLink);
-			// ---
-			obs.sub('/markCurrentFeedAsRead', this.markCurrentFeedAsRead);
-			// ---
-			obs.sub('/viewModeChange', this.onModeChange);
-			// ---
-			obs.sub('/enableMultiSelect', this.enableMultiSelect);
-			obs.sub('/disableMultiSelect', this.disableMultiSelect);
-			// ---
-			obs.sub('/toggleReadState', this.toggleReadState);
-			obs.sub('/toggleStarState', this.toggleStarState);
-			obs.sub('/toggleShareState', this.toggleShareState);
-			// ---
-			console.log(_module + ': connected.');
+
+			obs.msub(_module,{
+				'/displayHeaders': this.displayHeaders,
+				'/displayArticle': this.displayArticle,
+				'/loadNextArticle': this.loadNextArticle,
+				'/loadPrevArticle': this.loadPrevArticle,
+				'/openCurrentLink': this.openCurrentLink,
+				'/markCurrentFeedAsRead': this.markCurrentFeedAsRead,
+				'/viewModeChange': this.onModeChange,
+				'/enableMultiSelect': this.enableMultiSelect,
+				'/disableMultiSelect': this.disableMultiSelect,
+				'/toggleReadState': this.toggleReadState,
+				'/toggleStarState': this.toggleStarState,
+				'/toggleShareState': this.toggleShareState
+			});
+			
 			// ---
 			contentBlock = $('#view');
-			// ---
-			this.activateFeed(feedId);
+			console.log(_module + ': connected.');
 		},
 		disconnect: function() {
-			obs.unsub('/displayHeaders', this.displayHeaders);
+			obs.munsub(_module);
 		},
-		activateFeed: function(feedId) {
+		setSource: function(feedId) {
 			console.log(_module + ': activating feed %s', feedId);
 			currentFeed = feedId;
-			// очищаем всё что есть
+			// clear view
 			_clearHeaders();
-			// индикатор загрузки
+			// progress indicator
 			// ...
-			// запрашиваем заголовки
-			params = {
-				skip: 0,
-				id: utils.id(currentFeed),
-				isCategory: utils.isCategory(currentFeed),
-				view_mode: 'adaptive',
-				show_content: 1,
-			};
-			console.log(_module + ': headers request to dataManager');
-			obs.pub('/getHeaders', params);
+			console.log(_module + ': request for headers');
+			obs.pub('/getHeaders');
 		},
-		displayHeaders: function(event, seq) {
-			_displayHeaders(event, seq);
-		},
-		displayArticle: function(event, artId) {
-			_displayArticle(artId);
+		displayHeaders: _displayHeaders,
+		displayArticle: function(event, id) {
+			_displayItem(id);
 		},
 		loadNextArticle: _loadNextArticle,
 		loadPrevArticle: _loadPrevArticle,

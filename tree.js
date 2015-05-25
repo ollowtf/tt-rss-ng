@@ -6,164 +6,125 @@
 var treeView = (function() {
 
 	// private
-	//  ...
+	// ------------------------------------------------
+
 	var _module = 'TreeView';
 
-	var feedTree = [];
-	var feedTreeObject = {};
-	var boldList = [];
-
-	function nodeName(name, unread) {
-		var unreadString = '';
-		if(unread != 0) {
-			unreadString = ' (' + unread + ')';
+	function tnElement(model) {
+		var title = model.get("name");
+		var unread = model.get("unread");
+		// ---
+		var tn_a = $('<a/>').addClass("tnlink").attr("id","tnl_"+model.sid());
+		var tn_header = $('<div/>').addClass("tnheader").attr("id","tnh_"+model.sid());
+		var tn_title=$('<div/>').addClass("tntitle").html(title);
+		if (unread != 0) {
+			tn_title.addClass("tnunread");
+			var tn_counter = $('<div/>').addClass("tncounter").html(unread);
+			tn_header.append(tn_counter);
+		}else{
+			tn_a.addClass("tnread");
 		};
-		return(name + unreadString);
-	};
-
-	function nodeFont(unread) {
-		if(unread == 0) {
-			return('normal');
-		} else {
-			return('bold');
+		tn_a.addClass("tnread")
+		// ---
+		var tn_iconbox = $('<div/>').addClass("iconscolumn");
+		var tn_icon = $('<div/>');
+		if (model.isGroup()) {
+			tn_icon.addClass("tngroup");
+		}else{
+			tn_icon.addClass("tnchannel");
 		};
+		tn_iconbox.append(tn_icon);
+		// ---
+		tn_header.append(tn_iconbox);
+		tn_header.append(tn_title);
+		tn_a.append(tn_header);
+		// ---
+		tn_header.click(nodeClick);
+		// ---
+		//model.set("tree_element", tn_a); // for future use
+		// ---
+		return(tn_a);
 	};
-
-	function getFont(treeId, node) {
-		return node.font ? node.font : {};
-	}
 
 	function createTree() {
-
-		// формируем json-структуру фидов
+		var channelTree = $('#channelTree');
+		channels = dataManager.getChannels();
+		groups = dataManager.getGroups();
 		// ---
-		feeds = dataManager.getFeeds();
-		_.each(dataManager.getCategories(), function(element, index, array) {
-
-			var currentCategory = element.id;
-			var cNode = {
-				id: 'c' + currentCategory,
-				pId: 0,
-				title: element.title,
-				open: false,
-				name: nodeName(element.title, element.unread),
-				font: {
-					'font-weight': nodeFont(element.unread)
-				},
-				iconSkin: 'category',
-				unread: element.unread
-			};
-			if(element.unread != 0) {
-				boldList.push(cNode.id);
-			};
-
-			// добавляем фиды по текущей категории
-			currentFeeds = _.filter(feeds, function(el) {
-				return el.cat_id == currentCategory;
-			});
-			if(_.size(currentFeeds) != 0) {
-				feedTree.push(cNode);
-				_.each(currentFeeds, function(feed) {
-					var fNode = {
-						id: 'f' + feed.id,
-						pId: cNode.id,
-						title: feed.title,
-						name: nodeName(feed.title, feed.unread),
-						font: {
-							'font-weight': nodeFont(feed.unread)
-						},
-						iconSkin: 'feed',
-						unread: feed.unread
-					};
-					feedTree.push(fNode);
-					if(feed.unread != 0) {
-						boldList.push(fNode.id);
-					};
-				});
-			};
-
-
-		});
-
-		// устанавливаем настройки
-		// ---
-		var treeSettings = {
-			treeId: "feedTree",
-			view: {
-				dblClickExpand: false,
-				showLine: true,
-				showTitle: false,
-				selectedMulti: false,
-				fontCss: getFont,
-				nameIsHTML: false
-			},
-			data: {
-				simpleData: {
-					enable: true,
-					idKey: "id",
-					pIdKey: "pId",
-					rootPId: ""
-				}
-			},
-			callback: {
-				beforeClick: onNodeSelect
-			}
-		};
-
-		// инициализируем дерево
-		// ---
-		t = $.fn.zTree.init($('#feedTree'), treeSettings, feedTree);
+		createNodes(channelTree, dataManager.getFeedTree());
 	};
 
-	function onNodeSelect(treeId, treeNode) {
-		// делаем запрос непрочитанных
-		var currentNodeId = treeNode.id;
-		console.log(_module + ": activated node %s", currentNodeId);
-		obs.pub('/feedActivated', [currentNodeId]);
+	function createNodes(parentDiv, treeNode) {
+		if (treeNode.items == undefined) {
+            return;
+        }
+        // ---
+        var model = {};
+		_.each(treeNode.items, function(item){
+            if (item.type == "category") {
+                // category
+                model = groups.get(item.bare_id);
+                var tn_li = $('<li/>');
+                var tn_ul = $('<ul/>');
+				tn_li.append(tnElement(model));
+                createNodes(tn_ul,item);
+                tn_li.append(tn_ul);
+                // ---
+                parentDiv.append(tn_li);
+            }else{
+                // feed
+                model = channels.get(item.bare_id);
+                var tn_li = $('<li/>');
+				tn_li.append(tnElement(model));
+				// ---
+				parentDiv.append(tn_li);
+            }
+        });
 	}
 
-	function _setUnreadCount(event, feedId, unread) {
-		var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		var node = ztree.getNodeByParam('id', feedId);
-		if(node != undefined) {
-			node.name = nodeName(node.title, unread);
-			node.unread = unread;
-			node.font = {
-				'font-weight': nodeFont(unread)
-			}
-			// ztree.setting.view.fontCss['font-weight'] = nodeFont(unread);
-			ztree.updateNode(node);
-		};
+	function nodeClick(event) {
+		$('div.tnheader').parent().parent().removeClass("tncurrent");
+		var tn_header = $(event.currentTarget);
+		tn_header.parent().parent().addClass("tncurrent");
+		var sid = tn_header.attr("id").slice(4);
+		console.log("%s: activated node %s", _module, sid);
+		obs.pub('/selectSource', [sid]);
+	}
+
+	function _setUnreadCount(event, model) {
+		// ---
+		var tn = $("#tnl_"+model.sid()).replaceWith(tnElement(model));
 	};
 
 	function _setFeedViewMode(event, mode) {
-		// alert(mode);
-		var ztree = $.fn.zTree.getZTreeObj("feedTree");
-		var nodes = ztree.getNodesByParam('unread', 0);
-		if(mode == 'showAll') {
-			ztree.showNodes(nodes);
-		} else {
-			ztree.hideNodes(nodes);
-		};
+		var nodes = $('.tnread');
+	 	if (mode == 'showAll') {
+	 		nodes.show();
+	 	} else {
+	 		nodes.hide();
+	 	};
 	};
 
 	// public
+	// ------------------------------------------------
 	return {
 
 		// инициализация
 		init: function() {
-			console.log(_module + ": initializing...");
+			console.log("%s: initializing...", _module);
+			// ------------------------------------------------
 			obs.sub('/feedsUpdated', this.createFeedTree);
 			obs.sub('/setUnreadCount', this.setUnreadCount);
 			obs.sub('/setFeedViewMode', this.setFeedViewMode);
-			// ---
-			// создаём кнопку меню
+			// ------------------------------------------------
+			// menu button
 			$('#settings').button({
 				text: false,
 				icons: {
 					primary: "ui-icon-carat-1-n"
 				}
 			});
+			// ------------------------------------------------
 			// context menu for settings
 			$.contextMenu({
 				selector: '#settings',
@@ -184,20 +145,18 @@ var treeView = (function() {
 					},
 					"sep1": "---------",
 					"settings": {
-						name: "settings"
+						name: "settings",
+						callback: function(key,opt) {
+							var prefs = location.href;
+							window.open(prefs.replace(location.pathname,"/prefs.php"), '_blank');
+						}
 					}
 				}
 			});
-
-			/*$('#feedShowMode').buttonset();
-			$('#feedShowMode input[type=radio]').click(function() {
-				obs.pub('/setFeedViewMode', [$('input[name=feedShowMode]:checked').attr('id')]);
-			});*/
 		},
 
-		// обновление дерева
 		createFeedTree: function() {
-			console.log(_module + ': feed update event. Creating tree.');
+			console.log("%s: feed update event. Creating tree.", _module);
 			createTree();
 		},
 		setUnreadCount: _setUnreadCount,

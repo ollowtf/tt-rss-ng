@@ -19,459 +19,353 @@ var dataManager = (function() {
     var apiLevel;
     var sid;
     // ---
-    var isCategoriesLoaded = false;
-    var isFeedsLoaded = false;
-    // ---
-    var Categories = {};
+    var FeedTree={};
     var Feeds = {};
+    var Categories = {};
+    // ---
+    var utime = new Date();
     // ---
     var feedCache = {};
 
-    function version() {
+    // ---------------------------------------------
+    
+    var tmplGroup = Backbone.Model.extend({
+        idAttribute: "bare_id",
+        sid: function() {
+            return("g"+this.id);
+        },
+        isGroup: function() {
+            return(true);
+        }
+    });
+    var tmplGroups = Backbone.Collection.extend({
+        model: tmplGroup
+    });
+    var groups = new tmplGroups();
+    groups.on("add", function(group) {
+        console.log("%s: added group: %s", _module,group.get("name"));
+    })
+    // ---
+    var tmplChannel = Backbone.Model.extend({
+        idAttribute: "bare_id",
+        sid: function() {
+            return("c"+this.id);
+        },
+        isGroup: function() {
+            return(false);
+        }
+    });
+    var tmplChannels = Backbone.Collection.extend({
+        model: tmplChannel
+    });
+    var channels = new tmplChannels();
+    // ---
+    var tmplItem = Backbone.Model.extend({});
+    var tmplItems = Backbone.Collection.extend({
+        model: tmplChannel
+    });
+    var items = new tmplItems();
 
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'getVersion'
-            },
-            success: onVersion
+    // ---------------------------------------------
+    
+    var currentSource = '';
+    var currentViewMode = '';
+    var params = {};
+
+    // ------------------------------------------------
+
+    function apiCall(apiParams, success) {
+        apiParams.sid = sid;
+        console.info("%s: API call", _module);
+        console.log(apiParams);
+        $.post(apiURL, $.toJSON(apiParams), success);
+    }
+
+    function getFeedTree() {
+        apiCall({
+            "op": "getFeedTree"
+        }, function(data){
+            console.info(_module + ": successful tree request.");
+            FeedTree = data.content.categories;
+            processFeedTree();
         });
     }
 
-    function onVersion(data) {
-        serverVersion = $.parseJSON(data).content.version;
-        console.log(_module + ": successful version request. Version=%s", serverVersion);
-        // тут мы проверяем, что версия нам подходит
-        login();
-    }
+    function processFeedTree() {
 
-    function login() {
-
-        // пробуем получить sid
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'login',
-                'user': user,
-                'password': password
-            },
-            success: onLogin
-        });
-
-    }
-
-    function onLogin(data) {
-        sid = $.parseJSON(data).content.session_id;
-        console.log(_module + ": successful login request. SID=%s", sid);
-        // вызываем функцию получения категорий и фидов
-        updateFeeds();
-    }
-
-    function updateFeeds() {
-
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'getCategories'
-            },
-            success: function(data) {
-                rCategories = $.parseJSON(data).content;
-                _.each(rCategories, function(value) {
-                    Categories[value.id] = value;
-                });
-                isCategoriesLoaded = true;
-                console.log(_module + ": successful categories request.");
-                if (isCategoriesLoaded == true & isFeedsLoaded == true) {
-                    feedsUpdated();
-                }
-            }
-        });
-
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                'op': 'getFeeds',
-                'cat_id': -3
-            },
-            success: function(data) {
-                rFeeds = $.parseJSON(data).content;
-                _.each(rFeeds, function(value) {
-                    Feeds[value.id] = value;
-                });
-                isFeedsLoaded = true;
-                console.log(_module + ": successful feeds request.");
-                if (isCategoriesLoaded == true & isFeedsLoaded == true) {
-                    feedsUpdated();
-                }
-            }
-        });
-    }
-
-    function feedsUpdated() {
-        // на этот вызов должно среагировать представление
-        console.log(_module + ": publish feeds update");
-        // вызываем функцию получения
+        // recursive
+        parseTreeData(FeedTree);
+        // ---
+        console.log(_module + ": feeds loaded");
         obs.pub("/feedsUpdated");
+        obs.pub("/updateCounters");
     }
 
-    function _getHeaders(params) {
-
-        seq++;
-        console.log(_module + ': headers request for seq %d', seq);
-        console.log(params);
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                "op": "getHeadlines",
-                "seq": seq,
-                "feed_id": params.id,
-                "is_cat": params.isCategory,
-                "skip": params.skip,
-                "limit": 50,
-                "view_mode": params.view_mode,
-                "show_excerpt": 1,
-                "show_content": params.show_content,
-                "include_attachments": 0
-            },
-            success: onHeadersResponse
+    function parseTreeData(treeNode,parentGroup) {
+        if (treeNode.items == undefined) {
+            return;
+        }
+        // ---
+        _.each(treeNode.items, function(item){
+            if (item.type == "category") {
+                // category
+                var newGroup = new tmplGroup(item);
+                newGroup.set("parent",parentGroup);
+                groups.add(newGroup);
+                parseTreeData(item, newGroup);
+                // ---
+            }else{
+                // feed
+                var newChannel = new tmplChannel(item);
+                newChannel.set("parent",parentGroup);
+                newChannel.set("delta",0);
+                channels.add(newChannel);
+            }
         });
     }
 
-    function onHeadersResponse(data) {
-        jdata = $.parseJSON(data);
-        rseq = jdata.seq;
-        headers = jdata.content;
-        console.log(_module + ': headers response for seq %d', rseq);
-        // записываем в кеш
-        _.each(headers, function(value) {
-            value['seq'] = rseq;
-            feedCache[value.id] = value;
+    // ---
+
+    function _getHeaders() {
+        
+        var skip=0;
+        if ((currentViewMode == "adaptive") || (currentViewMode == "unread")) {
+            skip = _.size(items.where({"unread": true}));
+        }else{
+            skip = _.size(items);
+        }
+
+        apiCall({
+            "op": "getHeadlines",
+            "seq": seq++,
+            "feed_id": params.id,
+            "is_cat": params.isCategory,
+            "skip": skip,
+            "limit": 50,
+            "view_mode": currentViewMode,
+            "show_excerpt": true,
+            "show_content": params.show_content,
+            "include_attachments": false,
+            "include_nested": true
+        }, _getHeadersSuccess);
+    }
+
+    function _getHeadersSuccess(jdata) {
+        console.log("%s: headers response seq=%d, count=%d",_module, jdata.seq ,_.size(jdata.content));
+        // ------------------------------------------------
+        _.each(jdata.content, function(value) {
+            var newItem = new tmplItem(value);
+            newItem.set("channel",channels.get(value.feed_id));
+            newItem.set("visible",false);
+            items.add(newItem);
         });
-        console.log(_module + ': cached %d headers', _.size(headers));
-        console.log(_module + ': %d headers in cache', _.size(feedCache));
-        // публикуем заголовки
-        obs.pub('/displayHeaders', rseq);
+        // ------------------------------------------------
+        obs.pub('/displayHeaders');
     };
 
     function _getArticle(id) {
         // ajax request
-        seq++;
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                "op": "getArticle",
-                "seq": seq,
-                "article_id": id
-            },
-            success: onArticleResponse
-        });
+        apiCall({
+            "op": "getArticle",
+            "seq": seq++,
+            "article_id": id
+        },onArticleResponse);
     }
 
-    function onArticleResponse(data) {
-        jdata = $.parseJSON(data);
+    function onArticleResponse(jdata) {
         article = jdata.content;
         feedCache[article.id] = article;
         obs.pub('/displayArticle', article.id);
     };
 
-    function _setArticleRead(event, id) {
-        // находим в кеше
-        article = feedCache[id];
-        if (article.unread) {
-            article.unread = false;
-            // ---
-            // обновляем счетчики
-            feed = Feeds[article.feed_id];
-            feed.unread--;
-            cat = Categories[feed.cat_id];
-            cat.unread--;
-            obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
-            obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
-            // ---
-            $.post(apiURL, {
-                "op": "updateArticle",
-                "seq": seq,
-                "article_ids": id,
-                "mode": 0,
-                "field": 2
-            }, function(data) {
-                // ...
-            });
-        };
-    };
-
-    function _setArticleUnread(event, id) {
-        // находим в кеше
-        article = feedCache[id];
-        if (!article.unread) {
-            article.unread = true;
-            // ---
-            // обновляем счетчики
-            feed = Feeds[article.feed_id];
-            feed.unread++;
-            cat = Categories[feed.cat_id];
-            cat.unread++;
-            obs.pub('/setUnreadCount', ['f' + feed.id, feed.unread]);
-            obs.pub('/setUnreadCount', ['c' + cat.id, cat.unread]);
-            // ---
-            $.post(apiURL, {
-                "op": "updateArticle",
-                "seq": seq,
-                "article_ids": id,
-                "mode": 1,
-                "field": 2
-            }, function(data) {
-                // ...
-            });
-        };
-    };
-
     function _markFeedAsRead(event, feed) {
-        // определяем параметры фида
         var isCategory = utils.isCategory(feed);
         var id = utils.id(feed);
-        // для каждой статьи из кеша устанавливаем флаг прочитанного
-        _.each(feedCache, function(element) {
-            element.unread = false;
-        });
-        // обновляем счётчики
-        if (isCategory) {
-            currentCategory = Categories[id];
-            currentCategory.unread = 0;
-            obs.pub('/setUnreadCount', ['c' + id, currentCategory.unread]);
-            // обнуляем непрочитанные у подчинённых фидов
-            feeds = _.filter(Feeds, function(element) {
-                return element.cat_id == id;
-            });
-            _.each(feeds, function(element) {
-                element.unread = 0;
-                obs.pub('/setUnreadCount', ['f' + element.id, element.unread]);
-            });
-        } else {
-            currentFeed = Feeds[id];
-            unread = currentFeed.unread;
-            currentFeed.unread = 0;
-            obs.pub('/setUnreadCount', ['f' + id, currentFeed.unread]);
-            // ---
-            currentCategory = Categories[currentFeed.cat_id];
-            currentCategory.unread = currentCategory.unread - unread;
-            obs.pub('/setUnreadCount', ['c' + currentCategory.id, currentCategory.unread]);
-        };
-        // отправляем запрос
-        $.post(apiURL, {
+        // ------------------------------------------------
+        apiCall({
             "op": "catchupFeed",
             "seq": seq,
             "feed_id": id,
             "is_cat": isCategory
         }, function(data) {
-            // ...
+            obs.pub("/updateCounters");
         });
     };
 
-    function _getCounters() {
-        $.ajax({
-            type: 'POST',
-            url: apiURL,
-            data: {
-                "op": "getCounters",
-                "seq": seq,
-                "output_mode": "fc"
-            },
-            success: _onCountersUpdate
+    function _updateCounters() {
+        console.log("%s: updating counters...",_module);
+        utime = new Date();
+        apiCall({
+            "op": "getCounters",
+            "seq": seq,
+            "output_mode": "fc"
+        }, function(data) {
+            _onCountersUpdate(data.content, utime);
         });
     };
 
-    function _onCountersUpdate(data) {
-        var jdata = $.parseJSON(data);
-        var content = jdata.content;
-        // ---
-        _.each(content, function(element) {
-            if (element.kind == 'cat') {
-                if (Categories[element.id] != undefined) {
-                    if (Categories[element.id].unread != element.counter) {
-                        Categories[element.id].unread = element.counter;
-                        if (element.id > 0) {
-                            obs.pub('/setUnreadCount', ['c' + element.id, element.counter]);
-                        };
-                    };
-                };
-
+    function _onCountersUpdate(content, rtime) {
+        if (rtime != utime) {
+            return;
+        }
+        var model = {};
+        _.each(content, function(item) {
+            if (item.kind == 'cat') {
+                model = groups.get(item.id);
             } else {
-                if (Feeds[element.id] != undefined) {
-                    if (Feeds[element.id].unread != element.counter) {
-                        Feeds[element.id].unread = element.counter;
-                        obs.pub('/setUnreadCount', ['f' + element.id, element.counter]);
-                    };
+                model = channels.get(item.id);
+            };
+            if (model != undefined) {
+                if (model.get("unread") != item.counter) {
+                    model.set("unread", item.counter);
+                    model.set("utime", utime);
+                    obs.pub('/setUnreadCount', [model]);
                 };
             };
         });
     };
 
-    function _toggleReadState(event, articles) {
-        // находим в кэше, группируем по признаку
-        var markAsRead = {};
-        var markAsUnread = {};
-        var mapCC = {};
-        var mapCF = {};
-        _.each(articles, function(id) {
-            var article = feedCache[id];
-            var feedId = article.feed_id;
-            var catId = Feeds[article.feed_id].cat_id;
-            // ---
-            if (mapCF[feedId] == undefined) {
-                mapCF[feedId] = 0;
-            };
-            if (mapCC[catId] == undefined) {
-                mapCC[catId] = 0;
-            };
-            // ---
-            if (article.unread) {
-                article.unread = false;
-                mapCF[feedId]--;
-                mapCC[catId]--;
-                markAsRead[id] = true;
-            } else {
-                article.unread = true;
-                mapCF[feedId]++;
-                mapCC[catId]++;
-                markAsUnread[id] = true;
+    function _toggleItemsState(field,ids) {
+        var groupTrue = [];
+        var groupFalse = [];
+        var requestTemplates = [];
+        _.each(ids,function(id) {
+            var item = items.get(id);
+            if (item.get(field)==true) {
+                groupFalse.push(id);
+            }else{
+                groupTrue.push(id);
             };
         });
-        // ---
-        _.each(mapCF, function(value,key) {
-            if (value != 0) {
-                var currentFeed = Feeds[key];
-                var unread = Number(currentFeed.unread)+value;
-                currentFeed.unread = unread;
-                obs.pub('/setUnreadCount', ['f' + key, unread]);
-            };
-        });
-        // ---
-        _.each(mapCC, function(value,key) {
-            if (value != 0) {
-                var currentCat = Categories[key];
-                var unread = Number(currentCat.unread)+value;
-                currentCat.unread = unread;
-                obs.pub('/setUnreadCount', ['c' + key, unread]);
-            };
-        });
-        
-        // выполняем запросы на изменение
-        if (_.size(markAsRead) != 0 || _.size(markAsUnread) != 0) {
-
-            var ops = {
-                'op': 'updateArticle',
-                'seq': seq,
-                'article_ids': '',
-                'mode': 0,
-                'field': 2
-            };
-
-            if (_.size(markAsRead) != 0) {
-                ops.mode = 0;
-                ops.article_ids = _.keys(markAsRead).join();
-                $.post(apiURL,ops);
-            };
-            // ---
-            if (_.size(markAsUnread) != 0) {
-                ops.mode = 1;
-                ops.article_ids = _.keys(markAsUnread).join();
-                $.post(apiURL,ops);
-            };
-
+        // ------------------------------------------------
+        if (_.size(groupTrue) != 0) {
+            requestTemplates.push({
+                "ids": groupTrue,
+                "value": true
+            });
         };
-
+        if (_.size(groupFalse) != 0) {
+            requestTemplates.push({
+                "ids": groupFalse,
+                "value": false
+            });
+        };
+        // ------------------------------------------------
+        _.each(requestTemplates,function(request) {
+            var dbfield=-1;
+            if (field=="unread") {
+                dbfield=2;
+                utime = new Date();
+            }else if (field=="star") {
+                dbfield=0;
+            }else if (field=="share") {
+                dbfield=1;
+            };
+            var dbops={
+                "op": "updateArticle",
+                "seq": seq++,
+                "article_ids": request.ids.join(),
+                "mode": request.value ? 1 : 0,
+                "field": dbfield
+            };
+            // ---
+            apiCall(dbops, 
+                function() {
+                    _changeItemsState(utime,field,request.ids,request.value)
+                });
+        });
     };
 
-    function _toggleStarState(event, articles) {
-        var markAsStar = {};
-        var markAsUnstar = {};
-        // ---
-        _.each(articles, function(id) {
-            var article = feedCache[id];
+    function _changeItemsState(rtime,field, ids, value) {
+        console.info("%s: changing %s status for ids %s to %s",_module, field, ids.join(),value);
+        var updateUnread = true;
+        if (rtime != utime) {
+            updateUnread = false;
+        }
+        var changedChannels = {};
+        _.each(ids,function(id) {
+            var item = items.get(id);
+            item.set(field,value);
             // ---
-            if (article.marked) {
-                article.marked = false;
-                markAsUnstar[id] = true;
-            } else {
-                article.marked = true;
-                markAsStar[id] = true;
+            if (field=="unread" && updateUnread) {
+                var channel = item.get("channel");
+                changedChannels[channel.id]=channel;
+                var delta = value ? 1: -1;
+                channel.set("unread",channel.get("unread")+ delta);
+                channel.set("delta", channel.get("delta")+delta);
             };
         });
-
-        // выполняем запросы на изменение
-        if (_.size(markAsStar) != 0 || _.size(markAsUnstar) != 0) {
-
-            var ops = {
-                'op': 'updateArticle',
-                'seq': seq,
-                'article_ids': '',
-                'mode': 0,
-                'field': 0
-            };
-
-            if (_.size(markAsStar) != 0) {
-                ops.mode = 1;
-                ops.article_ids = _.keys(markAsStar).join();
-                $.post(apiURL,ops);
-            };
-            // ---
-            if (_.size(markAsUnstar) != 0) {
-                ops.mode = 0;
-                ops.article_ids = _.keys(markAsUnstar).join();
-                $.post(apiURL,ops);
-            };
-
+        // ---
+        if (field=="unread" && updateUnread) {
+            _refreshCounters(changedChannels);
         };
+    };
+
+    function _refreshCounters(changedChannels) {
+        var changedGroups = {};
+        _.each(changedChannels,function(channel) {
+            
+            //channel.set("useq",rseq);
+            obs.pub('/setUnreadCount', [channel]);
+            var delta = channel.get("delta");
+            channel.set("delta",0);
+            if (channel.get("parent") != undefined) {
+                var cg = channel.get("parent");
+                while (cg != undefined) {
+                    changedGroups[cg.id]=cg;
+                    cg.set("unread",cg.get("unread")+ delta);
+                    // ---
+                    cg = cg.get("parent");
+                }
+            }
+        });
+        // ------------------------------------------------
+        _.each(changedGroups,function(group) {
+            obs.pub('/setUnreadCount', [group]);
+        });
+    };
+
+    function _toggleReadState(event, ids) {
+        _toggleItemsState("unread",ids);
+    };
+
+    function _toggleStarState(event, ids) {
+        _toggleItemsState("star",ids);
     };
 
     function _toggleShareState(event, articles) {
-        var markAsShare = {};
-        var markAsUnshare = {};
-        // ---
-        _.each(articles, function(id) {
-            var article = feedCache[id];
-            // ---
-            if (article.published) {
-                article.published = false;
-                markAsUnshare[id] = true;
-            } else {
-                article.published = true;
-                markAsShare[id] = true;
-            };
-        });
-
-        // выполняем запросы на изменение
-        if (_.size(markAsShare) != 0 || _.size(markAsUnshare) != 0) {
-
-            var ops = {
-                'op': 'updateArticle',
-                'seq': seq,
-                'article_ids': '',
-                'mode': 0,
-                'field': 1
-            };
-
-            if (_.size(markAsShare) != 0) {
-                ops.mode = 1;
-                ops.article_ids = _.keys(markAsShare).join();
-                $.post(apiURL,ops);
-            };
-            // ---
-            if (_.size(markAsUnshare) != 0) {
-                ops.mode = 0;
-                ops.article_ids = _.keys(markAsUnshare).join();
-                $.post(apiURL,ops);
-            };
-
-        };
+        _toggleItemsState("share",ids);
     };
+
+    // clear model's cache
+    function _clearCache() {
+        items.reset();
+    };
+
+    function _setSource(source, ViewMode) {
+        items.reset();
+        if (source != currentSource) {
+            currentSource = source;
+        };
+        if (ViewMode != currentViewMode) {
+            currentViewMode = ViewMode;
+        };
+        // ---
+        // запрашиваем заголовки
+        params = {
+            skip: 0,
+            id: utils.id(currentSource),
+            isCategory: utils.isCategory(currentSource),
+            view_mode: currentViewMode,
+            show_content: true,
+        };
+
+    };
+
+    function _onModeChange(event, mode) {
+        currentViewMode = mode;
+        _clearCache();
+    }
 
     // public:
     return {
@@ -484,64 +378,72 @@ var dataManager = (function() {
             password = settings.password;
             sid = settings.session;
 
-            // подписываемся на интересующие нас события
-            obs.sub("/getHeaders", this.onGetHeaders);
-            obs.sub('/setArticleRead', this.setArticleRead);
-            obs.sub('/setArticleUnread', this.setArticleUnread);
-            obs.sub('/markFeedAsRead', this.markFeedAsRead);
-            obs.sub('/getCounters', this.getCounters);
-            // ---
-            obs.sub('/toggleReadState', this.toggleReadState);
-            obs.sub('/toggleStarState', this.toggleStarState);
-            obs.sub('/toggleShareState', this.toggleShareState);
+            // subs
+            obs.msub(_module, {
+                '/start': this.start,
+                '/getHeaders': this.onGetHeaders,
+                '/markFeedAsRead': this.markFeedAsRead,
+                '/updateCounters': this.updateCounters,
+                '/viewModeChange': this.onModeChange,
+                '/toggleReadState': this.toggleReadState,
+                '/toggleStarState': this.toggleStarState,
+                '/toggleShareState': this.toggleShareState
+            });
 
-            // запускаем цепочку инициализации
-            console.log(_module + ": initializing ...");
-            // ---
-            updateFeeds()
-
+            // init
+            console.log("%s: initializing ...", _module);
         },
-        test: function() {
-            console.log(_module + ": successful test call. Server version %s", serverVersion);
+        start: function() {
+            getFeedTree();
         },
-        // служебное, получение версии
+        // version request
         getServerVerion: function() {
             return (serverVersion);
         },
-        // служебное, получение версии
+        // session request
         getSid: function() {
             return (sid);
         },
+        getGroups: function() {
+            return(groups);
+        },
+        // obsoleted
         getCategories: function() {
             return (Categories);
         },
+        getChannels: function() {
+            return(channels);
+        },
+        getItems: function() {
+            return(items);
+        },
+        // obsoleted
         getFeeds: function() {
             return (Feeds);
+        },
+        getFeedTree: function() {
+            return (FeedTree);
         },
         onGetHeaders: function(event, data) {
             _getHeaders(data);
         },
-        getHeaders: function(sequence) {
-            return (_.where(feedCache, {
-                'seq': sequence
-            }));
+        getHeaders: function() {
+            return (items.where({"visible": false}));
         },
-        getArticle: function(artId) {
-            article = feedCache[artId];
+        getItem: function(id) {
+            article = items.get(id);
             if (article.content == '') {
-                _getArticle(artId);
+                _getArticle(id);
                 return (false);
             } else {
                 return (article);
             };
         },
-        clearCache: function() {
-            feedCache = {};
-        },
-        setArticleRead: _setArticleRead,
-        setArticleUnread: _setArticleUnread,
+        setSource: _setSource,
         markFeedAsRead: _markFeedAsRead,
-        getCounters: _getCounters,
+        updateCounters: _updateCounters,
+        // ---
+        onModeChange: _onModeChange,
         // ---
         toggleReadState: _toggleReadState,
         toggleStarState: _toggleStarState,
