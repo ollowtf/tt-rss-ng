@@ -141,22 +141,22 @@ var imagesView = (function() {
 			// ---
 			row.addClass("current");
 			console.log(_module + ': click on article %d. Loading.', artId);
-			_displayArticle(artId);
+			_displayItem(artId);
 		}
 	};
-
-	function _displayArticle(artId) {
+	
+	function _displayItem(id) {
 		if (!multiSelect) {
-				obs.pub('/newSelection', artId);
+				obs.pub('/newSelection', id);
 			};
 		// ---
-		article = dataManager.getArticle(artId);
-		if (article == false) {
+		item = dataManager.getItem(id);
+		if (item == false) {
 			// включаем индикатор
 			// ...
 		} else {
-			if (artId == _currentId()) {
-				_showArticle(article);
+			if (id == _currentId()) {
+				_showItem(item);
 			} else {
 				// выключаем индикатор
 				// ...
@@ -171,9 +171,10 @@ var imagesView = (function() {
 		obs.pub(checked ? '/addSelection' : '/removeSelection', chk_id);
 	};
 
-	function _showArticle(article) {
+	function _showItem(item) {
 		
-		var rowSelector = "#row-" + article.id;
+		var article = item.attributes;
+		var rowSelector = "#row-" + item.id;
 		var row = $(rowSelector);
 
 		// ищем imageform
@@ -325,7 +326,7 @@ var imagesView = (function() {
 			_displayHeaders(event, seq);
 		},
 		displayArticle: function(event, artId) {
-			_displayArticle(artId);
+			_displayItem(artId);
 		}
 	}
 
