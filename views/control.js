@@ -60,9 +60,17 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 					filter: "unread"
 				};
 				// ---
+				// set active view
 				$("input[name=modeView]").removeAttr('checked').parent().removeClass(
 					'active');
 				$("input[name=modeView][data-view=" + this.options.view + "]").attr(
+					'checked',
+					'checked').parent().addClass('active');
+				// ---
+				// set active filter
+				$("input[name=modeFilter]").removeAttr('checked').parent().removeClass(
+					'active');
+				$("input[name=modeFilter][data-filter=" + this.options.filter + "]").attr(
 					'checked',
 					'checked').parent().addClass('active');
 				// ---
