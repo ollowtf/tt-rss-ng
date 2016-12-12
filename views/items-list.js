@@ -25,6 +25,7 @@ define(['backbone', 'underscore', 'jquery',
 
       },
       events: {
+        'click div[data-action="state_read"]': 'eChangeReadState',
         'click div[data-action="state_star"]': 'eChangeStarState',
         'click div.header': 'eItemHeaderClick'
       },
@@ -73,6 +74,7 @@ define(['backbone', 'underscore', 'jquery',
               'title': element.title,
               'excerpt': ' - ' + element.excerpt,
               'status': element.unread ? 'unread' : 'read',
+              'unread': element.unread ? 'unreaded' : 'readed',
               'star': element.marked ? 'stared' : 'unstared',
               'publish': element.published ? 'shared' : 'unshared',
               'multi': multiSelect ? '' : 'hidden'
@@ -89,6 +91,12 @@ define(['backbone', 'underscore', 'jquery',
 
         e.stopPropagation();
         console.log(this.title + ":  star item " + e.target.dataset.id);
+
+      },
+      eChangeReadState: function(e) {
+
+        e.stopPropagation();
+        console.log(this.title + ":  read item " + e.target.dataset.id);
 
       },
       eItemHeaderClick: function(e) {
@@ -109,6 +117,10 @@ define(['backbone', 'underscore', 'jquery',
           // ---
           if (this.currentItem.get('unread')) {
             this.currentItem.set('unread', false);
+            // ---
+            // temporary - will be on confirmation event
+            $(".unreaded", this.currentRow).removeClass('unreaded').addClass(
+              'readed');
             // ---
             this.currentRow.removeClass('unread').addClass('read');
             // ---

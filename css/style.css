@@ -208,7 +208,7 @@ span#progname {
 
 /*--------------------------------------------*/
 
-.stared, .unstared, .shared, .unshared {
+.stared, .unstared, .shared, .unshared, .readed, .unreaded {
 	cursor: pointer;
 	height: 16px;
 	width: 16px;
@@ -231,6 +231,14 @@ span#progname {
 
 .unshared {
 	background-image: url('../img/share_unset.png');
+}
+
+.readed {
+  background-image: url('../img/state_read.png');
+}
+
+.unreaded {
+  background-image: url('../img/state_unread.png');
 }
 
 
