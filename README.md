@@ -2,9 +2,9 @@
 Alternative frontend for **Tiny Tiny RSS** (https://tt-rss.org/gitlab/fox/tt-rss/wikis/home) news feed reader and aggregator.  
 ##Features
  - 3 available view modes
- -- classic inline (**in progress**)
- -- wide mode
- -- thumbnails (**in progress**)
+  - classic inline (**in progress**)
+  - wide mode
+  - thumbnails (**in progress**)
  - session settings per feed/group (**in progress**)
  - adjustment images for viewport size
  - i18n support
