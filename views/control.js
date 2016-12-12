@@ -182,12 +182,13 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			},
 			eItemFocused: function(item) {
 
+				this.currentItem = item;
 				this.trigger('focus', item);
 
 			},
 			eItemUnfocused: function(item) {
 
-				//this.trigger('unfocus');
+				this.currentItem = undefined;
 
 			}
 		});
