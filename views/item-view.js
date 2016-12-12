@@ -27,8 +27,10 @@ define(['backbone', 'underscore', 'jquery',
         // set max-width for images
         if (this.mode == "list-wide") {
           var maxWidth = this.App.Layout.east.state.innerWidth - 35;
+        } else if (this.mode == 'list') {
+          var maxWidth = this.App.Layout.center.state.innerWidth - 35;
         }
-
+        // ---
         $("img", this.$el).attr('style', 'max-width:' + maxWidth +
           'px;').removeAttr('height');
 

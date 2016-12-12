@@ -11,6 +11,7 @@ define(['backbone', 'underscore', 'jquery',
         this.title = "Views/ItemsList";
         // ---
         this.mode = options.mode;
+        this.itemView = options.itemView;
         // ---
         this.items = options.items;
         this.listenTo(this.items, 'reset', this.eClear);
@@ -98,31 +99,53 @@ define(['backbone', 'underscore', 'jquery',
         // ---
         this.currentItem = this.items.get(id);
 
-        var currentRow = $("#i-" + this.currentItem.id, this.$el);
-        // set current
-        $(".itemrow").removeClass('current');
-        currentRow.addClass('current');
-        // ---
-        if (this.currentItem.get('unread')) {
-          this.currentItem.set('unread', false);
+        this.currentRow = $("#i-" + this.currentItem.id, this.$el);
+
+        if (!this.currentRow.hasClass('current')) {
+
+          // set current
+          $(".itemrow").removeClass('current');
+          this.currentRow.addClass('current');
           // ---
-          currentRow.removeClass('unread').addClass('read');
+          if (this.currentItem.get('unread')) {
+            this.currentItem.set('unread', false);
+            // ---
+            this.currentRow.removeClass('unread').addClass('read');
+            // ---
+          }
           // ---
+          this.displayItem();
+
+        } else {
+
+          this.currentRow.removeClass('current');
+          this.hideItem();
+
         }
-        // ---
-        this.displayItem();
+
 
       },
       displayItem: function() {
 
-        if (this.mode == 'list-wide') {
-          // trigger event to draw view in right sidebar
-          this.trigger('focus', this.currentItem);
+        if (this.mode != 'list-wide') {
+          // remove any exsiting containers
+          $(".viewContainer", this.$el).remove();
+          // create element for ItemView
+          var viewContainer = $("<div/>").addClass('viewContainer');
+          this.currentRow.append(viewContainer);
           // ---
+          this.itemView.setElement(viewContainer);
+        }
+        // ---
+        this.trigger('focus', this.currentItem);
 
+      },
+      hideItem: function() {
+
+        if (this.mode == 'list-wide') {
+          this.trigger('unfocus');
         } else {
-          // draw view
-          // ...
+          $(".viewContainer", this.currentRow).remove();
         }
 
       },

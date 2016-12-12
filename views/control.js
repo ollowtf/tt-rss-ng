@@ -48,8 +48,9 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			},
 			eCurrentNodeChanged: function(mNode) {
 
-				//var sid = this.tree.get('current');
 				this.current = mNode;
+				this.currentItem = undefined;
+				// ---
 				console.log(this.title + ": node=" + mNode.sid());
 				this.trigger('unfocus'); // to clear ItemView
 				// ---
@@ -166,7 +167,9 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				this.options.view = e.target.dataset.view;
 				this.setupDetailedView(false);
 				// ---
-				this.trigger('display');
+				if (this.currentItem != undefined) {
+					this.trigger('display');
+				}
 
 			},
 			eItemFocused: function(item) {
