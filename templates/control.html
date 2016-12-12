@@ -1,0 +1,58 @@
+<div class="toolbar">
+
+	<div class="btn-toolbar">
+
+		<div class="btn-group" data-toggle="buttons">
+		  <label class="btn btn-xs btn-default active">
+		    <input type="radio" name="modeFilter" data-filter="adaptive" id="filterAdaptive" autocomplete="off" checked><span data-i18n="filter.selectorAdaptive">-</span>
+		  </label>
+		  <label class="btn btn-xs btn-default">
+		    <input type="radio" name="modeFilter" data-filter="unread" id="filterUnread" autocomplete="off"><span data-i18n="filter.selectorUnread">-</span>
+		  </label>
+		  <label class="btn btn-xs btn-default">
+		    <input type="radio" name="modeFilter" data-filter="all" id="filterAll" autocomplete="off"><span data-i18n="filter.selectorAll">-</span>
+		  </label>
+		</div>
+
+		<div class="btn-group" data-toggle="buttons">
+		  <label class="btn btn-xs btn-default">
+		    <input type="radio" name="modeView" id="modeViewList" data-view="list" autocomplete="off" checked><span class="glyphicon glyphicon-list"></span>
+		  </label>
+			<label class="btn btn-xs btn-default">
+		    <input type="radio" name="modeView" id="modeViewListWide" data-view="list-wide" autocomplete="off" checked><span class="glyphicon glyphicon-list-alt"></span>
+		  </label>
+		  <label class="btn btn-xs btn-default">
+		    <input type="radio" name="modeView" id="modeViewPics" data-view="pics" autocomplete="off"><span class="glyphicon glyphicon-picture"></span>
+		  </label>
+		</div>
+
+		<div class="btn-group">
+		  <button type="button" class="btn btn-xs btn-default" data-i18n="content.buttonMarkAsRead" data-action="markFeed">-</button>
+		  <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    <span class="caret"></span>
+		    <span class="sr-only">Toggle Dropdown</span>
+		  </button>
+		  <ul class="dropdown-menu">
+		    <li><a data-action="test">Test</a></li>
+		    <li><a >-</a></li>
+		    <li><a >-</a></li>
+		    <li role="separator" class="divider"></li>
+		    <li><a href="#">-</a></li>
+		  </ul>
+		</div>
+
+	</div>
+
+</div>
+
+<div class="ui-layout-content">
+
+	<div id="items">
+	Loading...
+	</div>
+
+</div>
+
+<div class="toolbar">
+	more buttons
+</div>

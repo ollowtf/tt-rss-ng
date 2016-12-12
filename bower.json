@@ -1,0 +1,37 @@
+{
+  "name": "tt-rss-ng",
+  "homepage": "https://github.com/ollowtf/tt-rss-ng",
+  "authors": [
+    "Pavel Grechishkin <grechishkin.pavel@yandex.ru>"
+  ],
+  "description": "Frontend for tt-rss",
+  "main": "",
+  "keywords": [
+    "rss",
+    "tt-rss",
+    "frontend"
+  ],
+  "license": "AGPLv3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "deps/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.0.0",
+    "jquery-layout": "^1.4.3",
+    "underscore": "^1.8.3",
+    "backbone.marionette": "^2.4.7",
+    "backbone.paginator": "^2.0.5",
+    "i18next": "^3.2.0",
+    "i18next-xhr-backend": "^0.6.0",
+    "jquery-i18next": "^0.2.0",
+    "bootstrap": "^3.3.6",
+    "jquery-ui": "^1.11.4",
+    "bootstrap-treeview": "^1.2.0"
+  }
+}

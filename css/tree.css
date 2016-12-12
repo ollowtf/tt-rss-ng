@@ -81,7 +81,11 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
 
 /* ---------------------------------- */
 
-.tree {margin:0; padding:5px; color:#333}
+.tree {
+	margin:0; 
+	padding:5px; 
+	color:#333
+}
 
 .tree * {
     padding:0;
@@ -108,9 +112,9 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
 	position: relative;
 }
 
-.tree a:hover {
+/* .tree a:hover {
 	background-color: #FF0000;
-}
+} */
 
 .tnheader {
     clear: both;
@@ -164,9 +168,15 @@ ul.ztree.zTreeDragUL {margin:0; padding:0; position:absolute; width:auto; height
 }
 
 .tngroup {
-    background-image: url('img/folder.png');
+    background-image: url('../img/folder.png');
 }
 
 .tnchannel {
-    background-image: url('img/feed.png');
+    background-image: url('../img/feed.png');
+}
+
+li.list-group-item > a {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }

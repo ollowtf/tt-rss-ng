@@ -1,0 +1,16 @@
+{
+	"nav": {
+		"home": "Home",
+		"shippings": "Shippings",
+		"statistics": "Statistics",
+		"logout": "Logout"
+	},
+	"filter": {
+		"selectorAdaptive": "Adaptive",
+		"selectorUnread": "Unread",
+		"selectorAll": "All"
+	},
+	"content": {
+		"buttonMarkAsRead": "Mark as read"
+	}
+}

@@ -1,25 +1,30 @@
 body{
     background-color: #FFFFFF; /* Цвет фона веб-страницы */
    	font-family: arial,sans-serif;
-   	font-size: 12px;	
+   	font-size: 12px;
 	margin:0;
 }
 
-#sidebar {
+#layoutLeft {
 	background: #E6E6E6;
 	float: left;
-	height: 800px;
+	/* height: 800px; */
 	/*padding: 5px;*/
 	width: 200px;
 	overflow: hidden;
 }
 
-#content {
+#layoutCenter {
 	background: #FDF6E3;
 	display: block;
 	float: left;
 	height: 800px * ;
 	overflow: hidden;
+}
+
+#layoutRight {
+  background: #FFFFFF;
+  overflow: scroll;
 }
 
 .view {
@@ -36,21 +41,38 @@ body{
 
 /* --------------------------------------------------------- */
 
-div.row {
-	border-bottom: 1px solid #CCCCCC;
-	border-left: 3px solid inherit;
+div.itemrow {
 	display: block;
 }
 
+div.item {
+  padding-top: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+}
 
+.itemrow.current {
+	/*border-left: 3px solid #000000; */
+	border-top: 1px solid #0000FF;
+	border-bottom: 1px solid #0000FF;
+}
+
+current .header {
+	background-color: #EEEEEE;
+}
+
+.current .titlecolumn .title {
+  font-weight: bold; 
+}
+
+.current .titlecolumn .excerpt { display: none; }
+
+.unread .titlecolumn .title { font-weight: bold; }
 
 /* --------------------------------------------------------- */
 
-
-
-
-
-div.current { 		
+div.current {
 	background: #FFFFFF;
 }
 
@@ -93,13 +115,13 @@ div.content {
 	width: 16px;
 }
 
-.shared {
-	background-image: url('img/share_set.png');
+/*.shared {
+	background-image: url('../img/share_set.png');
 }
 
 .unshared {
-	background-image: url('img/share_unset.png');
-}
+	background-image: url('../img/share_unset.png');
+}*/
 
 /* --------------------------------------------------------- */
 
@@ -126,7 +148,7 @@ div.content {
 	width:100%;
 }
 
-.toolbar button {
+/* .toolbar button {
 	display: inline-block;
 	margin: 0;
 	cursor: pointer;
@@ -134,10 +156,10 @@ div.content {
 	border-radius: 2px;
 	padding: 0;
 	font-size: 0.9em;
-}
+} */
 
 .toolbar button:hover {
-	border: 1px solid #CC0000;
+	/* border: 1px solid #CC0000; */
 }
 
 .toolbar select {
@@ -196,26 +218,26 @@ span#progname {
 }
 
 .stared {
-	background-image: url('img/star_set.png');
+	background-image: url('../img/star_set.png');
 }
 
 .unstared {
-	background-image: url('img/star_unset.png');
+	background-image: url('../img/star_unset.png');
 }
 
 .shared {
-	background-image: url('img/share_set.png');
+	background-image: url('../img/share_set.png');
 }
 
 .unshared {
-	background-image: url('img/share_unset.png');
+	background-image: url('../img/share_unset.png');
 }
 
 
 /*--------------------------------------------*/
 
 
-.row { 
+.row {
 	clear: both;
 	padding: 0px;
 	width:100%;
@@ -223,11 +245,14 @@ span#progname {
 }
 
 .header {
+  cursor: pointer;
 	clear: both;
     height: 1.6em;
     line-height:1.6em;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid #CCCCCC;
+  	/*border-left: 3px solid inherit;*/
 }
 
 
@@ -254,6 +279,7 @@ span#progname {
     white-space: nowrap;
     width: auto;
     position: static;
+    padding-left: 5px;
 }
 
 .updatecolumn {
@@ -267,27 +293,17 @@ span#progname {
 }
 
 .title {
-	cursor: pointer;
+	/*cursor: pointer;*/
 }
 
-.current .header {
-	background-color: #EEEEEE;
-}
+.
 
 
-.row.current {
-	/*border-left: 3px solid #000000; */
-	border-top: 1px solid #0000FF;
-	border-bottom: 1px solid #0000FF;
-}
 
-.current .titlecolumn .title { font-weight: bold; }
 
-.current .titlecolumn .excerpt { display: none; }
 
-.unread .titlecolumn .title { font-weight: bold; }
 
-.excerpt { 
+.excerpt {
 	color: #555555;
 }
 
@@ -406,4 +422,17 @@ a.article-link {
 	overflow-x:auto;
 	overflow-y:hidden;
 	white-space: nowrap;
+}
+
+
+
+.ui-layout-content {
+    overflow-y: auto;
+    padding: 0;
+}
+
+.ui-layout-content div {
+    /*border: 0 !important;  reference */
+    /* overflow: visible; reference */
+    /* padding: 10px 20px 20px; sample */
 }
