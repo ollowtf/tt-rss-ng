@@ -1,0 +1,11 @@
+<div class="itemrow <%=status%>" id="i-<%=id%>">
+  <div class="header" data-id="<%=id%>">
+  <div class="iconscolumn checkbox <%=multi%>"><input id="chk-<%=id%>" type="checkbox"></div>
+  <div class="iconscolumn state"><div data-action="state_read" data-id="<%=id%>" class="<%=unread%>"></div></div>
+  <div class="iconscolumn star"><div data-action="state_star" data-id="<%=id%>" class="<%=star%>"></div></div>
+  <!-- <div class="iconscolumn share"><div id="shr-<%=id%>" class="<%=publish%>"></div></div> -->
+  <div class="updatecolumn"><%=updated%> <a href="<%=link%>" target="_blank"><span class="glyphicon glyphicon-share"></span></a></div>
+  <div class="titlecolumn"><span id="hdr-<%=id%>" class="title"><%=title%></span>
+  <span class="excerpt"><%=excerpt%></span></div>
+  </div>
+</div>
