@@ -32,6 +32,7 @@
     "jquery-i18next": "^0.2.0",
     "bootstrap": "^3.3.6",
     "jquery-ui": "^1.11.4",
-    "bootstrap-treeview": "^1.2.0"
+    "bootstrap-treeview": "^1.2.0",
+    "jquery-scrollto": "^1.4.6"
   }
 }

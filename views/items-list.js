@@ -1,7 +1,7 @@
-define(['backbone', 'underscore', 'jquery',
+define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo',
     'text!templates/items-list-row.html'
   ],
-  function(Backbone, _, $, RowTemplate) {
+  function(Backbone, _, $, jqueryScrollTo, RowTemplate) {
 
     var ItemsList = Backbone.View.extend({
 
@@ -50,8 +50,8 @@ define(['backbone', 'underscore', 'jquery',
       eClear: function() {
 
         // clear list
-        //this.$("#items").html('');
         this.$el.html("");
+        this.currentItem = undefined;
 
       },
       eFetched: function() {
@@ -186,17 +186,32 @@ define(['backbone', 'underscore', 'jquery',
 
       },
       eNextItem: function() {
-        var index = this.items.indexOf(this.currentItem) + 1;
+        if (this.currentItem != undefined) {
+          var index = this.items.indexOf(this.currentItem) + 1;
+        } else {
+          var index = 0;
+        }
+        // ---
         if (index < this.items.length && index >= 0) {
           var nextItem = this.items.at(index);
+          // ---
           this.focusItem(nextItem.id);
+          // scroll to item row
+          $("#i-" + nextItem.id).ScrollTo();
         }
       },
       ePrevItem: function() {
-        var index = this.items.indexOf(this.currentItem) - 1;
+        if (this.currentItem != undefined) {
+          var index = this.items.indexOf(this.currentItem) - 1;
+        } else {
+          return;
+        }
+        // ---
         if (index < this.items.length && index >= 0) {
           var prevItem = this.items.at(index);
           this.focusItem(prevItem.id);
+          // scroll to item row
+          $("#i-" + prevItem.id).ScrollTo();
         }
       }
 
