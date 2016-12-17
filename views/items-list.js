@@ -88,6 +88,10 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo',
           item.set('visible', true);
 
         });
+        // ---
+        $(".scrollHelper").remove();
+        var scrollHelper = $("<div/>").addClass('scrollHelper');
+        this.$el.append(scrollHelper);
 
       },
       eChangeStateStar: function(e) {
