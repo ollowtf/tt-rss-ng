@@ -1,7 +1,7 @@
-define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo',
+define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
     'text!templates/items-list-row.html'
   ],
-  function(Backbone, _, $, jqueryScrollTo, RowTemplate) {
+  function(Backbone, _, $, jqueryScrollTo, jqueryWaypoints, RowTemplate) {
 
     var ItemsList = Backbone.View.extend({
 
@@ -92,6 +92,14 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo',
         $(".scrollHelper").remove();
         var scrollHelper = $("<div/>").addClass('scrollHelper');
         this.$el.append(scrollHelper);
+        // ---
+        scrollHelper.waypoint({
+          handler: function(direction) {
+            console.log("hit");
+          },
+          offset: '100%',
+          context: this.$el.get()
+        });
 
       },
       eChangeStateStar: function(e) {

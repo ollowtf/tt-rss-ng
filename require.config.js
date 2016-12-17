@@ -19,7 +19,8 @@ requirejs.config({
 		i18next: 'deps/i18next/i18next.min',
 		i18nextXHRBackend: 'deps/i18next-xhr-backend/i18nextXHRBackend.min',
 		jqueryI18next: 'deps/jquery-i18next/jquery-i18next.min',
-		jqueryScrollTo: 'lib/jquery-scrollto'
+		jqueryScrollTo: 'lib/jquery-scrollto',
+		jqueryWaypoints: 'deps/waypoints/lib/jquery.waypoints.min'
 	},
 	shim: {
 		bootstrap: {
@@ -47,6 +48,9 @@ requirejs.config({
 			deps: ['jquery']
 		},
 		jqueryScrollTo: {
+			deps: ['jquery']
+		},
+		jqueryWaypoints: {
 			deps: ['jquery']
 		}
 	},

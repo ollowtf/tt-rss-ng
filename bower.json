@@ -33,6 +33,7 @@
     "bootstrap": "^3.3.6",
     "jquery-ui": "^1.11.4",
     "bootstrap-treeview": "^1.2.0",
-    "jquery-scrollto": "^1.4.6"
+    "jquery-scrollto": "^1.4.6",
+    "waypoints": "^4.0.1"
   }
 }
