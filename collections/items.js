@@ -140,7 +140,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			// ---
 
 			// update counters
-			var udate = Date.now();
+			var udate = Date.now() + (5 * 1000); // now() + 5 sec
 			var channel = this.tree.get('channels').get(item.get('feed_id'));
 			var branch = [channel];
 			var initialElement = channel;

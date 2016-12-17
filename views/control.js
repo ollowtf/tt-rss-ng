@@ -23,8 +23,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				this.listenTo(this.items, 'change:current', this.eCurrentNodeChanged);
 				this.listenTo(this.items, 'reset', this.clear);
 				// ---
-				// this.listenTo(this.items, 'focus', this.eItemFocused);
-				// this.listenTo(this.items, 'unfocus', this.eItemUnfocused);
+				this.registerHotkeys();
 
 			},
 			events: {
@@ -189,6 +188,27 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			eItemUnfocused: function(item) {
 
 				this.currentItem = undefined;
+
+			},
+			registerHotkeys: function() {
+
+				$(document).bind("keypress", (e) => {
+					this.hotkeyEvent(e);
+				});
+
+			},
+			hotkeyEvent: function(e) {
+
+				switch (e.key) {
+					case 'j':
+						this.trigger('/nextItem');
+						break;
+					case 'k':
+						this.trigger('/prevItem');
+						break;
+					default:
+						return;
+				}
 
 			}
 		});

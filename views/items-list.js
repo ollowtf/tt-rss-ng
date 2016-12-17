@@ -19,6 +19,9 @@ define(['backbone', 'underscore', 'jquery',
         this.listenTo(options.control, 'clear', this.eClear);
         this.listenTo(options.control, 'display', this.eDisplay);
         // ---
+        this.listenTo(options.control, '/nextItem', this.eNextItem);
+        this.listenTo(options.control, '/prevItem', this.ePrevItem);
+        // ---
         this.templateRow = _.template(RowTemplate);
         // ---
         console.info(this.title + ": ok");
@@ -117,6 +120,11 @@ define(['backbone', 'underscore', 'jquery',
         var id = e.currentTarget.dataset.id;
         console.log(this.title + ": item " + id);
         // ---
+        this.focusItem(id);
+
+      },
+      focusItem: function(id) {
+
         this.currentItem = this.items.get(id);
 
         this.currentRow = $("#i-" + this.currentItem.id, this.$el);
@@ -147,7 +155,6 @@ define(['backbone', 'underscore', 'jquery',
 
         }
 
-
       },
       displayItem: function() {
 
@@ -177,6 +184,20 @@ define(['backbone', 'underscore', 'jquery',
 
         this.displayItem();
 
+      },
+      eNextItem: function() {
+        var index = this.items.indexOf(this.currentItem) + 1;
+        if (index < this.items.length && index >= 0) {
+          var nextItem = this.items.at(index);
+          this.focusItem(nextItem.id);
+        }
+      },
+      ePrevItem: function() {
+        var index = this.items.indexOf(this.currentItem) - 1;
+        if (index < this.items.length && index >= 0) {
+          var prevItem = this.items.at(index);
+          this.focusItem(prevItem.id);
+        }
       }
 
     });
