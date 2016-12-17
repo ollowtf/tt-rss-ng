@@ -34,6 +34,12 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 		},
 		fetchItems: function() {
 
+			if (!this.tree.countersFetched) {
+				console.log(this.title + ": counters not fetched. waiting...");
+				setTimeout(this.fetchItems.bind(this), 1 * 1000);
+				return;
+			}
+
 			this.seq_gh++;
 			// ---
 			var viewMode = this.settings.mode;

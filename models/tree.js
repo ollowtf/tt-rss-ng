@@ -84,6 +84,8 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 				seq_uc: 0
 			});
 			// ---
+			this.countersFetched = false;
+			// ---
 			this.listenTo(this.get('channels'), 'change:counter', this.onCounterChange);
 			this.listenTo(this.get('groups'), 'change:counter', this.onCounterChange);
 
@@ -169,9 +171,8 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 		parseCounters: function(data) {
 
 			parseCounters(this, data)
-				/*if (parseCounters(this, data)) {
-					this.trigger('change:counters');
-				}*/
+				// ---
+			this.countersFetched = true;
 
 		},
 		onCounterChange: function(model) {
