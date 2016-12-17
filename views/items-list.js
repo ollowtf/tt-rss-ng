@@ -107,6 +107,8 @@ define(['backbone', 'underscore', 'jquery',
         item.set('unread', !item.get('unread'));
         // ---
         $(e.target).toggleClass('readed').toggleClass('unreaded');
+        $("div.itemrow#i-" + id).toggleClass('unread').toggleClass(
+          'read');
 
       },
       eItemHeaderClick: function(e) {
