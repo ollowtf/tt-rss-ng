@@ -44,12 +44,27 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 				model = tree.get('channels').get(item.id);
 			};
 			if (model != undefined) {
-				if (model.get("unread") != item.counter) {
 
-					countersChanged = true;
-					model.set("unread", item.counter);
+				var updateCounter = false;
+				// ---
+				var lastUnreadUpdate = model.get('lastUnreadUpdate');
+				if (lastUnreadUpdate != undefined) {
+					if (lastUnreadUpdate < tree.lastCountersUpdate) {
+						updateCounter = true;
+					}
+				} else {
+					updateCounter = true;
+				}
+				// -------------------------
+				if (updateCounter) {
+					if (model.get("unread") != item.counter) {
 
-				};
+						countersChanged = true;
+						model.set("unread", item.counter);
+
+					};
+				}
+
 			};
 		});
 		return (countersChanged);
@@ -145,6 +160,9 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 			this.set('seq_uc', seq, {
 				silent: true
 			});
+			// ---
+			this.lastCountersUpdate = Date.now();
+			// ---
 			$.post(this.url, JSON.stringify({
 					"op": "getCounters",
 					"seq": seq,

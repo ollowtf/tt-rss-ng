@@ -129,11 +129,30 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 		eStateUnread: function(item) {
 
 			console.log(this.title + ": unread state changed for item " + item.sid());
+			var step = 0;
 			if (item.get('unread')) {
 				this.ItemsToMarkUnread.push(item.id);
+				step = +1;
 			} else {
 				this.ItemsToMarkRead.push(item.id);
+				step = -1;
 			}
+			// ---
+
+			// update counters
+			var udate = Date.now();
+			var channel = this.tree.get('channels').get(item.get('feed_id'));
+			var branch = [channel];
+			var initialElement = channel;
+			while (initialElement.get('parent') != undefined) {
+				initialElement = initialElement.get('parent');
+				branch.push(initialElement);
+			}
+			// ---
+			_(branch).each((element) => {
+				element.set('unread', element.get('unread') + step);
+				element.set('lastUnreadUpdate', udate);
+			});
 
 		},
 		eStateStar: function(item) {
