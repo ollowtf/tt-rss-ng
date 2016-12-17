@@ -25,8 +25,8 @@ define(['backbone', 'underscore', 'jquery',
 
       },
       events: {
-        'click div[data-action="state_read"]': 'eChangeReadState',
-        'click div[data-action="state_star"]': 'eChangeStarState',
+        'click div[data-action="state_read"]': 'eChangeStateUnread',
+        'click div[data-action="state_star"]': 'eChangeStateStar',
         'click div.header': 'eItemHeaderClick'
       },
       setMode: function(mode) {
@@ -87,16 +87,26 @@ define(['backbone', 'underscore', 'jquery',
         });
 
       },
-      eChangeStarState: function(e) {
+      eChangeStateStar: function(e) {
 
         e.stopPropagation();
-        console.log(this.title + ":  star item " + e.target.dataset.id);
+        var id = e.target.dataset.id;
+        console.log(this.title + ":  star item " + id);
+        var item = this.items.get(id);
+        item.set('marked', !item.get('marked'));
+        // ---
+        $(e.target).toggleClass('stared').toggleClass('unstared');
 
       },
-      eChangeReadState: function(e) {
+      eChangeStateUnread: function(e) {
 
         e.stopPropagation();
+        var id = e.target.dataset.id;
         console.log(this.title + ":  read item " + e.target.dataset.id);
+        var item = this.items.get(id);
+        item.set('unread', !item.get('unread'));
+        // ---
+        $(e.target).toggleClass('readed').toggleClass('unreaded');
 
       },
       eItemHeaderClick: function(e) {

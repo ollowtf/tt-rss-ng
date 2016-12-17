@@ -23,6 +23,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.listenTo(this.tree, 'change:current', this.eChangeCurrent);
 			// ---
 			this.listenTo(this, 'change:unread', this.eStateUnread);
+			this.listenTo(this, 'change:marked', this.eStateStar);
 			// ---
 			// init regular check of state changes every 2 seconds
 			setInterval(this.checkState.bind(this), 5 * 1000);
@@ -129,6 +130,16 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			}
 
 		},
+		eStateStar: function(item) {
+
+			console.log(this.title + ": star state changed for item " + item.sid());
+			if (item.get('marked')) {
+				this.ItemsToMarkStar.push(item.id);
+			} else {
+				this.ItemsToMarkUnstar.push(item.id);
+			}
+
+		},
 		checkState: function() {
 
 			var sq = []; // state queue
@@ -158,17 +169,23 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 				if (qmRead != 0 && qmUnread != 0) {
 
 					// use underscore's difference()
-					sq.push({
-						state: 'unread',
-						value: false,
-						ids: _.difference(this.ItemsToMarkRead, this.ItemsToMarkUnread).join()
-					});
+					var idsToPush = _.difference(this.ItemsToMarkRead, this.ItemsToMarkUnread);
+					if (idsToPush.length != 0) {
+						sq.push({
+							state: 'unread',
+							value: false,
+							ids: idsToPush.join()
+						});
+					}
 					// ---
-					sq.push({
-						state: 'unread',
-						value: true,
-						ids: _.difference(this.ItemsToMarkUnread, this.ItemsToMarkRead).join()
-					});
+					idsToPush = _.difference(this.ItemsToMarkUnread, this.ItemsToMarkRead);
+					if (idsToPush.length != 0) {
+						sq.push({
+							state: 'unread',
+							value: true,
+							ids: idsToPush.join()
+						});
+					}
 					// ---
 					this.ItemsToMarkRead.length = 0;
 					this.ItemsToMarkUnread.length = 0;
@@ -176,6 +193,58 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 				}
 
 			}
+			// ---
+			// Star state
+			var qmStar = this.ItemsToMarkStar.length;
+			var qmUnstar = this.ItemsToMarkUnstar.length;
+			if (qmStar != 0 || qmUnstar != 0) {
+
+				if (qmStar != 0 && qmUnstar == 0) {
+					sq.push({
+						state: 'star',
+						value: true,
+						ids: this.ItemsToMarkStar.join()
+					});
+					this.ItemsToMarkStar.length = 0;
+				}
+				// ---
+				if (qmStar == 0 && qmUnstar != 0) {
+					sq.push({
+						state: 'star',
+						value: false,
+						ids: this.ItemsToMarkUnstar.join()
+					});
+					this.ItemsToMarkUnstar.length = 0;
+				}
+				// ---
+				if (qmStar != 0 && qmUnstar != 0) {
+
+					// use underscore's difference()
+					var idsToPush = _.difference(this.ItemsToMarkStar, this.ItemsToMarkUnstar);
+					if (idsToPush.length != 0) {
+						sq.push({
+							state: 'star',
+							value: true,
+							ids: idsToPush.join()
+						});
+					}
+					// ---
+					idsToPush = _.difference(this.ItemsToMarkUnstar, this.ItemsToMarkStar);
+					if (idsToPush.length != 0) {
+						sq.push({
+							state: 'star',
+							value: false,
+							ids: idsToPush.join()
+						});
+					}
+					// ---
+					this.ItemsToMarkStar.length = 0;
+					this.ItemsToMarkUnstar.length = 0;
+
+				}
+
+			}
+
 			// -------------------------
 			_(sq).each((element) => {
 
@@ -189,6 +258,15 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 				// ---
 				if (element.state == 'unread') {
 					opts["field"] = 2;
+					if (element.value) {
+						opts["mode"] = 1;
+					} else {
+						opts["mode"] = 0;
+					}
+					opts["article_ids"] = element.ids;
+				}
+				if (element.state == 'star') {
+					opts["field"] = 0;
 					if (element.value) {
 						opts["mode"] = 1;
 					} else {
