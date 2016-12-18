@@ -172,6 +172,9 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			changeView: function(e) {
 
 				console.log(this.title + ":  view changed to " + e.target.dataset.view);
+				// ---
+				this.items.eChangeView(e.target.dataset.view);
+				// ---
 				this.trigger('unfocus');
 				this.options.view = e.target.dataset.view;
 				this.setupDetailedView(false);

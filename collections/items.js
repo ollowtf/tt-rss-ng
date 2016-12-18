@@ -125,25 +125,51 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.EndOfList = false;
 			// ---
 			//read Settings
-			this.settings = {
+			var defaultSettings = {
 				view: 'list',
 				filter: 'adaptive',
 				order: 'reversed', // reversed = new first/ direct = old first
 			};
+			var localSettings = localStorage.getItem(sid);
+			if (localSettings == undefined) {
+				localSettings = {};
+			} else {
+				try {
+					localSettings = JSON.parse(localSettings);
+				} catch (e) {
+					localSettings = {};
+				} finally {
+					// ---
+				}
+
+			}
+			this.settings = _.defaults(localSettings, defaultSettings);
+			this.saveSettings();
 			// ---
-			//this.trigger('clear'); // ?
 			this.trigger('change:current', this.current);
-			// ---
-			// this.fetch();
+
+		},
+		saveSettings: function() {
+
+			localStorage.setItem(this.current.sid(), JSON.stringify(this.settings));
 
 		},
 		eChangeFilter: function(filter) {
 
 			this.settings.filter = filter;
+			this.saveSettings();
+			// ---
 			this.reset(null);
 			this.EndOfList = false;
+			// ---
 			this.trigger('clear');
 			this.fetch();
+
+		},
+		eChangeView: function(view) {
+
+			this.settings.view = view;
+			this.saveSettings();
 
 		},
 		eStateUnread: function(item) {
