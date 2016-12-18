@@ -15,6 +15,8 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.seq_gh = 0; // getHeadlines seq
 			this.seq_cs = 0; // change state seq
 			// ---
+			this.EndOfList = false;
+			// ---
 			this.ItemsToMarkRead = [];
 			this.ItemsToMarkUnread = [];
 			this.ItemsToMarkStar = [];
@@ -42,9 +44,9 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 
 			this.seq_gh++;
 			// ---
-			var viewMode = this.settings.mode;
-			if (this.settings.mode == 'all') {
-				viewMode = 'all_articles';
+			var filterMode = this.settings.filter;
+			if (this.settings.filter == 'all') {
+				filterMode = 'all_articles';
 			}
 			var orderMode = 'feed_dates';
 			if (this.settings.order == 'direct') {
@@ -62,7 +64,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 				"is_cat": this.current.isGroup(),
 				"show_excerpt": true,
 				"show_content": true,
-				"view_mode": viewMode,
+				"view_mode": filterMode,
 				"order_by": orderMode,
 				"include_nested": true
 			};
@@ -102,6 +104,12 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 
 			});
 
+			// check if it is end of list
+			// TODO: make constant for articles limit
+			if (items.length == 0 || items.length < 50) {
+				this.EndOfList = true;
+			}
+
 		},
 		eChangeCurrent: function() {
 
@@ -114,9 +122,11 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			// ---
 			this.current = this.tree.getCurrentNodeBySid(sid);
 			// ---
+			this.EndOfList = false;
+			// ---
 			//read Settings
 			this.settings = {
-				mode: 'adaptive',
+				filter: 'adaptive',
 				order: 'reversed', // reversed = new first/ direct = old first
 			};
 			// ---

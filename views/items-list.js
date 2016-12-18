@@ -10,6 +10,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
 
         this.title = "Views/ItemsList";
         // ---
+        this.control = options.control;
         this.mode = options.mode;
         this.itemView = options.itemView;
         // ---
@@ -23,6 +24,8 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         this.listenTo(options.control, '/prevItem', this.ePrevItem);
         // ---
         this.templateRow = _.template(RowTemplate);
+        // ---
+        this.stateLoading = false;
         // ---
         console.info(this.title + ": ok");
 
@@ -93,13 +96,36 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         var scrollHelper = $("<div/>").addClass('scrollHelper');
         this.$el.append(scrollHelper);
         // ---
-        scrollHelper.waypoint({
-          handler: function(direction) {
-            console.log("hit");
-          },
-          offset: '100%',
-          context: this.$el.get()
-        });
+        this.stateLoading = false;
+        // ---
+        if (!this.items.EndOfList) {
+          var self = this;
+          scrollHelper.waypoint({
+            handler: function(direction) {
+              if (direction == "down") {
+                self.eLoadMore();
+              }
+              //console.log("hit");
+            },
+            offset: '100%',
+            context: this.$el.get()
+          });
+        }
+
+
+      },
+      eLoadMore: function() {
+
+        if (!this.items.EndOfList) {
+
+          if (!this.stateLoading) {
+
+            this.stateLoading = true;
+            this.control.startFetching();
+
+          }
+
+        }
 
       },
       eChangeStateStar: function(e) {
