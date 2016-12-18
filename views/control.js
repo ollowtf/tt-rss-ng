@@ -30,7 +30,8 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				'click .btn[data-action="markFeed"]': 'markAsRead',
 				'click [data-action="test"]': 'test',
 				'change [name="modeFilter"]': 'changeFilter',
-				'change [name="modeView"]': 'changeView'
+				'change [name="modeView"]': 'changeView',
+				'change [name="modeOrder"]': 'changeOrder'
 			},
 			render: function() {
 
@@ -43,6 +44,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 
 				//this.$("#items").html('');
 				//this.trigger('clear');
+				this.trigger('unfocus');
 
 			},
 			eCurrentNodeChanged: function(mNode) {
@@ -74,6 +76,13 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 					'checked',
 					'checked').parent().addClass('active');
 				// ---
+				// set active order
+				$("input[name=modeOrder]").removeAttr('checked').parent().removeClass(
+					'active');
+				$("input[name=modeOrder][data-order=" + this.options.order + "]").attr(
+					'checked',
+					'checked').parent().addClass('active');
+				// -------------------------
 				this.setupDetailedView(true);
 
 			},
@@ -182,6 +191,13 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				if (this.currentItem != undefined) {
 					this.trigger('display');
 				}
+
+			},
+			changeOrder: function(e) {
+
+				console.log(this.title + ":  order changed to " + e.target.dataset.order);
+				// ---
+				this.items.eChangeOrder(e.target.dataset.order);
 
 			},
 			eItemFocused: function(item) {

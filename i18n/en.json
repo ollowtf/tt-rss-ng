@@ -11,6 +11,7 @@
 		"selectorAll": "All"
 	},
 	"content": {
-		"buttonMarkAsRead": "Mark as read"
+		"buttonMarkAsRead": "Mark as read",
+		"buttonMarkDisplyaedAsRead": "Mark shown as read"
 	}
 }

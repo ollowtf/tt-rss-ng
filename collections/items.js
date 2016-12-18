@@ -166,6 +166,18 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.fetch();
 
 		},
+		eChangeOrder: function(order) {
+
+			this.settings.order = order;
+			this.saveSettings();
+			// ---
+			this.reset(null);
+			this.EndOfList = false;
+			// ---
+			this.trigger('clear');
+			this.fetch();
+
+		},
 		eChangeView: function(view) {
 
 			this.settings.view = view;
