@@ -17,6 +17,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         this.items = options.items;
         this.listenTo(this.items, 'reset', this.eClear);
         this.listenTo(this.items, 'fetched', this.eFetched);
+        this.listenTo(this.items, 'reset', this.eClear);
         this.listenTo(options.control, 'clear', this.eClear);
         this.listenTo(options.control, 'display', this.eDisplay);
         // ---

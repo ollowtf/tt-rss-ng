@@ -126,6 +126,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			// ---
 			//read Settings
 			this.settings = {
+				view: 'list',
 				filter: 'adaptive',
 				order: 'reversed', // reversed = new first/ direct = old first
 			};
@@ -134,6 +135,15 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.trigger('change:current', this.current);
 			// ---
 			// this.fetch();
+
+		},
+		eChangeFilter: function(filter) {
+
+			this.settings.filter = filter;
+			this.reset(null);
+			this.EndOfList = false;
+			this.trigger('clear');
+			this.fetch();
 
 		},
 		eStateUnread: function(item) {

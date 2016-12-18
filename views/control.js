@@ -54,10 +54,11 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				this.trigger('unfocus'); // to clear ItemView
 				// ---
 				// read settings for current
-				this.options = {
-					view: "list",
-					filter: "unread"
-				};
+				// this.options = {
+				// 	view: "list",
+				// 	filter: "unread"
+				// };
+				this.options = this.items.settings;
 				// ---
 				// set active view
 				$("input[name=modeView]").removeAttr('checked').parent().removeClass(
@@ -166,6 +167,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			},
 			changeFilter: function(e) {
 				console.log(this.title + ":  filter changed to " + e.target.dataset.filter);
+				this.items.eChangeFilter(e.target.dataset.filter);
 			},
 			changeView: function(e) {
 
