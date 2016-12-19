@@ -75,7 +75,8 @@ define(['backbone', 'underscore', 'jquery', 'text!templates/sidebar.html',
 
 			},
 			events: {
-				'click .tngroup': 'eToggleGroup'
+				'click .tngroup': 'eToggleGroup',
+				'click .tntitle': 'eFocus'
 			},
 			render: function() {
 
@@ -172,6 +173,11 @@ define(['backbone', 'underscore', 'jquery', 'text!templates/sidebar.html',
 				}
 				// ---
 				this.saveTreeState();
+
+			},
+			eFocus: function(e) {
+
+				window.location.href = $("a", e.target).attr('href');
 
 			}
 
