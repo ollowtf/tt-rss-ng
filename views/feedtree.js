@@ -177,7 +177,7 @@ define(['backbone', 'underscore', 'jquery', 'text!templates/sidebar.html',
 			},
 			eFocus: function(e) {
 
-				window.location.href = $("a", e.target).attr('href');
+				window.location.href = $("a", e.currentTarget).attr('href');
 
 			}
 
