@@ -74,6 +74,9 @@ define(['backbone', 'underscore', 'jquery', 'text!templates/sidebar.html',
 				this.listenTo(this.model, 'change:counter', this.updateCounter);
 
 			},
+			events: {
+				'click .tngroup': 'eToggleGroup'
+			},
 			render: function() {
 
 				console.debug(this.title + ": rendering");
@@ -100,9 +103,36 @@ define(['backbone', 'underscore', 'jquery', 'text!templates/sidebar.html',
 				};
 				// ---
 				createNodes(channelTree, rawTree, data);
+				// ---
+				this.restoreTreeState();
 
 				// ---
 				this.trigger('ready');
+
+			},
+			restoreTreeState: function() {
+
+				var collapsedGroups = localStorage.getItem('collapsedGroups');
+				if (collapsedGroups != undefined) {
+
+					collapsedGroups = JSON.parse(collapsedGroups);
+					_(collapsedGroups).each((sid) => {
+
+						$(".tnheader[data-sid=" + sid + "]").addClass('collapsed').next().hide();
+
+					});
+
+				}
+
+			},
+			saveTreeState: function() {
+
+				var collapsedGroups = [];
+				var headers = $(".tnheader.collapsed");
+				_.each(headers, (header) => {
+					collapsedGroups.push(header.dataset.sid);
+				})
+				localStorage.setItem('collapsedGroups', JSON.stringify(collapsedGroups));
 
 			},
 			updateCounter: function(model) {
@@ -124,8 +154,24 @@ define(['backbone', 'underscore', 'jquery', 'text!templates/sidebar.html',
 
 				var sid = this.model.get('current');
 				console.log(this.title + ": node=" + sid);
-				$(".tnlink").parent().removeClass('tncurrent');
-				$("#tnl_" + sid).parent().addClass('tncurrent');
+				$(".tnheader").parent().removeClass('tncurrent');
+				var $row = $(".tnheader[data-sid=" + sid + "]");
+				$row.parent().addClass('tncurrent');
+
+			},
+			eToggleGroup: function(e) {
+
+				e.stopPropagation();
+				var sid = e.target.dataset.sid;
+				// ---
+				var $row = $(".tnheader[data-sid=" + sid + "]");
+				if ($row.hasClass('collapsed')) {
+					$row.removeClass('collapsed').next().show();
+				} else {
+					$row.addClass('collapsed').next().hide();
+				}
+				// ---
+				this.saveTreeState();
 
 			}
 

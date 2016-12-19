@@ -28,7 +28,6 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			},
 			events: {
 				'click .btn[data-action="markFeed"]': 'markAsRead',
-				'click [data-action="test"]': 'test',
 				'change [name="modeFilter"]': 'changeFilter',
 				'change [name="modeView"]': 'changeView',
 				'change [name="modeOrder"]': 'changeOrder'
