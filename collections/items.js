@@ -14,6 +14,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.settings = {};
 			this.seq_gh = 0; // getHeadlines seq
 			this.seq_cs = 0; // change state seq
+			this.seq_mr = 0; // mark as read
 			// ---
 			this.EndOfList = false;
 			// ---
@@ -364,6 +365,62 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					});
 
 			});
+
+		},
+		eMarkFeedAsRead: function() {
+
+			if (this.current != undefined) {
+
+				// request
+				this.seq_mr++;
+				// ---
+				var opts = {
+					"op": "catchupFeed",
+					"sid": this.session,
+					"seq": this.seq_mr,
+					"feed_id": this.current.id,
+					"is_cat": this.current.isGroup()
+				};
+				$.post(this.url, JSON.stringify(opts))
+					.done((result) => {
+						console.log(result);
+					});
+
+				// TODO: move all logic to request callback :)
+
+				// items
+				var unreadItems = this.where({
+					unread: true
+				});
+				_(unreadItems).each((item) => {
+					item.set({
+						unread: false
+					}, {
+						silent: true
+					});
+				});
+				// event for listView
+				this.trigger('catchup');
+
+				// counters
+				var udate = Date.now() + (5 * 1000); // now() + 5 sec
+				var branch = [];
+				var initialElement = this.current;
+				while (initialElement.get('parent') != undefined) {
+					initialElement = initialElement.get('parent');
+					branch.push(initialElement);
+				}
+				// ---
+				var wasUnread = this.current.get('unread');
+				this.current.set('unread', 0);
+				_(branch).each((element) => {
+					element.set('unread', element.get('unread') - wasUnread);
+					element.set('lastUnreadUpdate', udate);
+				});
+
+				// ---
+			}
+
 
 		}
 

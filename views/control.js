@@ -172,7 +172,9 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				// -------------------------
 			},
 			markAsRead: function() {
-				//console.log("View/Content: Mark as read");
+
+				this.items.eMarkFeedAsRead();
+
 			},
 			changeFilter: function(e) {
 				console.log(this.title + ":  filter changed to " + e.target.dataset.filter);
