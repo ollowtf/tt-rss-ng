@@ -1,7 +1,8 @@
 define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
-		'views/item-view'
+		'views/items-pics', 'views/item-view'
 	],
-	function(Backbone, $, ControlTemplate, ItemsListClass, ItemViewClass) {
+	function(Backbone, $, ControlTemplate, ItemsListClass, ItemsPicsClass,
+		ItemViewClass) {
 
 		// ---
 
@@ -15,6 +16,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				// ---
 				this.views = {};
 				this.currentView = undefined;
+				this.registeredViews = [];
 				// ---
 				this.App = options.app;
 				this.tree = options.tree; // ???
@@ -41,24 +43,18 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			},
 			clear: function() {
 
-				//this.$("#items").html('');
-				//this.trigger('clear');
 				this.trigger('unfocus');
 
 			},
 			eCurrentNodeChanged: function(mNode) {
 
+				console.log(this.title + ": node=" + mNode.sid());
+				// ---
 				this.current = mNode;
 				this.currentItem = undefined;
 				// ---
-				console.log(this.title + ": node=" + mNode.sid());
 				this.trigger('unfocus'); // to clear ItemView
 				// ---
-				// read settings for current
-				// this.options = {
-				// 	view: "list",
-				// 	filter: "unread"
-				// };
 				this.options = this.items.settings;
 				// ---
 				// set active view
@@ -88,24 +84,36 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			setupDetailedView: function(externalEvent) {
 
 				var opts = this.options;
+				var activeView = '';
 				// -------------------------
 
-				if (opts.view == "list" || opts.view == "list-wide") {
+				// init always
+				if (!this.views.ItemView) {
+					this.views.ItemView = new ItemViewClass({
+						id: 'ItemView',
+						app: this.App,
+						items: this.items,
+						control: this,
+						mode: opts.view
+					});
+				} else {
+					this.views.ItemView.setMode(opts.view);
+				}
+				// ---
 
-					if (!this.views.ItemView) {
-						this.views.ItemView = new ItemViewClass({
-							id: 'ItemView',
-							app: this.App,
-							items: this.items,
-							control: this,
-							mode: opts.view
-						});
-					} else {
-						this.views.ItemView.setMode(opts.view);
-					}
-					// ---
-					if (!this.views.ItemsList) {
-						this.views.ItemsList = new ItemsListClass({
+				// check panes status
+				this.checkWideMode(opts);
+
+				// -------------------------
+
+				if (opts.view == 'list' || opts.view == 'list-wide') {
+
+					activeView = 'ItemsList';
+					// -------------------------
+
+					if (!this.views[activeView]) {
+
+						this.views[activeView] = new ItemsListClass({
 							id: 'ItemsList',
 							items: this.items,
 							control: this,
@@ -113,23 +121,68 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 							itemView: this.views.ItemView
 						});
 						// ---
-						this.listenTo(this.views.ItemsList, 'ready', this.eDetailedViewReady);
-						this.listenTo(this.views.ItemsList, 'focus', this.eItemFocused);
-						this.listenTo(this.views.ItemsList, 'unfocus', this.eItemUnfocused);
+						this.listenTo(this.views[activeView], 'ready', this.eDetailedViewReady);
+						this.listenTo(this.views[activeView], 'focus', this.eItemFocused);
+						this.listenTo(this.views[activeView], 'unfocus', this.eItemUnfocused);
+						// ---
+						this.registeredViews.push(activeView);
+
 					} else {
 						this.views.ItemsList.setMode(opts.view);
 					}
+					// -------------------------
+
+					// set $el for ItemView in wide mode
+					if (opts.view == 'list-wide') {
+						this.views.ItemView.setElement($(".ui-layout-content", $(
+							"#layoutRight")));
+					}
+
+				}
+				// ---
+				if (opts.view == 'pics') {
+
+					activeView = 'ItemsPics';
+					// -------------------------
+
+					if (!this.views[activeView]) {
+						this.views[activeView] = new ItemsPicsClass({
+							id: 'ItemsPics',
+							items: this.items,
+							control: this
+								// mode: opts.view,
+								//itemView: this.views.ItemView
+						});
+						// ---
+						this.listenTo(this.views[activeView], 'ready', this.eDetailedViewReady);
+						this.listenTo(this.views[activeView], 'focus', this.eItemFocused);
+						this.listenTo(this.views[activeView], 'unfocus', this.eItemUnfocused);
+					}
+
+				}
+
+				// -------------------------
+
+				if (this.currentView != activeView) {
+
+					// pause view if exist
+					if (this.currentView != undefined) {
+						this.views[this.currentView].pause();
+					}
 					// ---
-					this.checkWideMode(opts);
+					this.currentView = activeView;
 					// ---
-					if (this.currentView != this.views.ItemsList) {
-						this.views.ItemsList.setElement($(".ui-layout-content", this.$el));
-						this.views.ItemsList.render();
-						this.currentView = this.views.ItemsList;
-					} else {
-						if (externalEvent) {
-							this.startFetching();
-						}
+					if (!this.views[this.currentView].active) {
+						this.views[this.currentView].resume();
+					}
+					// ---
+					this.views[this.currentView].setElement($(".ui-layout-content", this.$el));
+					this.views[this.currentView].render();
+
+				} else {
+
+					if (externalEvent) {
+						this.startFetching();
 					}
 
 				}
@@ -149,9 +202,6 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 						this.App.Layout.sizePane('east', fullWidth / 2);
 						this.App.Layout.show('east');
 					}
-					// ---
-					this.views.ItemView.setElement($(".ui-layout-content", $(
-						"#layoutRight")));
 
 				} else {
 					this.App.Layout.hide('east');

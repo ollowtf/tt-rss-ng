@@ -1,14 +1,12 @@
-define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
-    'text!templates/items-list-row.html'
-  ],
-  function(Backbone, _, $, jqueryScrollTo, jqueryWaypoints, RowTemplate) {
+define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints'],
+  function(Backbone, _, $, jqueryScrollTo, jqueryWaypoints) {
 
-    var ItemsList = Backbone.View.extend({
+    var ItemsPics = Backbone.View.extend({
 
       className: "ItemsList",
       initialize: function(options) {
 
-        this.title = "Views/List";
+        this.title = "Views/Pics";
         // ---
         this.active = true;
         // ---
@@ -18,7 +16,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         // ---
         this.items = options.items;
         // ---
-        this.templateRow = _.template(RowTemplate);
+        //this.templateRow = _.template(RowTemplate);
         // ---
         this.stateLoading = false;
         // ---
@@ -58,22 +56,20 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
 
       },
       events: {
-        'click div[data-action="state_read"]': 'eChangeStateUnread',
-        'click div[data-action="state_star"]': 'eChangeStateStar',
-        'click div.header': 'eItemHeaderClick'
+        // 'click div[data-action="state_read"]': 'eChangeStateUnread',
+        // 'click div[data-action="state_star"]': 'eChangeStateStar',
+        // 'click div.header': 'eItemHeaderClick'
       },
-      setMode: function(mode) {
-        this.mode = mode;
-      },
+      // setMode: function(mode) {
+      //   this.mode = mode;
+      // },
       render: function() {
 
         console.debug(this.title + ": rendering");
         // ---
-        // var compiledTemplate = _.template(this.template);
-        // this.$el.html(compiledTemplate({})).localize();
         this.$el.html("ok");
         this.trigger('ready');
-
+        // ---
         return (this);
 
       },
@@ -95,29 +91,29 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
       },
       renderItems: function(newItems) {
 
-        _.each(newItems, (item) => {
-
-          var element = item.attributes;
-          var updateString = "";
-          var multiSelect = false;
-          var rowData = {
-              'id': element.id,
-              'link': element.link,
-              'updated': updateString,
-              'title': element.title,
-              'excerpt': ' - ' + element.excerpt,
-              'status': element.unread ? 'unread' : 'read',
-              'unread': element.unread ? 'unreaded' : 'readed',
-              'star': element.marked ? 'stared' : 'unstared',
-              'publish': element.published ? 'shared' : 'unshared',
-              'multi': multiSelect ? '' : 'hidden'
-            }
-            // ---
-          this.$el.append(this.templateRow(rowData));
-          // ---
-          item.set('visible', true);
-
-        });
+        // _.each(newItems, (item) => {
+        //
+        //   var element = item.attributes;
+        //   var updateString = "";
+        //   var multiSelect = false;
+        //   var rowData = {
+        //       'id': element.id,
+        //       'link': element.link,
+        //       'updated': updateString,
+        //       'title': element.title,
+        //       'excerpt': ' - ' + element.excerpt,
+        //       'status': element.unread ? 'unread' : 'read',
+        //       'unread': element.unread ? 'unreaded' : 'readed',
+        //       'star': element.marked ? 'stared' : 'unstared',
+        //       'publish': element.published ? 'shared' : 'unshared',
+        //       'multi': multiSelect ? '' : 'hidden'
+        //     }
+        //     // ---
+        //   this.$el.append(this.templateRow(rowData));
+        //   // ---
+        //   item.set('visible', true);
+        // 
+        // });
         // ---
         $(".scrollHelper").remove();
         var scrollHelper = $("<div/>").addClass('scrollHelper');
@@ -157,26 +153,26 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
       },
       eChangeStateStar: function(e) {
 
-        e.stopPropagation();
-        var id = e.target.dataset.id;
-        console.log(this.title + ":  star item " + id);
-        var item = this.items.get(id);
-        item.set('marked', !item.get('marked'));
-        // ---
-        $(e.target).toggleClass('stared').toggleClass('unstared');
+        // e.stopPropagation();
+        // var id = e.target.dataset.id;
+        // console.log(this.title + ":  star item " + id);
+        // var item = this.items.get(id);
+        // item.set('marked', !item.get('marked'));
+        // // ---
+        // $(e.target).toggleClass('stared').toggleClass('unstared');
 
       },
       eChangeStateUnread: function(e) {
 
-        e.stopPropagation();
-        var id = e.target.dataset.id;
-        console.log(this.title + ":  read item " + e.target.dataset.id);
-        var item = this.items.get(id);
-        item.set('unread', !item.get('unread'));
-        // ---
-        $(e.target).toggleClass('readed').toggleClass('unreaded');
-        $("div.itemrow#i-" + id).toggleClass('unread').toggleClass(
-          'read');
+        // e.stopPropagation();
+        // var id = e.target.dataset.id;
+        // console.log(this.title + ":  read item " + e.target.dataset.id);
+        // var item = this.items.get(id);
+        // item.set('unread', !item.get('unread'));
+        // // ---
+        // $(e.target).toggleClass('readed').toggleClass('unreaded');
+        // $("div.itemrow#i-" + id).toggleClass('unread').toggleClass(
+        //   'read');
 
       },
       eItemHeaderClick: function(e) {
@@ -223,26 +219,26 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
       },
       displayItem: function() {
 
-        if (this.mode != 'list-wide') {
-          // remove any exsiting containers
-          $(".viewContainer", this.$el).remove();
-          // create element for ItemView
-          var viewContainer = $("<div/>").addClass('viewContainer');
-          this.currentRow.append(viewContainer);
-          // ---
-          this.itemView.setElement(viewContainer);
-        }
-        // ---
-        this.trigger('focus', this.currentItem);
+        // if (this.mode != 'list-wide') {
+        //   // remove any exsiting containers
+        //   $(".viewContainer", this.$el).remove();
+        //   // create element for ItemView
+        //   var viewContainer = $("<div/>").addClass('viewContainer');
+        //   this.currentRow.append(viewContainer);
+        //   // ---
+        //   this.itemView.setElement(viewContainer);
+        // }
+        // // ---
+        // this.trigger('focus', this.currentItem);
 
       },
       hideItem: function() {
 
-        if (this.mode == 'list-wide') {
-          this.trigger('unfocus');
-        } else {
-          $(".viewContainer", this.currentRow).remove();
-        }
+        // if (this.mode == 'list-wide') {
+        //   this.trigger('unfocus');
+        // } else {
+        //   $(".viewContainer", this.currentRow).remove();
+        // }
 
       },
       eDisplay: function() {
@@ -281,14 +277,14 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
       },
       eFeedMarkedAsRead: function() {
 
-        $(".itemrow.unread", this.$el).removeClass('unread').addClass(
-          'read');
-        $(".unreaded").removeClass('unreaded').addClass('readed');
+        // $(".itemrow.unread", this.$el).removeClass('unread').addClass(
+        //   'read');
+        // $(".unreaded").removeClass('unreaded').addClass('readed');
 
       }
 
     });
 
-    return ItemsList;
+    return ItemsPics;
 
   });
