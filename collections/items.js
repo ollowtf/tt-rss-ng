@@ -23,6 +23,8 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			this.ItemsToMarkStar = [];
 			this.ItemsToMarkUnstar = [];
 			// ---
+			this.StatesOfItems = {};
+			// ---
 			this.listenTo(this.tree, 'change:current', this.eChangeCurrent);
 			// ---
 			this.listenTo(this, 'change:unread', this.eStateUnread);
@@ -196,10 +198,9 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 				this.ItemsToMarkRead.push(item.id);
 				step = -1;
 			}
-			// ---
 
 			// update counters
-			var udate = Date.now() + (5 * 1000); // now() + 5 sec
+			var udate = Date.now();
 			var channel = this.tree.get('channels').get(item.get('feed_id'));
 			var branch = [channel];
 			var initialElement = channel;
@@ -236,7 +237,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					sq.push({
 						state: 'unread',
 						value: false,
-						ids: this.ItemsToMarkRead.join()
+						ids: this.ItemsToMarkRead.slice(0)
 					});
 					this.ItemsToMarkRead.length = 0;
 				}
@@ -245,7 +246,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					sq.push({
 						state: 'unread',
 						value: true,
-						ids: this.ItemsToMarkUnread.join()
+						ids: this.ItemsToMarkUnread.slice(0)
 					});
 					this.ItemsToMarkUnread.length = 0;
 				}
@@ -258,7 +259,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 						sq.push({
 							state: 'unread',
 							value: false,
-							ids: idsToPush.join()
+							ids: idsToPush
 						});
 					}
 					// ---
@@ -267,7 +268,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 						sq.push({
 							state: 'unread',
 							value: true,
-							ids: idsToPush.join()
+							ids: idsToPush
 						});
 					}
 					// ---
@@ -287,7 +288,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					sq.push({
 						state: 'star',
 						value: true,
-						ids: this.ItemsToMarkStar.join()
+						ids: this.ItemsToMarkStar.slice(0)
 					});
 					this.ItemsToMarkStar.length = 0;
 				}
@@ -296,7 +297,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					sq.push({
 						state: 'star',
 						value: false,
-						ids: this.ItemsToMarkUnstar.join()
+						ids: this.ItemsToMarkUnstar.slice(0)
 					});
 					this.ItemsToMarkUnstar.length = 0;
 				}
@@ -309,7 +310,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 						sq.push({
 							state: 'star',
 							value: true,
-							ids: idsToPush.join()
+							ids: idsToPush
 						});
 					}
 					// ---
@@ -318,7 +319,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 						sq.push({
 							state: 'star',
 							value: false,
-							ids: idsToPush.join()
+							ids: idsToPush
 						});
 					}
 					// ---
@@ -340,6 +341,9 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					"seq": this.seq_cs,
 				};
 				// ---
+				element.date = Date.now();
+				this.StatesOfItems[this.seq_cs] = element;
+				// ---
 				if (element.state == 'unread') {
 					opts["field"] = 2;
 					if (element.value) {
@@ -347,7 +351,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					} else {
 						opts["mode"] = 0;
 					}
-					opts["article_ids"] = element.ids;
+					opts["article_ids"] = element.ids.join();
 				}
 				if (element.state == 'star') {
 					opts["field"] = 0;
@@ -356,15 +360,23 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 					} else {
 						opts["mode"] = 0;
 					}
-					opts["article_ids"] = element.ids;
+					opts["article_ids"] = element.ids.join();
 				}
 				// ---
 				$.post(this.url, JSON.stringify(opts))
-					.done((result) => {
-						console.log(result);
-					});
+					.done(this.responseItemsStateChanged.bind(this));
 
 			});
+
+		},
+		responseItemsStateChanged: function(result) {
+
+			var element = this.StatesOfItems[result.seq];
+			// ---
+			this.trigger('state:' +
+				element.state, element.ids);
+			// ---
+			delete this.StatesOfItems[result.seq];
 
 		},
 		eMarkFeedAsRead: function() {
@@ -403,20 +415,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 				this.trigger('catchup');
 
 				// counters
-				var udate = Date.now() + (5 * 1000); // now() + 5 sec
-				var branch = [];
-				var initialElement = this.current;
-				while (initialElement.get('parent') != undefined) {
-					initialElement = initialElement.get('parent');
-					branch.push(initialElement);
-				}
-				// ---
-				var wasUnread = this.current.get('unread');
-				this.current.set('unread', 0);
-				_(branch).each((element) => {
-					element.set('unread', element.get('unread') - wasUnread);
-					element.set('lastUnreadUpdate', udate);
-				});
+				this.tree.catchupNode(this.current);
 
 				// ---
 			}

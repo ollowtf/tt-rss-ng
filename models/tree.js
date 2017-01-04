@@ -19,6 +19,12 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 				newGroup.set('sid', newGroup.sid());
 				newGroup.set("parent", parentGroup);
 				tree.attributes.groups.add(newGroup);
+				if (_.isObject(parentGroup)) {
+					if (!parentGroup.has('children')) {
+						parentGroup.set('children', []);
+					}
+					parentGroup.attributes.children.push(newGroup);
+				}
 				parseTreeData(tree, item, newGroup);
 
 			} else {
@@ -29,10 +35,31 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 				newChannel.set("parent", parentGroup);
 				newChannel.set("delta", 0);
 				tree.attributes.channels.add(newChannel);
+				if (_.isObject(parentGroup)) {
+					if (!parentGroup.has('children')) {
+						parentGroup.set('children', []);
+					}
+					parentGroup.attributes.children.push(newChannel);
+				}
 
 			}
 		});
 	}
+
+	function catchupChildNodes(node, date) {
+
+		var children = node.get('children');
+		_.each(children, (childItem) => {
+
+			childItem.set('unread', 0);
+			childItem.set('lastUnreadUpdate', date);
+			if (childItem.isGroup()) {
+				catchupChildNodes(childItem, date);
+			}
+
+		});
+
+	};
 
 	function parseCounters(tree, data) {
 
@@ -96,7 +123,7 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 				groups: new Groups(),
 				channels: new Channels(),
 				raw: {},
-				seq_uc: 0
+				seq_uc: 0,
 			});
 			// ---
 			this.countersFetched = false;
@@ -161,7 +188,7 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 				silent: true
 			});
 			// ---
-			this.lastCountersUpdate = Date.now();
+			this.lastCountersUpdate = Date.now() - 30 * 1000; //30 seconds lag
 			// ---
 			$.post(this.url, JSON.stringify({
 					"op": "getCounters",
@@ -209,6 +236,28 @@ define(['backbone', 'underscore', 'collections/channels', 'models/channel',
 			return (this.get(collection).findWhere({
 				sid: sid
 			}));
+		},
+		catchupNode: function(currentNode) {
+
+			var udate = Date.now();
+			var branch = [];
+			var initialElement = currentNode;
+			while (initialElement.get('parent') != undefined) {
+				initialElement = initialElement.get('parent');
+				branch.push(initialElement);
+			}
+			// ---
+			var wasUnread = currentNode.get('unread');
+			currentNode.set('unread', 0);
+			_(branch).each((element) => {
+				element.set('unread', element.get('unread') - wasUnread);
+				element.set('lastUnreadUpdate', udate);
+			});
+			// ---
+			if (currentNode.isGroup()) {
+				catchupChildNodes(currentNode, udate);
+			}
+
 		}
 	});
 
