@@ -62,7 +62,8 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
       events: {
         'click div[data-action="state_read"]': 'eChangeStateUnread',
         'click div[data-action="state_star"]': 'eChangeStateStar',
-        'click div.header': 'eItemHeaderClick'
+        'click div.header': 'eItemHeaderClick',
+        'click div.updatecolumn > a': 'eLinkClick'
       },
       setMode: function(mode) {
         this.mode = mode;
@@ -258,6 +259,9 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
 
         this.displayItem();
 
+      },
+      eLinkClick: function(e) {
+        e.stopPropagation();
       },
       eNextItem: function() {
         if (this.currentItem != undefined) {
