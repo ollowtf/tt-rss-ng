@@ -20,6 +20,7 @@ requirejs.config({
 		i18nextXHRBackend: 'deps/i18next-xhr-backend/i18nextXHRBackend.min',
 		jqueryI18next: 'deps/jquery-i18next/jquery-i18next.min',
 		jqueryScrollTo: 'lib/jquery-scrollto',
+		jqueryFitImage: 'lib/jquery-fitimage',
 		jqueryWaypoints: 'deps/waypoints/lib/jquery.waypoints.min'
 	},
 	shim: {
@@ -48,6 +49,9 @@ requirejs.config({
 			deps: ['jquery']
 		},
 		jqueryScrollTo: {
+			deps: ['jquery']
+		},
+		jqueryFitImage: {
 			deps: ['jquery']
 		},
 		jqueryWaypoints: {

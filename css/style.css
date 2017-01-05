@@ -349,6 +349,7 @@ a.article-link {
 .imagerow {
 	width: 100%;
 	clear: both;
+  display: block;
 	/*border: 1px solid #f00;*/
 }
 

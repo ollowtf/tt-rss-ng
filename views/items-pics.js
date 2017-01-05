@@ -1,5 +1,7 @@
-define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints'],
-  function(Backbone, _, $, jqueryScrollTo, jqueryWaypoints) {
+define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
+    'jqueryWaypoints'
+  ],
+  function(Backbone, _, $, jqueryFitImage, jqueryScrollTo, jqueryWaypoints) {
 
     var ItemsPics = Backbone.View.extend({
 
@@ -91,35 +93,57 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints']
       },
       renderItems: function(newItems) {
 
-        // _.each(newItems, (item) => {
-        //
-        //   var element = item.attributes;
-        //   var updateString = "";
-        //   var multiSelect = false;
-        //   var rowData = {
-        //       'id': element.id,
-        //       'link': element.link,
-        //       'updated': updateString,
-        //       'title': element.title,
-        //       'excerpt': ' - ' + element.excerpt,
-        //       'status': element.unread ? 'unread' : 'read',
-        //       'unread': element.unread ? 'unreaded' : 'readed',
-        //       'star': element.marked ? 'stared' : 'unstared',
-        //       'publish': element.published ? 'shared' : 'unshared',
-        //       'multi': multiSelect ? '' : 'hidden'
-        //     }
-        //     // ---
-        //   this.$el.append(this.templateRow(rowData));
-        //   // ---
-        //   item.set('visible', true);
-        // 
-        // });
+        var viewPortWidth = this.$el.width();
+        var imageboxWidth = (150 + 6);
+        var thumbsPerRow = Math.floor(viewPortWidth / imageboxWidth);
+        var delta = viewPortWidth - (thumbsPerRow * imageboxWidth);
+        console.log(delta);
+        // -------------------------
+
+        var lastRow = $('.imagerow:last', this.$el);
+        if (lastRow.size() == 0) {
+          lastRow = $('<div/>').addClass('imagerow').appendTo(this.$el);
+        };
+        var currentRowThumbsCount = lastRow.children('.imagebox').size();
+
+        // -------------------------
+
+        _.each(newItems, (item) => {
+
+          var element = item.attributes;
+          // ---
+          rowId = 'row-' + element.id;
+          // ---
+          cd = $("<div/>").html(element.content);
+          images = $("img", cd);
+          if (images.size() == 0) {
+            content = '-';
+          } else {
+            content = images[0].outerHTML;
+          };
+          // ---
+          var newThumb = $('<div/>').addClass('imagebox').addClass(
+            'new').attr('id', rowId).html(content);
+          currentRowThumbsCount++;
+          if (currentRowThumbsCount <= thumbsPerRow) {
+            lastRow.append(newThumb);
+          } else {
+            lastRow = $('<div/>').addClass('imagerow').appendTo(
+              this.$el);
+            currentRowThumbsCount = 0;
+          };
+          // ---
+          item.set('visible', true);
+
+        });
+        // ---
+        $("div.imagebox.new img").fitImage().parent().removeClass(
+          'new');
         // ---
         $(".scrollHelper").remove();
         var scrollHelper = $("<div/>").addClass('scrollHelper');
-        this.$el.append(scrollHelper);
-        // ---
-        this.stateLoading = false;
+        this
+          .$el.append(scrollHelper);
         // ---
         if (!this.items.EndOfList) {
           var self = this;
@@ -134,8 +158,8 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints']
             context: this.$el.get()
           });
         }
-
-
+        // ---
+        this.stateLoading = false;
       },
       eLoadMore: function() {
 
@@ -200,8 +224,9 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints']
             this.currentItem.set('unread', false);
             // ---
             // temporary - will be on confirmation event
-            $(".unreaded", this.currentRow).removeClass('unreaded').addClass(
-              'readed');
+            $(".unreaded", this.currentRow).removeClass('unreaded')
+              .addClass(
+                'readed');
             // ---
             this.currentRow.removeClass('unread').addClass('read');
             // ---
