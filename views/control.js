@@ -149,7 +149,8 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 						this.views[activeView] = new ItemsPicsClass({
 							id: 'ItemsPics',
 							items: this.items,
-							control: this
+							control: this,
+							itemView: this.views.ItemView
 								// mode: opts.view,
 								//itemView: this.views.ItemView
 						});

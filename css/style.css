@@ -265,6 +265,13 @@ span#progname {
 	overflow: hidden;
 }
 
+.dotted {
+  /*border-top: 1px dotted #ccc;
+  border-bottom: 1px dotted #ccc;*/
+  border-top: 1px solid #0000FF;
+	border-bottom: 1px solid #0000FF;
+}
+
 .header {
   cursor: pointer;
 	clear: both;

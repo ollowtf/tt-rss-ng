@@ -5,7 +5,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
 
     var ItemsPics = Backbone.View.extend({
 
-      className: "ItemsList",
+      className: "ItemsPics",
       initialize: function(options) {
 
         this.title = "Views/Pics";
@@ -60,7 +60,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
       events: {
         // 'click div[data-action="state_read"]': 'eChangeStateUnread',
         // 'click div[data-action="state_star"]': 'eChangeStateStar',
-        // 'click div.header': 'eItemHeaderClick'
+        'click div.imagebox': 'eItemHeaderClick'
       },
       // setMode: function(mode) {
       //   this.mode = mode;
@@ -123,14 +123,16 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
           };
           // ---
           var newThumb = $('<div/>').addClass('imagebox').addClass(
-            'new').attr('id', rowId).html(content);
+            'new').attr('data-id', item.id).attr('id', rowId).html(
+            content);
           currentRowThumbsCount++;
           if (currentRowThumbsCount <= thumbsPerRow) {
             lastRow.append(newThumb);
           } else {
-            lastRow = $('<div/>').addClass('imagerow').appendTo(
-              this.$el);
-            currentRowThumbsCount = 0;
+            lastRow = $('<div/>').addClass('imagerow');
+            lastRow.append(newThumb);
+            currentRowThumbsCount = 1;
+            lastRow.appendTo(this.$el);
           };
           // ---
           item.set('visible', true);
@@ -212,21 +214,21 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
 
         this.currentItem = this.items.get(id);
 
-        this.currentRow = $("#i-" + this.currentItem.id, this.$el);
+        this.currentRow = $("#row-" + this.currentItem.id, this.$el);
 
         if (!this.currentRow.hasClass('current')) {
 
           // set current
-          $(".itemrow").removeClass('current');
+          $(".imagebox").removeClass('current');
           this.currentRow.addClass('current');
           // ---
           if (this.currentItem.get('unread')) {
             this.currentItem.set('unread', false);
             // ---
-            // temporary - will be on confirmation event
-            $(".unreaded", this.currentRow).removeClass('unreaded')
-              .addClass(
-                'readed');
+            // // temporary - will be on confirmation event
+            // $(".unreaded", this.currentRow).removeClass('unreaded')
+            //   .addClass(
+            //     'readed');
             // ---
             this.currentRow.removeClass('unread').addClass('read');
             // ---
@@ -244,26 +246,36 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
       },
       displayItem: function() {
 
-        // if (this.mode != 'list-wide') {
-        //   // remove any exsiting containers
-        //   $(".viewContainer", this.$el).remove();
-        //   // create element for ItemView
-        //   var viewContainer = $("<div/>").addClass('viewContainer');
-        //   this.currentRow.append(viewContainer);
-        //   // ---
-        //   this.itemView.setElement(viewContainer);
-        // }
-        // // ---
-        // this.trigger('focus', this.currentItem);
+        // check if next sibling of current row is viewContainer
+        var moveViewContainer = false;
+        var row = this.currentRow.parent();
+        if (!row.next().hasClass('viewContainer')) {
+          moveViewContainer = true;
+        }
+        // ---
+        if (moveViewContainer) {
+
+          // remove any exsiting containers
+          $(".viewContainer", this.$el).remove();
+
+          // create new
+          var viewContainer = $("<div/>").addClass('viewContainer').addClass(
+            'dotted');
+          row.after(viewContainer);
+
+          // set as element for itemView
+          this.itemView.setElement(viewContainer);
+
+        }
+        // ---
+        this.trigger('focus', this.currentItem);
+
+        row.ScrollTo();
 
       },
       hideItem: function() {
 
-        // if (this.mode == 'list-wide') {
-        //   this.trigger('unfocus');
-        // } else {
-        //   $(".viewContainer", this.currentRow).remove();
-        // }
+        $(".viewContainer", this.$el).remove();
 
       },
       eDisplay: function() {
@@ -282,8 +294,6 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
           var nextItem = this.items.at(index);
           // ---
           this.focusItem(nextItem.id);
-          // scroll to item row
-          $("#i-" + nextItem.id).ScrollTo();
         }
       },
       ePrevItem: function() {
@@ -296,8 +306,6 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
         if (index < this.items.length && index >= 0) {
           var prevItem = this.items.at(index);
           this.focusItem(prevItem.id);
-          // scroll to item row
-          $("#i-" + prevItem.id).ScrollTo();
         }
       },
       eFeedMarkedAsRead: function() {
