@@ -10,6 +10,7 @@ define(['backbone', 'underscore', 'jquery',
 
         this.App = options.app;
         this.mode = options.mode;
+        this.submode = options.submode;
         this.items = options.items;
         this.control = options.control;
         // ---
@@ -20,14 +21,18 @@ define(['backbone', 'underscore', 'jquery',
       render: function() {
         this.$el.html(this.template(this.model.toJSON()));
         // ---
+        if (this.submode == 'inline' && this.mode == 'list') {
+          $('#item-' + this.model.id, this.$el).hide();
+        }
+        // ---
         this.prepare();
       },
       prepare: function() {
 
         // set max-width for images
-        if (this.mode == "list-wide") {
+        if (this.submode == 'sidebar') {
           var maxWidth = this.App.Layout.east.state.innerWidth - 35;
-        } else if (this.mode == 'list') {
+        } else if (this.submode == 'inline') {
           var maxWidth = this.App.Layout.center.state.innerWidth - 35;
         }
         // ---
@@ -40,6 +45,9 @@ define(['backbone', 'underscore', 'jquery',
       },
       setMode: function(mode) {
         this.mode = mode;
+      },
+      setSubMode: function(submode) {
+        this.submode = submode;
       },
       setModel: function(model) {
         this.model = model;

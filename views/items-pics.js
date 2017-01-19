@@ -1,7 +1,8 @@
 define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
-    'jqueryWaypoints'
+    'jqueryWaypoints', 'text!templates/items-pics-footer.html'
   ],
-  function(Backbone, _, $, jqueryFitImage, jqueryScrollTo, jqueryWaypoints) {
+  function(Backbone, _, $, jqueryFitImage, jqueryScrollTo, jqueryWaypoints,
+    FooterTemplate) {
 
     var ItemsPics = Backbone.View.extend({
 
@@ -13,12 +14,12 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
         this.active = true;
         // ---
         this.control = options.control;
-        this.mode = options.mode;
+        this.submode = options.submode;
         this.itemView = options.itemView;
         // ---
         this.items = options.items;
         // ---
-        //this.templateRow = _.template(RowTemplate);
+        this.templateFooter = _.template(FooterTemplate);
         // ---
         this.stateLoading = false;
         // ---
@@ -31,10 +32,12 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
 
         this.listenTo(this.items, 'reset', this.eClear);
         this.listenTo(this.items, 'fetched', this.eFetched);
+        this.listenTo(this.control, 'fetched', this.eFetched);
         this.listenTo(this.items, 'catchup', this.eFeedMarkedAsRead);
         // ---
         this.listenTo(this.control, 'clear', this.eClear);
         this.listenTo(this.control, 'display', this.eDisplay);
+        this.listenTo(this.control, 'restore', this.eExternalFocus);
         this.listenTo(this.control, '/nextItem', this.eNextItem);
         this.listenTo(this.control, '/prevItem', this.ePrevItem);
 
@@ -58,13 +61,13 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
 
       },
       events: {
-        // 'click div[data-action="state_read"]': 'eChangeStateUnread',
-        // 'click div[data-action="state_star"]': 'eChangeStateStar',
+        'click div[data-action="state_read"]': 'eChangeStateUnread',
+        'click div[data-action="state_star"]': 'eChangeStateStar',
         'click div.imagebox': 'eItemHeaderClick'
       },
-      // setMode: function(mode) {
-      //   this.mode = mode;
-      // },
+      setSubMode: function(submode) {
+        this.submode = submode;
+      },
       render: function() {
 
         console.debug(this.title + ": rendering");
@@ -125,6 +128,19 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
           var newThumb = $('<div/>').addClass('imagebox').addClass(
             'new').attr('data-id', item.id).attr('id', rowId).html(
             content);
+          // ---
+          var rowData = {
+            'id': element.id,
+            'link': element.link,
+            'title': element.title,
+            'excerpt': ' - ' + element.excerpt,
+            'status': element.unread ? 'unread' : 'read',
+            'unread': element.unread ? 'unreaded' : 'readed',
+            'star': element.marked ? 'stared' : 'unstared',
+            'publish': element.published ? 'shared' : 'unshared'
+          };
+          // ---
+          newThumb.append(this.templateFooter(rowData));
           currentRowThumbsCount++;
           if (currentRowThumbsCount <= thumbsPerRow) {
             lastRow.append(newThumb);
@@ -170,7 +186,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
           if (!this.stateLoading) {
 
             this.stateLoading = true;
-            this.control.startFetching();
+            this.control.fetchMore();
 
           }
 
@@ -179,26 +195,26 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
       },
       eChangeStateStar: function(e) {
 
-        // e.stopPropagation();
-        // var id = e.target.dataset.id;
-        // console.log(this.title + ":  star item " + id);
-        // var item = this.items.get(id);
-        // item.set('marked', !item.get('marked'));
-        // // ---
-        // $(e.target).toggleClass('stared').toggleClass('unstared');
+        e.stopPropagation();
+        var id = e.target.dataset.id;
+        console.log(this.title + ":  star item " + id);
+        var item = this.items.get(id);
+        item.set('marked', !item.get('marked'));
+        // ---
+        $(e.target).toggleClass('stared').toggleClass('unstared');
 
       },
       eChangeStateUnread: function(e) {
 
-        // e.stopPropagation();
-        // var id = e.target.dataset.id;
-        // console.log(this.title + ":  read item " + e.target.dataset.id);
-        // var item = this.items.get(id);
-        // item.set('unread', !item.get('unread'));
-        // // ---
-        // $(e.target).toggleClass('readed').toggleClass('unreaded');
-        // $("div.itemrow#i-" + id).toggleClass('unread').toggleClass(
-        //   'read');
+        e.stopPropagation();
+        var id = e.target.dataset.id;
+        console.log(this.title + ":  read item " + e.target.dataset.id);
+        var item = this.items.get(id);
+        item.set('unread', !item.get('unread'));
+        // ---
+        $(e.target).toggleClass('readed').toggleClass('unreaded');
+        $("div.itemrow#i-" + id).toggleClass('unread').toggleClass(
+          'read');
 
       },
       eItemHeaderClick: function(e) {
@@ -209,6 +225,9 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
         // ---
         this.focusItem(id);
 
+      },
+      eExternalFocus: function(id) {
+        this.focusItem(id);
       },
       focusItem: function(id) {
 
@@ -225,10 +244,10 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
           if (this.currentItem.get('unread')) {
             this.currentItem.set('unread', false);
             // ---
-            // // temporary - will be on confirmation event
-            // $(".unreaded", this.currentRow).removeClass('unreaded')
-            //   .addClass(
-            //     'readed');
+            // temporary - will be on confirmation event
+            $(".unreaded", this.currentRow).removeClass('unreaded')
+              .addClass(
+                'readed');
             // ---
             this.currentRow.removeClass('unread').addClass('read');
             // ---
@@ -246,31 +265,39 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
       },
       displayItem: function() {
 
-        // check if next sibling of current row is viewContainer
-        var moveViewContainer = false;
-        var row = this.currentRow.parent();
-        if (!row.next().hasClass('viewContainer')) {
-          moveViewContainer = true;
-        }
+        var row = undefined;
         // ---
-        if (moveViewContainer) {
+        if (this.submode != 'sidebar') {
 
-          // remove any exsiting containers
-          $(".viewContainer", this.$el).remove();
+          // check if next sibling of current row is viewContainer
+          var moveViewContainer = false;
+          var row = this.currentRow.parent();
+          if (!row.next().hasClass('viewContainer')) {
+            moveViewContainer = true;
+          }
+          // ---
+          if (moveViewContainer) {
 
-          // create new
-          var viewContainer = $("<div/>").addClass('viewContainer').addClass(
-            'dotted');
-          row.after(viewContainer);
+            // remove any exsiting containers
+            $(".viewContainer", this.$el).remove();
 
-          // set as element for itemView
-          this.itemView.setElement(viewContainer);
+            // create new
+            var viewContainer = $("<div/>").addClass('viewContainer').addClass(
+              'dotted');
+            row.after(viewContainer);
+
+            // set as element for itemView
+            this.itemView.setElement(viewContainer);
+
+          }
 
         }
         // ---
         this.trigger('focus', this.currentItem);
 
-        row.ScrollTo();
+        if (row != undefined) {
+          row.ScrollTo();
+        }
 
       },
       hideItem: function() {
@@ -310,9 +337,9 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
       },
       eFeedMarkedAsRead: function() {
 
-        // $(".itemrow.unread", this.$el).removeClass('unread').addClass(
-        //   'read');
-        // $(".unreaded").removeClass('unreaded').addClass('readed');
+        $(".itemrow.unread", this.$el).removeClass('unread').addClass(
+          'read');
+        $(".unreaded").removeClass('unreaded').addClass('readed');
 
       }
 

@@ -130,6 +130,7 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 			//read Settings
 			var defaultSettings = {
 				view: 'list',
+				subview: 'inline',
 				filter: 'adaptive',
 				order: 'reversed', // reversed = new first/ direct = old first
 			};
@@ -184,6 +185,20 @@ define(['backbone', 'models/item'], function(Backbone, Item) {
 		eChangeView: function(view) {
 
 			this.settings.view = view;
+			this.saveSettings();
+			// ---
+			_.each(this.models, (item) => {
+				item.set({
+					visible: false
+				}, {
+					silent: true
+				})
+			});
+
+		},
+		eChangeDetailedView: function(view) {
+
+			this.settings.subview = view;
 			this.saveSettings();
 
 		},

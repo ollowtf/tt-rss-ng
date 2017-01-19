@@ -13,7 +13,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         this.active = true;
         // ---
         this.control = options.control;
-        this.mode = options.mode;
+        this.submode = options.submode;
         this.itemView = options.itemView;
         // ---
         this.items = options.items;
@@ -31,12 +31,14 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
 
         this.listenTo(this.items, 'reset', this.eClear);
         this.listenTo(this.items, 'fetched', this.eFetched);
+        this.listenTo(this.control, 'fetched', this.eFetched);
         this.listenTo(this.items, 'catchup', this.eFeedMarkedAsRead);
         // this.listenTo(this.items, 'state:unread', this.eUpdateItemsUnreadState);
         // this.listenTo(this.items, 'state:star', this.eUpdateItemsStarState);
         // ---
         this.listenTo(this.control, 'clear', this.eClear);
         this.listenTo(this.control, 'display', this.eDisplay);
+        this.listenTo(this.control, 'restore', this.eExternalFocus);
         this.listenTo(this.control, '/nextItem', this.eNextItem);
         this.listenTo(this.control, '/prevItem', this.ePrevItem);
 
@@ -65,8 +67,8 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         'click div.header': 'eItemHeaderClick',
         'click div.updatecolumn > a': 'eLinkClick'
       },
-      setMode: function(mode) {
-        this.mode = mode;
+      setSubMode: function(submode) {
+        this.submode = submode;
       },
       render: function() {
 
@@ -104,18 +106,18 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
           var updateString = "";
           var multiSelect = false;
           var rowData = {
-              'id': element.id,
-              'link': element.link,
-              'updated': updateString,
-              'title': element.title,
-              'excerpt': ' - ' + element.excerpt,
-              'status': element.unread ? 'unread' : 'read',
-              'unread': element.unread ? 'unreaded' : 'readed',
-              'star': element.marked ? 'stared' : 'unstared',
-              'publish': element.published ? 'shared' : 'unshared',
-              'multi': multiSelect ? '' : 'hidden'
-            }
-            // ---
+            'id': element.id,
+            'link': element.link,
+            'updated': updateString,
+            'title': element.title,
+            'excerpt': ' - ' + element.excerpt,
+            'status': element.unread ? 'unread' : 'read',
+            'unread': element.unread ? 'unreaded' : 'readed',
+            'star': element.marked ? 'stared' : 'unstared',
+            'publish': element.published ? 'shared' : 'unshared',
+            'multi': multiSelect ? '' : 'hidden'
+          };
+          // ---
           this.$el.append(this.templateRow(rowData));
           // ---
           item.set('visible', true);
@@ -151,7 +153,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
           if (!this.stateLoading) {
 
             this.stateLoading = true;
-            this.control.startFetching();
+            this.control.fetchMore();
 
           }
 
@@ -182,13 +184,6 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
           'read');
 
       },
-      // eUpdateItemsUnreadState: function(ids) {
-      //
-      //   _.each(ids, (id) => {
-      //     var
-      //   });
-      //
-      // },
       eItemHeaderClick: function(e) {
 
         // find header id
@@ -197,6 +192,10 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
         // ---
         this.focusItem(id);
 
+      },
+      eExternalFocus: function(id) {
+        this.focusItem(id);
+        this.currentRow.ScrollTo();
       },
       focusItem: function(id) {
 
@@ -233,7 +232,7 @@ define(['backbone', 'underscore', 'jquery', 'jqueryScrollTo', 'jqueryWaypoints',
       },
       displayItem: function() {
 
-        if (this.mode != 'list-wide') {
+        if (this.submode != 'sidebar') {
           // remove any exsiting containers
           $(".viewContainer", this.$el).remove();
           // create element for ItemView

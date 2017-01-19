@@ -32,6 +32,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				'click .btn[data-action="markFeed"]': 'markAsRead',
 				'change [name="modeFilter"]': 'changeFilter',
 				'change [name="modeView"]': 'changeView',
+				'change [name="modeDetailedView"]': 'changeDetailedView',
 				'change [name="modeOrder"]': 'changeOrder'
 			},
 			render: function() {
@@ -61,6 +62,14 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				$("input[name=modeView]").removeAttr('checked').parent().removeClass(
 					'active');
 				$("input[name=modeView][data-view=" + this.options.view + "]").attr(
+					'checked',
+					'checked').parent().addClass('active');
+				// ---
+				//set active subview
+				$("input[name=modeDetailedView]").removeAttr('checked').parent().removeClass(
+					'active');
+				$("input[name=modeDetailedView][data-view=" + this.options.subview +
+					"]").attr(
 					'checked',
 					'checked').parent().addClass('active');
 				// ---
@@ -94,10 +103,12 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 						app: this.App,
 						items: this.items,
 						control: this,
-						mode: opts.view
+						mode: opts.mode,
+						submode: opts.subview
 					});
 				} else {
 					this.views.ItemView.setMode(opts.view);
+					this.views.ItemView.setSubMode(opts.subview);
 				}
 				// ---
 
@@ -106,7 +117,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 
 				// -------------------------
 
-				if (opts.view == 'list' || opts.view == 'list-wide') {
+				if (opts.view == 'list') {
 
 					activeView = 'ItemsList';
 					// -------------------------
@@ -117,7 +128,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 							id: 'ItemsList',
 							items: this.items,
 							control: this,
-							mode: opts.view,
+							submode: opts.subview,
 							itemView: this.views.ItemView
 						});
 						// ---
@@ -126,18 +137,9 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 						this.listenTo(this.views[activeView], 'unfocus', this.eItemUnfocused);
 						// ---
 						this.registeredViews.push(activeView);
-
 					} else {
-						this.views.ItemsList.setMode(opts.view);
+						this.views[activeView].setSubMode(opts.subview);
 					}
-					// -------------------------
-
-					// set $el for ItemView in wide mode
-					if (opts.view == 'list-wide') {
-						this.views.ItemView.setElement($(".ui-layout-content", $(
-							"#layoutRight")));
-					}
-
 				}
 				// ---
 				if (opts.view == 'pics') {
@@ -150,16 +152,24 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 							id: 'ItemsPics',
 							items: this.items,
 							control: this,
+							submode: opts.subview,
 							itemView: this.views.ItemView
-								// mode: opts.view,
-								//itemView: this.views.ItemView
 						});
 						// ---
 						this.listenTo(this.views[activeView], 'ready', this.eDetailedViewReady);
 						this.listenTo(this.views[activeView], 'focus', this.eItemFocused);
 						this.listenTo(this.views[activeView], 'unfocus', this.eItemUnfocused);
+					} else {
+						this.views[activeView].setSubMode(opts.subview);
 					}
+				}
 
+				// -------------------------
+
+				// set $el for ItemView in wide mode
+				if (opts.subview == 'sidebar') {
+					this.views.ItemView.setElement($(".ui-layout-content", $(
+						"#layoutRight")));
 				}
 
 				// -------------------------
@@ -167,7 +177,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				if (this.currentView != activeView) {
 
 					// pause view if exist
-					if (this.currentView != undefined) {
+					if (this.currentView != undefined && this.currentView != '') {
 						this.views[this.currentView].pause();
 					}
 					// ---
@@ -193,7 +203,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 
 				var opts = this.options;
 				// -------------------------
-				var wideMode = (opts.view == "list-wide");
+				var wideMode = (opts.subview == 'sidebar');
 				if (wideMode == true) {
 
 					// set east-pane size as half of list-wide
@@ -213,13 +223,23 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 
 				console.debug(this.title + ": detailed view ready");
 				this.trigger('clear');
+				// ---
 				this.startFetching();
 
 			},
 			startFetching: function() {
 				// -------------------------
+				if (this.items.length == 0) {
+					this.items.fetch();
+				} else {
+					this.trigger('fetched');
+					if (this.currentItem != undefined) {
+						this.trigger('restore', this.currentItem.id);
+					}
+				}
+			},
+			fetchMore: function() {
 				this.items.fetch();
-				// -------------------------
 			},
 			markAsRead: function() {
 
@@ -240,6 +260,22 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 				this.options.view = e.target.dataset.view;
 				this.setupDetailedView(false);
 				// ---
+				// if (this.currentItem != undefined) {
+				// 	this.trigger('restore', this.currentItem.id);
+				// }
+
+			},
+			changeDetailedView: function(e) {
+
+				console.log(this.title + ": detailed view changed to " + e.target.dataset
+					.view);
+				// ---
+				this.items.eChangeDetailedView(e.target.dataset.view);
+				// ---
+				this.trigger('unfocus');
+				this.options.subview = e.target.dataset.view;
+				this.setupDetailedView(false);
+				// ---
 				if (this.currentItem != undefined) {
 					this.trigger('display');
 				}
@@ -255,7 +291,7 @@ define(['backbone', 'jquery', 'text!templates/control.html', 'views/items-list',
 			eItemFocused: function(item) {
 
 				this.currentItem = item;
-				this.trigger('focus', item);
+				this.trigger('focus', this.currentItem);
 
 			},
 			eItemUnfocused: function(item) {
