@@ -128,6 +128,8 @@ define(['backbone', 'underscore', 'jquery', 'jqueryFitImage', 'jqueryScrollTo',
           var newThumb = $('<div/>').addClass('imagebox').addClass(
             'new').attr('data-id', item.id).attr('id', rowId).html(
             content);
+          // remove loading="lazy" attribute
+          $(newThumb).children('img').removeAttr("loading");
           // ---
           var rowData = {
             'id': element.id,
