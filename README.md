@@ -11,6 +11,10 @@
  - i18n support
  - speed
 
+ ## Screenshots
+
+ ![](README/picsview.png)
+
  ## Installation
 
 Copy **setting.json.tmpl** to **settings.json** and set API url.
