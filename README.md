@@ -13,7 +13,9 @@
 
  ## Screenshots
 
- ![](README/picsview.png)
+ ![List + wide mode](README/listwide.png)
+ 
+ ![Pics mode](README/picsview.png)
 
  ## Installation
 
