@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  web:
+    build: ./
+    restart: always
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      - HTTP_PORT=${HTTP_PORT}
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
+    ports:
+      - ${HTTP_PORT}:80

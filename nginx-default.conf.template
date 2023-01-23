@@ -1,0 +1,13 @@
+server {
+  listen  80;
+
+  location / {
+    root  /usr/share/nginx/html/tt-rss-ng;
+    index index.html;
+  }
+
+  location /api/ {
+    proxy_pass  http://${API_HOST}:${API_PORT}/tt-rss$request_uri;
+    proxy_set_header  Host $http_host;
+  }
+}

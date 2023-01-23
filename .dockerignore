@@ -1,0 +1,9 @@
+.bowerrc
+.vscode
+Dockerfile
+github.access.token
+README.md
+README
+web
+.dockerignore
+settings.json

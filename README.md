@@ -19,23 +19,15 @@
 
  ## Installation
 
-Copy **setting.json.tmpl** to **settings.json** and set API url.
-
-To avoid Cross-Origin errors use mod_rewrite.
-
-I use SSH tunnel to server with tt-rss docker, so my API url
-
-```json
-{
-	"api": "http://localhost/rss/api/index.php"
-}
+Set .env vars
 ```
-
-and /etc/httpd/conf.d/rss.conf 
-
+HTTP_PORT=8055
+API_PORT=8280
+API_HOST="172.17.10.8"
 ```
-RewriteEngine On
-RewriteRule /api(.*)$ http://localhost:8280/tt-rss/api/$1 [P,L]
+Run
+```
+docker compose -f "docker-compose.yml" up -d --build
 ```
 
 
